@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "You selected : " + taskName , Toast.LENGTH_SHORT).show();
 
                 Intent editTaskIntent = new Intent(getApplication(), EditTask.class);
+
                 editTaskIntent.putExtra("taskId", task.getId());
                 startActivity(editTaskIntent);
             }
@@ -45,16 +46,13 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dataModel.saveTask("Nejaky ukol", "Ukolem tohoto ukolu je provest nejakou cinnost.", 1, 0);
+                dataModel.saveTask("Nejaky ukol 7", "Zkusebni put extra", 1, 0);
 
                 arrayAdapter.clear();
                 arrayAdapter.addAll(dataModel.getAllTasks());
             }
         });
 
-
     }
-
-
 
 }
