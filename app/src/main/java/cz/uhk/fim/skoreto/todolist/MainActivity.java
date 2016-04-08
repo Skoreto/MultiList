@@ -28,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
         listView.setAdapter(arrayAdapter);
 
-        Button fab = (Button) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        Button btnAdd = (Button) findViewById(R.id.btnAdd);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                database.saveTask("Nejaky ukol", "Ukolem tohoto ukolu je provest nejakou cinnost.");
+                database.saveTask("Nejaky ukol", "Ukolem tohoto ukolu je provest nejakou cinnost.", 1, 0);
 
                 arrayAdapter.clear();
                 arrayAdapter.addAll(database.getAllTasks());
