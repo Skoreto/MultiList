@@ -12,6 +12,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import cz.uhk.fim.skoreto.todolist.model.DataModel;
+import cz.uhk.fim.skoreto.todolist.model.Task;
+import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
+
 public class MainActivity extends AppCompatActivity {
 
     ListView listView;

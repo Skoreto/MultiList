@@ -1,4 +1,4 @@
-package cz.uhk.fim.skoreto.todolist;
+package cz.uhk.fim.skoreto.todolist.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import cz.uhk.fim.skoreto.todolist.R;
+import cz.uhk.fim.skoreto.todolist.model.Task;
 
 /**
  * Created by Tomas.

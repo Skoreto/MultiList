@@ -1,4 +1,4 @@
-package cz.uhk.fim.skoreto.todolist;
+package cz.uhk.fim.skoreto.todolist.model;
 
 import android.content.ContentValues;
 import android.content.Context;

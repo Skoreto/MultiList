@@ -1,4 +1,4 @@
-package cz.uhk.fim.skoreto.todolist;
+package cz.uhk.fim.skoreto.todolist.model;
 
 /**
  * Created by Tomas on 8.4.2016.

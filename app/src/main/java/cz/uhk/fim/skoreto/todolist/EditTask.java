@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import cz.uhk.fim.skoreto.todolist.model.DataModel;
+import cz.uhk.fim.skoreto.todolist.model.Task;
+
 /**
  * Aktivita pro zmenu a smazani ukolu.
  * Created by Tomas.
