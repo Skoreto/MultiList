@@ -32,13 +32,10 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Po klepnuti na polozku seznamu.
+                // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
                 Task task = (Task) listView.getItemAtPosition(position);
-                String taskName = task.getName();
-                Toast.makeText(MainActivity.this, "You selected : " + taskName , Toast.LENGTH_SHORT).show();
-
                 Intent editTaskIntent = new Intent(getApplication(), EditTask.class);
-
+                // Predej ID ukolu do intentu editTaskIntent.
                 editTaskIntent.putExtra("taskId", task.getId());
                 startActivity(editTaskIntent);
             }
@@ -63,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
                     // Aktualizace seznamu ukolu.
                     arrayAdapter.clear();
                     arrayAdapter.addAll(dataModel.getAllTasks());
+
+                    // Informovani uzivatele o uspesnem pridani ukolu.
+                    Toast.makeText(MainActivity.this, "Úkol přidán" , Toast.LENGTH_SHORT).show();
+                } else {
+                    // Informovani uzivatele o nutnosti vyplnit název úkolu.
+                    Toast.makeText(MainActivity.this, "Prázdný název úkolu!" , Toast.LENGTH_SHORT).show();
                 }
             }
         });

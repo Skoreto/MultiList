@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * Aktivita pro zmenu a smazani ukolu.
@@ -54,6 +55,9 @@ public class EditTask extends Activity {
         task.setDescription(etTaskDescription.getText().toString());
 
         dm.updateTask(task);
+        // Informovani uzivatele o uspesnem upraveni ukolu.
+        Toast.makeText(EditTask.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
+
         this.activateMainActivity(view);
     }
 
@@ -63,7 +67,11 @@ public class EditTask extends Activity {
     public void deleteTask(View view){
         Intent ii = getIntent();
         int taskId = ii.getIntExtra("taskId", 1);
+
         dm.deleteTask(taskId);
+        // Informovani uzivatele o uspesnem smazani ukolu.
+        Toast.makeText(EditTask.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
+
         this.activateMainActivity(view);
     }
 
