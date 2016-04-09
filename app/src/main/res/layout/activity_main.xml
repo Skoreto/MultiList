@@ -22,7 +22,7 @@
         android:ems="15"
         android:inputType="textShortMessage"
         android:layout_centerHorizontal="true"
-        android:height="50dp"
+        android:height="60dp"
         android:hint="@string/et_task_name_hint"
         android:nextFocusUp="@id/etTaskName"
         android:nextFocusLeft="@id/etTaskName" />

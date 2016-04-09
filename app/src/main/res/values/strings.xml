@@ -4,8 +4,8 @@
     <string name="btn_add_task">Přidej</string>
 
     <!-- Aktivita editace ukolu -->
-    <string name="s_task_name">Nazev</string>
-    <string name="s_task_description">Popis</string>
+    <string name="tv_task_name">Nazev</string>
+    <string name="tv_task_description">Popis</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="btn_delete_task">Smaž</string>
 </resources>

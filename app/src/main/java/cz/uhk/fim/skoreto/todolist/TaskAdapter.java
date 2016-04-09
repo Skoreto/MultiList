@@ -27,11 +27,11 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_item, parent, false);
         }
 
-        TextView tvTaskId = (TextView) convertView.findViewById(R.id.tvTaskId);
         TextView tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
+//        TextView tvTaskId = (TextView) convertView.findViewById(R.id.tvTaskId);
 
-        tvTaskId.setText(task.getDescription());
         tvTaskName.setText(task.getName());
+//        tvTaskId.setText(task.getDescription());
 
         return convertView;
     }
