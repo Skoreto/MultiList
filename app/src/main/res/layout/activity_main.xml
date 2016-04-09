@@ -7,19 +7,37 @@
     android:orientation="vertical"
     tools:context="cz.uhk.fim.skoreto.todolist.MainActivity">
 
-    <ListView
-        android:id="@+id/lvUsers"
-        android:layout_width="match_parent"
+    <!-- Pomocny item pro zabraneni etTaskName ziskani uvodniho focusu
+        :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px" />
+
+    <EditText
+        android:id="@+id/etTaskName"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" >
+        android:ems="15"
+        android:inputType="textShortMessage"
+        android:layout_centerHorizontal="true"
+        android:height="50dp"
+        android:hint="@string/et_task_name_hint"
+        android:nextFocusUp="@id/etTaskName"
+        android:nextFocusLeft="@id/etTaskName" />
+
+    <ListView
+        android:id="@+id/lvTasksList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/etTaskName">
     </ListView>
 
     <Button
-        android:id="@+id/btnAdd"
-        android:text="Pridej"
+        android:id="@+id/btnAddTask"
+        android:text="@string/btn_add_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

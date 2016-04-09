@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     ArrayAdapter<Task> arrayAdapter;
     DataModel dataModel;
+    EditText etTaskName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         dataModel = new DataModel(this);
-        listView = (ListView) findViewById(R.id.lvUsers);
+        listView = (ListView) findViewById(R.id.lvTasksList);
         arrayAdapter = new TaskAdapter(MainActivity.this, dataModel.getAllTasks());
         listView.setAdapter(arrayAdapter);
 
@@ -42,14 +44,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button btnAdd = (Button) findViewById(R.id.btnAdd);
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        // Pridani noveho ukolu.
+        Button btnAddTask = (Button) findViewById(R.id.btnAddTask);
+        btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dataModel.saveTask("Nejaky ukol 7", "Zkusebni put extra", 1, 0);
+                etTaskName = (EditText) findViewById(R.id.etTaskName);
 
-                arrayAdapter.clear();
-                arrayAdapter.addAll(dataModel.getAllTasks());
+                // Pokud neni prazdny nazev noveho ukolu.
+                if (!etTaskName.getText().toString().equals("")){
+                    dataModel.saveTask(etTaskName.getText().toString(), "", 1, 0);
+
+                    // Vyprazdneni pole po pridani ukolu.
+                    etTaskName.setText("");
+                    etTaskName.clearFocus();
+                    etTaskName.clearComposingText();
+
+                    // Aktualizace seznamu ukolu.
+                    arrayAdapter.clear();
+                    arrayAdapter.addAll(dataModel.getAllTasks());
+                }
             }
         });
 

@@ -24,9 +24,7 @@
             android:layout_weight="1"
             android:ems="15"
             android:inputType="textShortMessage"
-            android:layout_column="2"
-            android:enabled="false">
-            <requestFocus />
+            android:layout_column="2">
         </EditText>
 
     </TableRow>
