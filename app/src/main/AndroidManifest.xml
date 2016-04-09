@@ -17,6 +17,7 @@
         </activity>
 
         <activity android:name=".EditTask"></activity>
+        <activity android:name=".TaskListsActivity"></activity>
     </application>
 
 </manifest>

@@ -1,7 +1,9 @@
 <resources>
+    <!-- Hlavni aktivita -->
     <string name="app_name">ToDoList</string>
     <string name="et_task_name_hint">Nový úkol</string>
-    <string name="btn_add_task">Přidej</string>
+    <string name="btn_add_task">Přidat</string>
+    <string name="btn_task_lists">Seznamy</string>
 
     <!-- Aktivita editace ukolu -->
     <string name="tv_task_name">Nazev</string>

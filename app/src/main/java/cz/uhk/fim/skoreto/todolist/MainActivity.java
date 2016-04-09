@@ -54,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // Pokud neni prazdny nazev noveho ukolu.
                 if (!etTaskName.getText().toString().equals("")){
-                    dataModel.saveTask(etTaskName.getText().toString(), "", 1, 0);
+                    // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny.
+                    dataModel.saveTask(etTaskName.getText().toString(), "", 0, 0);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");
@@ -74,6 +75,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnTaskLists = (Button) findViewById(R.id.btnTaskLists);
+        btnTaskLists.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent taskListsIntent = new Intent(getApplication(), TaskListsActivity.class);
+                startActivity(taskListsIntent);
+            }
+        });
     }
 
 }

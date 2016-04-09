@@ -16,7 +16,7 @@ import java.util.List;
 public class DataModel extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TODOLIST";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public DataModel(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -142,11 +142,34 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda vraci seznam vsech seznamu ukolu v databazi.
+     */
+    public ArrayList<TaskList> getAllTaskLists(){
+        ArrayList<TaskList> taskLists = new ArrayList<>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASK_LISTS", null);
+
+        if (cursor.moveToFirst()){
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+
+                TaskList taskList = new TaskList(id, name);
+                taskLists.add(taskList);
+            } while (cursor.moveToNext());
+        }
+        return taskLists;
+    }
+
+    /**
      * Metoda se vola v pripade, ze databazove objekty jeste neexistuji a je potreba je vytvorit.
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER)");
+        db.execSQL("CREATE TABLE TASK_LISTS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT)");
+
+        // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox.
+        db.execSQL("INSERT INTO TASK_LISTS VALUES(null, ?)", new Object[] {"Inbox"});
     }
 
     /**
@@ -157,6 +180,7 @@ public class DataModel extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS TASKS");
+        db.execSQL("DROP TABLE IF EXISTS TASK_LISTS");
         onCreate(db);
     }
 }
