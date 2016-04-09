@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<Task> arrayAdapter;
     DataModel dataModel;
     EditText etTaskName;
+    int listId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +31,13 @@ public class MainActivity extends AppCompatActivity {
 
         dataModel = new DataModel(this);
         listView = (ListView) findViewById(R.id.lvTasksList);
-        arrayAdapter = new TaskAdapter(MainActivity.this, dataModel.getAllTasks());
+
+        Intent anyTaskListIntent = getIntent();
+        // Nastaveni listId pro filtraci ukolu.
+        // Ve vychozim pripade 1 (Inbox) - pokud IntExtra neprijde ze zadneho intentu.
+        listId = anyTaskListIntent.getIntExtra("listId", 1);
+
+        arrayAdapter = new TaskAdapter(MainActivity.this, dataModel.getTasksByListId(listId));
         listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -38,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
                 Task task = (Task) listView.getItemAtPosition(position);
-                Intent editTaskIntent = new Intent(getApplication(), EditTask.class);
+                Intent editTaskIntent = new Intent(getApplication(), EditTaskActivity.class);
                 // Predej ID ukolu do intentu editTaskIntent.
                 editTaskIntent.putExtra("taskId", task.getId());
                 startActivity(editTaskIntent);
@@ -55,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 // Pokud neni prazdny nazev noveho ukolu.
                 if (!etTaskName.getText().toString().equals("")){
                     // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny.
-                    dataModel.saveTask(etTaskName.getText().toString(), "", 0, 0);
+                    dataModel.saveTask(etTaskName.getText().toString(), "", listId, 0);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");
@@ -64,10 +71,10 @@ public class MainActivity extends AppCompatActivity {
 
                     // Aktualizace seznamu ukolu.
                     arrayAdapter.clear();
-                    arrayAdapter.addAll(dataModel.getAllTasks());
+                    arrayAdapter.addAll(dataModel.getTasksByListId(listId));
 
                     // Informovani uzivatele o uspesnem pridani ukolu.
-                    Toast.makeText(MainActivity.this, "Úkol přidán" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
                 } else {
                     // Informovani uzivatele o nutnosti vyplnit název úkolu.
                     Toast.makeText(MainActivity.this, "Prázdný název úkolu!" , Toast.LENGTH_SHORT).show();

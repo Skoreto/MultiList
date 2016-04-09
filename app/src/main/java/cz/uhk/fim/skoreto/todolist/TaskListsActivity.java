@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,7 +33,13 @@ public class TaskListsActivity extends Activity {
         lvTaskLists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO rozbal seznam ukolu
+                // Po klepnuti na polozku listu ziskej instanci zvoleneho seznamu ukolu.
+                TaskList taskList = (TaskList) lvTaskLists.getItemAtPosition(position);
+
+                Intent mainActivityIntent = new Intent(getApplication(), MainActivity.class);
+                // Predej ID ukolu do intentu editTaskIntent.
+                mainActivityIntent.putExtra("listId", taskList.getId());
+                startActivity(mainActivityIntent);
             }
         });
 

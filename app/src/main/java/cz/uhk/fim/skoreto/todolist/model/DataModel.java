@@ -142,6 +142,27 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda vraci seznam vsech ukolu ve vybranem seznamu ukolu identifikovanem pomoci listId.
+     */
+    public ArrayList<Task> getTasksByListId(int listId){
+        ArrayList<Task> tasks = new ArrayList<>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId, null);
+
+        if (cursor.moveToFirst()){
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+                String description = cursor.getString(2);
+                int completed = cursor.getInt(4);
+
+                Task task = new Task(id, name, description, listId, completed);
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
+        return tasks;
+    }
+
+    /**
      * Metoda vraci seznam vsech seznamu ukolu v databazi.
      */
     public ArrayList<TaskList> getAllTaskLists(){
