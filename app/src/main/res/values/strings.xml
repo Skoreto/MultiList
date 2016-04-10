@@ -1,7 +1,7 @@
 <resources>
     <!-- Hlavni aktivita -->
     <string name="app_name">ToDoList</string>
-    <string name="et_task_name_hint">Nový úkol</string>
+    <string name="et_task_name_hint">Nový úkol...</string>
     <string name="btn_add_task">Přidat</string>
     <string name="btn_task_lists">Seznamy</string>
 
@@ -10,4 +10,8 @@
     <string name="tv_task_description">Popis</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="btn_delete_task">Smaž</string>
+
+    <!-- Aktivita seznamu Task Listu -->
+    <string name="et_task_list_name_hint">Nový seznam...</string>
+    <string name="btn_add_task_list">Přidat seznam</string>
 </resources>

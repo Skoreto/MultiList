@@ -7,11 +7,42 @@
     android:orientation="vertical"
     tools:context="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
 
+    <!-- Pomocny item pro zabraneni etTaskName ziskani uvodniho focusu
+    :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px" />
+
+    <EditText
+        android:id="@+id/etTaskListName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="15"
+        android:inputType="textShortMessage"
+        android:layout_centerHorizontal="true"
+        android:height="60dp"
+        android:hint="@string/et_task_list_name_hint"
+        android:nextFocusUp="@id/etTaskListName"
+        android:nextFocusLeft="@id/etTaskListName" />
+
     <ListView
         android:id="@+id/lvTaskListsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/etTaskListName">
     </ListView>
+
+    <Button
+        android:id="@+id/btnAddTaskList"
+        android:text="@string/btn_add_task_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

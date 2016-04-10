@@ -32,14 +32,15 @@ public class MainActivity extends AppCompatActivity {
         dataModel = new DataModel(this);
         listView = (ListView) findViewById(R.id.lvTasksList);
 
-        Intent anyTaskListIntent = getIntent();
-        // Nastaveni listId pro filtraci ukolu.
+        Intent anyIntent = getIntent();
+        // Nastaveni listId pro filtraci ukolu v seznamu.
         // Ve vychozim pripade 1 (Inbox) - pokud IntExtra neprijde ze zadneho intentu.
-        listId = anyTaskListIntent.getIntExtra("listId", 1);
+        listId = anyIntent.getIntExtra("listId", 1);
 
         arrayAdapter = new TaskAdapter(MainActivity.this, dataModel.getTasksByListId(listId));
         listView.setAdapter(arrayAdapter);
 
+        // Editace ukolu po klepnuti v seznamu ukolu.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent editTaskIntent = new Intent(getApplication(), EditTaskActivity.class);
                 // Predej ID ukolu do intentu editTaskIntent.
                 editTaskIntent.putExtra("taskId", task.getId());
+                // Predej ID seznamu pro prechod do aktivity EditTaskActivity.
+                editTaskIntent.putExtra("listId", listId);
                 startActivity(editTaskIntent);
             }
         });
@@ -62,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 // Pokud neni prazdny nazev noveho ukolu.
                 if (!etTaskName.getText().toString().equals("")){
                     // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny.
-                    dataModel.saveTask(etTaskName.getText().toString(), "", listId, 0);
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");

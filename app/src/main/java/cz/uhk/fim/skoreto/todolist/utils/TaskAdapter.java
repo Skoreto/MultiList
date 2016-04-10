@@ -40,7 +40,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
         // Over, zda se znovupouziva existujici view, jinak inflatuj toto view.
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.tasks_list_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_list_item, parent, false);
 
             holder = new ViewHolder();
             holder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);

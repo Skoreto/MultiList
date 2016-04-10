@@ -25,7 +25,7 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda pro ulozeni noveho ukolu do databaze.
      */
-    public void saveTask(String name, String description, int listId, int completed){
+    public void addTask(String name, String description, int listId, int completed){
         ContentValues contentValues = new ContentValues();
         contentValues.put("NAME", name);
         contentValues.put("DESCRIPTION", description);
@@ -33,6 +33,16 @@ public class DataModel extends SQLiteOpenHelper {
         contentValues.put("COMPLETED", completed);
 
         getWritableDatabase().insert("TASKS", null, contentValues);
+    }
+
+    /**
+     * Metoda pro ulozeni noveho seznamu ukolu do databaze.
+     */
+    public void addTaskList(String name){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("NAME", name);
+
+        getWritableDatabase().insert("TASK_LISTS", null, contentValues);
     }
 
     /**
