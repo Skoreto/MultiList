@@ -4,11 +4,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
+
+import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
+import cz.uhk.fim.skoreto.todolist.model.TaskList;
 
 /**
  * Aktivita pro zmenu a smazani ukolu.
@@ -18,7 +25,8 @@ public class EditTaskActivity extends Activity {
 
     EditText etTaskName;
     EditText etTaskDescription;
-    EditText etTaskCompleted;
+    CheckBox chbTaskCompleted;
+    Spinner spinTaskLists;
     DataModel dm = new DataModel(this);
     int taskId;
     int listId;
@@ -32,7 +40,8 @@ public class EditTaskActivity extends Activity {
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
-        etTaskCompleted = (EditText) findViewById(R.id.etTaskCompleted);
+        chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
+        spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
 
         Intent anyTaskListIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -42,19 +51,42 @@ public class EditTaskActivity extends Activity {
         taskId = anyTaskListIntent.getIntExtra("taskId", 1);
         Task task = dm.getTask(taskId);
 
-        String taskState = "neurceno";
-        if (task.getCompleted() == 1){
-            taskState = "1";
-        }
-        if (task.getCompleted() == 0){
-            taskState = "0";
-        }
+        etTaskName.setText(task.getName());
+        etTaskDescription.setText(task.getDescription());
 
-        if (task != null) {
-            etTaskName.setText(task.getName());
-            etTaskDescription.setText(task.getDescription());
-            etTaskCompleted.setText(taskState);
-        }
+        // Zaskrtnuti checkbocu podle toho zda ukol je/neni splnen.
+        if (task.getCompleted() == 1)
+            chbTaskCompleted.setChecked(true);
+        if (task.getCompleted() == 0)
+            chbTaskCompleted.setChecked(false);
+
+        // SPINNER seznamu ukolu
+        List<TaskList> taskLists = dm.getAllTaskLists();
+
+        // Vytvoreni instance adapteru pro spinner a pripojeni jeho dat.
+        // POZOR! Zobrazeni nazvu bylo docileno pouhym prepsanim metody toString() ve tride TaskList.
+        // Pro aktualni ucely nebylo nutne tvorit vlastni adapter.
+        ArrayAdapter<TaskList> taskListsAdapter = new ArrayAdapter<TaskList>(this, R.layout.support_simple_spinner_dropdown_item, taskLists);
+        spinTaskLists.setAdapter(taskListsAdapter);
+
+        // Vychozi nastaveni zvoleneho seznamu.
+        // TODO NEFUNGUJE
+        spinTaskLists.setSelection(taskListsAdapter.getPosition(dm.getTaskListById(listId)), true);
+
+        // Listener pro kliknuti na spinner.
+        spinTaskLists.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // TODO nejspis neni potreba
+                TaskList taskList = (TaskList) spinTaskLists.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // TODO automaticky generovana metoda
+            }
+        });
+
     }
 
     /**
@@ -63,7 +95,7 @@ public class EditTaskActivity extends Activity {
     public void editTask(View view){
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
-        etTaskCompleted = (EditText) findViewById(R.id.etTaskCompleted);
+        chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
 
         // Ziskani upravovaneho ukolu.
         Task task = dm.getTask(taskId);
@@ -73,11 +105,14 @@ public class EditTaskActivity extends Activity {
         task.setName(etTaskName.getText().toString());
         task.setDescription(etTaskDescription.getText().toString());
 
-        if (etTaskCompleted.getText().equals("1")) {
+        if (chbTaskCompleted.isChecked())
             task.setCompleted(1);
-        } else {
+        else
             task.setCompleted(0);
-        }
+
+        // Ziskani vybraneho seznamu ukolu a dle nej prirazeni ukolu do prislusneho seznamu.
+        TaskList taskList = (TaskList) spinTaskLists.getSelectedItem();
+        task.setListId(taskList.getId());
 
         dm.updateTask(task);
         // Informovani uzivatele o uspesnem upraveni ukolu.

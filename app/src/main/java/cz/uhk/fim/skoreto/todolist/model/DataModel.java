@@ -112,6 +112,25 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda pro vraceni konkretniho seznamu ukolu (dle id) z databaze.
+     */
+    public TaskList getTaskListById(int taskListId){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM TASK_LISTS WHERE ID=" + taskListId, null);
+        TaskList taskList = new TaskList();
+        if (cursor.moveToFirst()){
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+
+                taskList.setId(id);
+                taskList.setName(name);
+            } while (cursor.moveToNext());
+        }
+        return taskList;
+    }
+
+    /**
      * Metoda vraci seznam vsech nazvu ukolu v databazi.
      */
     public List<String> getNameAllTasks(){
@@ -199,7 +218,7 @@ public class DataModel extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER)");
         db.execSQL("CREATE TABLE TASK_LISTS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT)");
 
-        // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox.
+        // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox - ziska ID 1.
         db.execSQL("INSERT INTO TASK_LISTS VALUES(null, ?)", new Object[] {"Inbox"});
     }
 

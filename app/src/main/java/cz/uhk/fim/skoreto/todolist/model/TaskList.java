@@ -9,6 +9,9 @@ public class TaskList {
 
     private String name;
 
+    public TaskList() {
+    }
+
     public TaskList(int id, String name) {
         this.id = id;
         this.name = name;
@@ -28,5 +31,13 @@ public class TaskList {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Přepsání pro účely zobrazeni nazvu seznamu ukolu ve spinneru editace ukolu.
+     */
+    @Override
+    public String toString() {
+        return this.name;
     }
 }

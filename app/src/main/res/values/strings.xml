@@ -1,17 +1,19 @@
 <resources>
     <!-- Hlavni aktivita -->
     <string name="app_name">ToDoList</string>
-    <string name="et_task_name_hint">Nový úkol...</string>
+    <string name="et_task_name_hint">Nový úkol&#8230;</string>
     <string name="btn_add_task">Přidat</string>
     <string name="btn_task_lists">Seznamy</string>
 
     <!-- Aktivita editace ukolu -->
-    <string name="tv_task_name">Nazev</string>
+    <string name="tv_task_name">Název</string>
     <string name="tv_task_description">Popis</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="btn_delete_task">Smaž</string>
+    <string name="tv_task_list">Seznam</string>
+    <string name="tv_task_completed">Splněno</string>
 
     <!-- Aktivita seznamu Task Listu -->
-    <string name="et_task_list_name_hint">Nový seznam...</string>
+    <string name="et_task_list_name_hint">Nový seznam&#8230;</string>
     <string name="btn_add_task_list">Přidat seznam</string>
 </resources>
