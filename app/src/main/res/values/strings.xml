@@ -1,6 +1,6 @@
 <resources>
     <!-- Hlavni aktivita -->
-    <string name="app_name">ToDoList</string>
+    <string name="app_name">MultiList</string>
     <string name="et_task_name_hint">Nový úkol&#8230;</string>
     <string name="btn_add_task">Přidat</string>
     <string name="btn_task_lists">Seznamy</string>

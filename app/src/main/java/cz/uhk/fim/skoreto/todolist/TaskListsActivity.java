@@ -40,8 +40,8 @@ public class TaskListsActivity extends Activity {
                 // Po klepnuti na polozku listu ziskej instanci zvoleneho seznamu ukolu.
                 TaskList taskList = (TaskList) lvTaskLists.getItemAtPosition(position);
 
-                Intent mainActivityIntent = new Intent(getApplication(), MainActivity.class);
-                // Predej ID seznamu pro prechod do aktivity MainActivity.
+                Intent mainActivityIntent = new Intent(getApplication(), TaskListActivity.class);
+                // Predej ID seznamu pro prechod do aktivity TaskListActivity.
                 mainActivityIntent.putExtra("listId", taskList.getId());
                 startActivity(mainActivityIntent);
             }

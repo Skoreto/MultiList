@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".TaskListActivity">
 
     <!-- Pomocny item pro zabraneni etTaskName ziskani uvodniho focusu
         :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
@@ -18,11 +18,10 @@
     <EditText
         android:id="@+id/etTaskName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:ems="15"
         android:inputType="textShortMessage"
         android:layout_centerHorizontal="true"
-        android:height="60dp"
         android:hint="@string/et_task_name_hint"
         android:nextFocusUp="@id/etTaskName"
         android:nextFocusLeft="@id/etTaskName" />

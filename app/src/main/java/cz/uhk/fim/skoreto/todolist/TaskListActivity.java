@@ -16,7 +16,7 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class TaskListActivity extends AppCompatActivity {
 
     ListView listView;
     ArrayAdapter<Task> arrayAdapter;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         // Ve vychozim pripade 1 (Inbox) - pokud IntExtra neprijde ze zadneho intentu.
         listId = anyIntent.getIntExtra("listId", 1);
 
-        arrayAdapter = new TaskAdapter(MainActivity.this, dataModel.getTasksByListId(listId));
+        arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId));
         listView.setAdapter(arrayAdapter);
 
         // Editace ukolu po klepnuti v seznamu ukolu.
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 editTaskIntent.putExtra("taskId", task.getId());
                 // Predej ID seznamu pro prechod do aktivity EditTaskActivity.
                 editTaskIntent.putExtra("listId", listId);
+                editTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(editTaskIntent);
             }
         });
@@ -77,10 +78,10 @@ public class MainActivity extends AppCompatActivity {
                     arrayAdapter.addAll(dataModel.getTasksByListId(listId));
 
                     // Informovani uzivatele o uspesnem pridani ukolu.
-                    Toast.makeText(MainActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskListActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
                 } else {
                     // Informovani uzivatele o nutnosti vyplnit název úkolu.
-                    Toast.makeText(MainActivity.this, "Prázdný název úkolu!" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskListActivity.this, "Prázdný název úkolu!" , Toast.LENGTH_SHORT).show();
                 }
             }
         });

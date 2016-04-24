@@ -115,11 +115,11 @@ public class EditTaskActivity extends Activity {
         }
 
         ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                                           @Override
-                                           public void onClick(View view) {
-                                               Toast.makeText(EditTaskActivity.this, "Zobraz fotku", Toast.LENGTH_SHORT).show();
-                                           }
-                                       }
+               @Override
+               public void onClick(View view) {
+                   Toast.makeText(EditTaskActivity.this, "Zobraz fotku", Toast.LENGTH_SHORT).show();
+               }
+           }
         );
 
 
@@ -154,7 +154,7 @@ public class EditTaskActivity extends Activity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(EditTaskActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
-        this.activateMainActivity(view, listId);
+        this.activateTaskListActivity(view, listId);
     }
 
     /**
@@ -165,17 +165,17 @@ public class EditTaskActivity extends Activity {
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(EditTaskActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
-        this.activateMainActivity(view, listId);
+        this.activateTaskListActivity(view, listId);
     }
 
     /**
-     * Metoda pro intent prechodu na MainActivity.
+     * Metoda pro intent prechodu na TaskListActivity.
      */
-    public void activateMainActivity(View view, int listId){
-        Intent mainActivityIntent = new Intent(getApplication(), MainActivity.class);
-        // Predej ID seznamu pro prechod do aktivity MainActivity.
-        mainActivityIntent.putExtra("listId", listId);
-        startActivity(mainActivityIntent);
+    public void activateTaskListActivity(View view, int listId){
+        Intent taskListActivityIntent = new Intent(getApplication(), TaskListActivity.class);
+        // Predej ID seznamu pro prechod do aktivity TaskListActivity.
+        taskListActivityIntent.putExtra("listId", listId);
+        startActivity(taskListActivityIntent);
     }
 
     /**
@@ -201,7 +201,6 @@ public class EditTaskActivity extends Activity {
                 startActivityForResult(takePhotoIntent, REQUEST_TAKE_PHOTO);
             }
         }
-
     }
 
     /**

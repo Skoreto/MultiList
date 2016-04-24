@@ -12,16 +12,14 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".TaskListActivity"></activity>
+        <activity android:name=".EditTaskActivity"></activity>
+        <activity android:name=".TaskListsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".EditTaskActivity"></activity>
-        <activity android:name=".TaskListsActivity"></activity>
     </application>
 
 </manifest>
