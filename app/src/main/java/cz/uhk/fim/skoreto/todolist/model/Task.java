@@ -1,7 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.model;
 
 /**
- * Created by Tomas on 8.4.2016.
+ * Created by Tomas.
  */
 public class Task {
 
@@ -15,16 +15,18 @@ public class Task {
 
     private int completed;
 
-    public Task(){
+    private String photoName;
 
+    public Task(){
     }
 
-    public Task(int id, String name, String description, int listId, int completed) {
+    public Task(int id, String name, String description, int listId, int completed, String photoName) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.listId = listId;
         this.completed = completed;
+        this.photoName = photoName;
     }
 
     public int getId() {
@@ -65,5 +67,13 @@ public class Task {
 
     public void setCompleted(int completed) {
         this.completed = completed;
+    }
+
+    public String getPhotoName() {
+        return photoName;
+    }
+
+    public void setPhotoName(String photoName) {
+        this.photoName = photoName;
     }
 }

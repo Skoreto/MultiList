@@ -16,7 +16,7 @@ import java.util.List;
 public class DataModel extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "TODOLIST";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     public DataModel(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -25,12 +25,13 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda pro ulozeni noveho ukolu do databaze.
      */
-    public void addTask(String name, String description, int listId, int completed){
+    public void addTask(String name, String description, int listId, int completed, String photoName){
         ContentValues contentValues = new ContentValues();
         contentValues.put("NAME", name);
         contentValues.put("DESCRIPTION", description);
         contentValues.put("LIST_ID", listId);
         contentValues.put("COMPLETED", completed);
+        contentValues.put("PHOTO_NAME", photoName);
 
         getWritableDatabase().insert("TASKS", null, contentValues);
     }
@@ -56,6 +57,7 @@ public class DataModel extends SQLiteOpenHelper {
         contVal.put("DESCRIPTION", task.getDescription());
         contVal.put("LIST_ID", task.getListId());
         contVal.put("COMPLETED", task.getCompleted());
+        contVal.put("PHOTO_NAME", task.getPhotoName());
 
         return db.update("TASKS", contVal, "ID = ?",  new String[] {String.valueOf(task.getId())});
     }
@@ -100,12 +102,14 @@ public class DataModel extends SQLiteOpenHelper {
                 String description = cursor.getString(2);
                 int listId = cursor.getInt(3);
                 int completed = cursor.getInt(4);
+                String photoName = cursor.getString(5);
 
                 task.setId(taskId);
                 task.setName(name);
                 task.setDescription(description);
                 task.setListId(listId);
                 task.setCompleted(completed);
+                task.setPhotoName(photoName);
             } while (cursor.moveToNext());
         }
         return task;
@@ -162,8 +166,9 @@ public class DataModel extends SQLiteOpenHelper {
                 String description = cursor.getString(2);
                 int listId = cursor.getInt(3);
                 int completed = cursor.getInt(4);
+                String photoName = cursor.getString(5);
 
-                Task task = new Task(id, name, description, listId, completed);
+                Task task = new Task(id, name, description, listId, completed, photoName);
                 tasks.add(task);
             } while (cursor.moveToNext());
         }
@@ -183,8 +188,9 @@ public class DataModel extends SQLiteOpenHelper {
                 String name = cursor.getString(1);
                 String description = cursor.getString(2);
                 int completed = cursor.getInt(4);
+                String photoName = cursor.getString(5);
 
-                Task task = new Task(id, name, description, listId, completed);
+                Task task = new Task(id, name, description, listId, completed, photoName);
                 tasks.add(task);
             } while (cursor.moveToNext());
         }
@@ -215,7 +221,7 @@ public class DataModel extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER)");
+        db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER, PHOTO_NAME TEXT)");
         db.execSQL("CREATE TABLE TASK_LISTS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT)");
 
         // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox - ziska ID 1.
