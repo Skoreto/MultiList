@@ -1,11 +1,16 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +30,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
     private class ViewHolder {
         TextView tvTaskName;
         CheckBox chbTaskCompleted;
+        ImageView ivPhotoThumbnail;
     }
 
     public TaskAdapter(Context context, ArrayList<Task> tasks) {
@@ -45,6 +51,20 @@ public class TaskAdapter extends ArrayAdapter<Task> {
             holder = new ViewHolder();
             holder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
             holder.chbTaskCompleted = (CheckBox) convertView.findViewById(R.id.chbTaskCompleted);
+            holder.ivPhotoThumbnail = (ImageView) convertView.findViewById(R.id.ivPhotoThumbnail);
+
+            // Prirazeni nahledu fotografie k ukolu.
+            if (!task.getPhotoName().equals("")) {
+                String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/MultiListPhotos/" + task.getPhotoName() + ".jpg";
+                Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 80, 80);
+                holder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
+            }
+
+            holder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
+                   public void onClick(View v) {
+                       Toast.makeText(getContext(), "Kliknuto na obrazek - " + task.getName(), Toast.LENGTH_SHORT).show();
+                   }}
+            );
 
             // Odskrtni checkboxy ukolu, podle toho, zda jsou splneny.
             if (task.getCompleted() == 0){
@@ -83,13 +103,15 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         }
 
         // Zamezeni preteceni nazvu ukolu v uvodnim seznamu.
-        if (task.getName().length() > 40) {
-            holder.tvTaskName.setText(task.getName().substring(0, 40) + " ...");
+        if (task.getName().length() > 25) {
+            holder.tvTaskName.setText(task.getName().substring(0, 25) + " ...");
         } else {
             holder.tvTaskName.setText(task.getName());
         }
 
         return convertView;
     }
+
+
 
 }

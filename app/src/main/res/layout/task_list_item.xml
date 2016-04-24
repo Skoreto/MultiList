@@ -4,20 +4,32 @@
     android:layout_height="match_parent"
     android:padding="10dp">
 
+    <ImageView
+        android:id="@+id/ivPhotoThumbnail"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/photo_thumbnail"
+        android:layout_alignParentLeft="true"
+        />
+
     <TextView
         android:id="@+id/tvTaskName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:textAppearance="?android:attr/textAppearanceListItem"
         android:layout_alignBaseline="@+id/chbTaskCompleted"
         android:layout_alignBottom="@id/chbTaskCompleted"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="36dp" />
+android:layout_toRightOf="@+id/ivPhotoThumbnail"
+        android:layout_toEndOf="@+id/ivPhotoThumbnail"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="36dp"
+
+        />
 
     <CheckBox
         android:id="@+id/chbTaskCompleted"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:focusable="false"
