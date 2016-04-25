@@ -9,6 +9,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,8 +39,10 @@ import cz.uhk.fim.skoreto.todolist.model.TaskList;
  * Aktivita pro zmenu a smazani ukolu.
  * Created by Tomas.
  */
-public class EditTaskActivity extends Activity {
+public class EditTaskActivity extends AppCompatActivity {
 
+    Toolbar tlbEditTaskActivity;
+    ActionBar actionBar;
     Task task;
     EditText etTaskName;
     EditText etTaskDescription;
@@ -53,6 +61,18 @@ public class EditTaskActivity extends Activity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_edit);
+
+        // Implementace ActionBaru.
+        tlbEditTaskActivity = (Toolbar) findViewById(R.id.tlbEditTaskListActivity);
+        if (tlbEditTaskActivity != null) {
+            setSupportActionBar(tlbEditTaskActivity);
+
+            // Ziskani podpory ActionBaru korespondujiciho s Toolbarem.
+            actionBar = getSupportActionBar();
+            // Povoleni tlacitka Zpet.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
@@ -128,7 +148,7 @@ public class EditTaskActivity extends Activity {
     /**
      * Metoda pro zmenu atributu ukolu.
      */
-    public void editTask(View view){
+    public void editTask(){
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
@@ -154,24 +174,24 @@ public class EditTaskActivity extends Activity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(EditTaskActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
-        this.activateTaskListActivity(view, listId);
+        this.activateTaskListActivity(listId);
     }
 
     /**
      * Metoda pro smazani ukolu.
      */
-    public void deleteTask(View view){
+    public void deleteTask(){
         dm.deleteTask(taskId);
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(EditTaskActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
-        this.activateTaskListActivity(view, listId);
+        this.activateTaskListActivity(listId);
     }
 
     /**
      * Metoda pro intent prechodu na TaskListActivity.
      */
-    public void activateTaskListActivity(View view, int listId){
+    public void activateTaskListActivity(int listId){
         Intent taskListActivityIntent = new Intent(getApplication(), TaskListActivity.class);
         // Predej ID seznamu pro prechod do aktivity TaskListActivity.
         taskListActivityIntent.putExtra("listId", listId);
@@ -246,6 +266,32 @@ public class EditTaskActivity extends Activity {
 
     }
 
+    /**
+     * Metoda pro inicializaci layoutu ActionBaru.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.edit_task_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Metoda pro obluhu tlacitek v ActionBaru.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_done:
+                // Potvrdit zmeny a ulozit do databaze.
+                editTask();
+                return true;
+
+            default:
+                // Vyvolani superclass pro obsluhu nerozpoznane akce.
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 
 }

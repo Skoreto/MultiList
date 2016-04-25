@@ -23,7 +23,7 @@ import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
 public class TaskListActivity extends AppCompatActivity {
 
-    Toolbar taskListActivityToolbar;
+    Toolbar tlbTaskListActivity;
     ActionBar actionBar;
     ListView listView;
     ArrayAdapter<Task> arrayAdapter;
@@ -38,9 +38,10 @@ public class TaskListActivity extends AppCompatActivity {
 
         dataModel = new DataModel(this);
 
-        taskListActivityToolbar = (Toolbar) findViewById(R.id.tlbTaskListActivity);
-        if (taskListActivityToolbar != null) {
-            setSupportActionBar(taskListActivityToolbar);
+        // Implementace ActionBaru.
+        tlbTaskListActivity = (Toolbar) findViewById(R.id.tlbTaskListActivity);
+        if (tlbTaskListActivity != null) {
+            setSupportActionBar(tlbTaskListActivity);
 
             // Ziskani podpory ActionBaru korespondujiciho s Toolbarem.
             actionBar = getSupportActionBar();
@@ -115,11 +116,13 @@ public class TaskListActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Metoda pro inicializaci layoutu ActionBaru.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.task_list_activity_menu, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
