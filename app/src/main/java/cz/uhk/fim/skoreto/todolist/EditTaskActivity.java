@@ -1,8 +1,12 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,10 +22,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +56,12 @@ public class EditTaskActivity extends AppCompatActivity {
     DataModel dm = new DataModel(this);
     int taskId;
     int listId;
+
+    private AudioManager audioManager;
+    private MediaRecorder mediaRecorder;
+    private MediaPlayer mediaPlayer;
+    private String taskRecordName;
+    private String taskRecordPath;
 
     ImageView ivTaskPhoto;
     static final int REQUEST_TAKE_PHOTO = 888;
@@ -141,7 +153,118 @@ public class EditTaskActivity extends AppCompatActivity {
            }
         );
 
+        // NAHRAVANI / PREHRAVANI ZVUKU
+        final ToggleButton btnRecordTask = (ToggleButton) findViewById(R.id.btnRecordTask);
+        final ToggleButton btnPlayTask = (ToggleButton) findViewById(R.id.btnPlayTask);
 
+        btnRecordTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                btnPlayTask.setEnabled(!isChecked);
+                onRecordPressed(isChecked);
+            }
+        });
+
+        btnPlayTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                btnRecordTask.setEnabled(!isChecked);
+                onPlayPressed(isChecked);
+            }
+        });
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.requestAudioFocus(afcListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+
+        taskRecordName = "record1";
+        taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
+    }
+
+    private void onRecordPressed(boolean bReady) {
+        if (bReady) startRecording();
+        else stopRecording();
+    }
+
+    private void startRecording() {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+
+        // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListRecordings" pokud neexistuji.
+        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings";
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            File photosDirectory = new File(folderPath);
+            photosDirectory.mkdirs();
+        }
+
+        mediaRecorder.setOutputFile(taskRecordPath);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mediaRecorder.prepare();
+        } catch (IOException e) {
+            Toast.makeText(EditTaskActivity.this, "CHYBA MediaRecorder nahravani", Toast.LENGTH_SHORT).show();
+        }
+
+        mediaRecorder.start();
+    }
+
+    private void stopRecording() {
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+    }
+
+    private void onPlayPressed(boolean bReady) {
+        if (bReady) startPlaying();
+        else stopPlaying();
+    }
+
+    private void startPlaying() {
+        mediaPlayer = new MediaPlayer();
+
+        try {
+            mediaPlayer.setDataSource(taskRecordPath);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            Toast.makeText(EditTaskActivity.this, "CHYBA MediaPlayer prehravani", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void stopPlaying() {
+//        if (null != canvas) {
+            if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+//        }
+    }
+
+    AudioManager.OnAudioFocusChangeListener afcListener = new AudioManager.OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                audioManager.abandonAudioFocus(afcListener);
+                if (mediaPlayer.isPlaying()) stopPlaying();
+            }
+        }
+    };
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaRecorder != null) {
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     /**
