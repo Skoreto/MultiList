@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -76,8 +77,10 @@ public class TaskListActivity extends AppCompatActivity {
             }
         });
 
+
+
         // Pridani noveho ukolu.
-        Button btnAddTask = (Button) findViewById(R.id.btnAddTask);
+        FloatingActionButton btnAddTask = (FloatingActionButton) findViewById(R.id.btnAddTask);
         btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
