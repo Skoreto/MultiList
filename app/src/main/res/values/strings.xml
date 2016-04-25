@@ -20,4 +20,8 @@
 
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
+
+    <!-- TaskListActivity ActionBar -->
+    <string name="action_sort">Seřadit</string>
+    <string name="action_settings">Nastavení</string>
 </resources>

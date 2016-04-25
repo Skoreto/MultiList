@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:local="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -15,24 +16,40 @@
         android:layout_width="0px"
         android:layout_height="0px" />
 
-    <EditText
-        android:id="@+id/etTaskName"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:ems="15"
-        android:inputType="textShortMessage"
-        android:layout_centerHorizontal="true"
-        android:hint="@string/et_task_name_hint"
-        android:nextFocusUp="@id/etTaskName"
-        android:nextFocusLeft="@id/etTaskName" />
-
-    <ListView
-        android:id="@+id/lvTasksList"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/etTaskName">
-    </ListView>
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tlbTaskListActivity"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            local:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            local:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:elevation="4dp" />
+
+        <EditText
+            android:id="@+id/etTaskName"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:ems="15"
+            android:inputType="textShortMessage"
+
+            android:hint="@string/et_task_name_hint"
+            android:nextFocusUp="@id/etTaskName"
+            android:nextFocusLeft="@id/etTaskName"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center_horizontal" />
+
+        <ListView
+            android:id="@+id/lvTasksList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </ListView>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnAddTask"

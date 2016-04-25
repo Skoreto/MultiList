@@ -1,9 +1,14 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,6 +23,8 @@ import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
 public class TaskListActivity extends AppCompatActivity {
 
+    Toolbar taskListActivityToolbar;
+    ActionBar actionBar;
     ListView listView;
     ArrayAdapter<Task> arrayAdapter;
     DataModel dataModel;
@@ -27,9 +34,21 @@ public class TaskListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.task_list_activity);
 
         dataModel = new DataModel(this);
+
+        taskListActivityToolbar = (Toolbar) findViewById(R.id.tlbTaskListActivity);
+        if (taskListActivityToolbar != null) {
+            setSupportActionBar(taskListActivityToolbar);
+
+            // Ziskani podpory ActionBaru korespondujiciho s Toolbarem.
+            actionBar = getSupportActionBar();
+            // Povoleni tlacitka Zpet.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
         listView = (ListView) findViewById(R.id.lvTasksList);
 
         Intent anyIntent = getIntent();
@@ -94,6 +113,34 @@ public class TaskListActivity extends AppCompatActivity {
                 startActivity(taskListsIntent);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.task_list_activity_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Metoda pro obluhu tlacitek v ActionBaru.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // implementace nastavení
+                return true;
+
+            case R.id.action_sort:
+                // TODO implementace řazení
+                return true;
+
+            default:
+                // Vyvolani superclass pro obsluhu nerozpoznane akce.
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }
