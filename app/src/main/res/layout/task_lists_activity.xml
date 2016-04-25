@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".TaskListActivity">
+    tools:context="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
 
     <!-- Pomocny item pro zabraneni etTaskName ziskani uvodniho focusu
-        :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
+    :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
     <LinearLayout
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -23,7 +23,7 @@
         android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/tlbTaskListActivity"
+            android:id="@+id/tlbTaskListsActivity"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
@@ -32,19 +32,19 @@
             android:elevation="4dp" />
 
         <EditText
-            android:id="@+id/etTaskName"
+            android:id="@+id/etTaskListName"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:ems="15"
             android:inputType="textShortMessage"
-            android:hint="@string/et_task_name_hint"
-            android:nextFocusUp="@id/etTaskName"
-            android:nextFocusLeft="@id/etTaskName"
+            android:hint="@string/et_task_list_name_hint"
+            android:nextFocusUp="@id/etTaskListName"
+            android:nextFocusLeft="@id/etTaskListName"
             android:layout_marginTop="4dp"
             android:layout_gravity="center_horizontal" />
 
         <ListView
-            android:id="@+id/lvTasksList"
+            android:id="@+id/lvTaskListsList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
         </ListView>
@@ -52,13 +52,12 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnAddTask"
-        android:text="@string/btn_add_task"
+        android:id="@+id/btnAddTaskList"
+        android:text="@string/btn_add_task_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

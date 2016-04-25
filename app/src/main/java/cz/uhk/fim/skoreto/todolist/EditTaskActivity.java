@@ -1,6 +1,5 @@
 package cz.uhk.fim.skoreto.todolist;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -60,7 +59,7 @@ public class EditTaskActivity extends AppCompatActivity {
      */
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.task_edit);
+        setContentView(R.layout.edit_task_activity);
 
         // Implementace ActionBaru.
         tlbEditTaskActivity = (Toolbar) findViewById(R.id.tlbEditTaskListActivity);

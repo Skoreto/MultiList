@@ -106,14 +106,6 @@ public class TaskListActivity extends AppCompatActivity {
             }
         });
 
-        Button btnTaskLists = (Button) findViewById(R.id.btnTaskLists);
-        btnTaskLists.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                Intent taskListsIntent = new Intent(getApplication(), TaskListsActivity.class);
-                startActivity(taskListsIntent);
-            }
-        });
     }
 
     /**

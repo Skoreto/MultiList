@@ -1,8 +1,9 @@
 package cz.uhk.fim.skoreto.todolist;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,8 +19,9 @@ import cz.uhk.fim.skoreto.todolist.utils.TaskListAdapter;
 /**
  * Created by Tomas.
  */
-public class TaskListsActivity extends Activity {
+public class TaskListsActivity extends AppCompatActivity {
 
+    Toolbar tlbTaskListsActivity;
     ListView lvTaskLists;
     ArrayAdapter<TaskList> arrayAdapter;
     DataModel dataModel;
@@ -27,7 +29,13 @@ public class TaskListsActivity extends Activity {
 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.task_lists);
+        setContentView(R.layout.task_lists_activity);
+
+        // Implementace ActionBaru.
+        tlbTaskListsActivity = (Toolbar) findViewById(R.id.tlbTaskListsActivity);
+        if (tlbTaskListsActivity != null) {
+            setSupportActionBar(tlbTaskListsActivity);
+        }
 
         dataModel = new DataModel(this);
         lvTaskLists = (ListView) findViewById(R.id.lvTaskListsList);
@@ -78,5 +86,6 @@ public class TaskListsActivity extends Activity {
         });
 
     }
+
 
 }
