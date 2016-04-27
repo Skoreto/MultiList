@@ -42,7 +42,7 @@ import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 
 
 /**
- * Aktivita pro zmenu a smazani ukolu.
+ * Aktivita pro zmenu, smazani a zobrazeni detailu ukolu.
  * Created by Tomas.
  */
 public class TaskDetailActivity extends AppCompatActivity {
@@ -136,7 +136,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
 
         if (!task.getPhotoName().equals("")) {
-            String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/MultiListPhotos/" + task.getPhotoName() + ".jpg";
+            String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
 //            String photoDir = task.getPhotoName();
 //            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoDir));
 
@@ -202,18 +202,34 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
-        this.activateTaskListActivity(listId);
+//        this.activateTaskListActivity(listId);
+        finish();
     }
 
     /**
      * Metoda pro smazani ukolu.
      */
     public void deleteTask(){
+        // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
+        if (!task.getPhotoName().equals("")) {
+            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            File oldTaskPhoto = new File(oldTaskPhotoPath);
+            boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
+        }
+
+        // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
+        if (!task.getRecordingName().equals("")) {
+            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+            File oldTaskRecording = new File(oldTaskRecordingPath);
+            boolean isTaskRecordingDeleted = oldTaskRecording.delete();
+        }
+
         dm.deleteTask(taskId);
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
-        this.activateTaskListActivity(listId);
+        finish();
+//        this.activateTaskListActivity(listId);
     }
 
     /**
@@ -255,12 +271,19 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Metoda pro vytvoreni souboru fotografie a jeji ulozeni do interniho uloziste.
      */
     private File createPhotoFile() throws IOException {
+        // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
+        if (!task.getPhotoName().equals("")) {
+            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            File oldTaskPhoto = new File(oldTaskPhotoPath);
+            boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
+        }
+
         // Vytvor unikatni jmeno fotografie z casu iniciace vyfoceni ukolu.
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String photoFileName = "JPEG_" + timeStamp;
 
         // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListPhotos" pokud neexistuji.
-        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListPhotos";
+        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos";
         File folder = new File(folderPath);
         if (!folder.exists()) {
             File photosDirectory = new File(folderPath);
@@ -335,7 +358,7 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Metoda pro obsluhu tlacitka spusteni prehravani.
      */
     private void onPlayPressed(boolean bReady) {
-        if (bReady) AudioController.startPlaying(task, mediaPlayer, TaskDetailActivity.this);
+        if (bReady) AudioController.startPlaying(dm, taskId, mediaPlayer, TaskDetailActivity.this);
         else {
             AudioController.stopPlaying(mediaPlayer);
             mediaPlayer = null;

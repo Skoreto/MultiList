@@ -17,19 +17,19 @@ public class Task {
 
     private String photoName;
 
-    private String recordName;
+    private String recordingName;
 
     public Task(){
     }
 
-    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordName) {
+    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordingName) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.listId = listId;
         this.completed = completed;
         this.photoName = photoName;
-        this.recordName = recordName;
+        this.recordingName = recordingName;
     }
 
     public int getId() {
@@ -80,11 +80,11 @@ public class Task {
         this.photoName = photoName;
     }
 
-    public String getRecordName() {
-        return recordName;
+    public String getRecordingName() {
+        return recordingName;
     }
 
-    public void setRecordName(String recordName) {
-        this.recordName = recordName;
+    public void setRecordingName(String recordingName) {
+        this.recordingName = recordingName;
     }
 }

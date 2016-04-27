@@ -29,10 +29,10 @@ public class AudioController {
      */
     public static void startRecording(Task task, MediaRecorder mediaRecorder, AudioManager audioManager, DataModel dm, Context context) {
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
-        if (!task.getRecordName().equals("")) {
-            String oldTaskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + task.getRecordName() + ".3gp";
-            File oldTaskRecord = new File(oldTaskRecordPath);
-            boolean isTaskRecordDeleted = oldTaskRecord.delete();
+        if (!task.getRecordingName().equals("")) {
+            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+            File oldTaskRecording = new File(oldTaskRecordingPath);
+            boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
 
         mediaRecorder = new MediaRecorder();
@@ -40,19 +40,19 @@ public class AudioController {
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
         // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListRecordings" pokud neexistuji.
-        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings";
+        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings";
         File folder = new File(folderPath);
         if (!folder.exists()) {
-            File photosDirectory = new File(folderPath);
-            photosDirectory.mkdirs();
+            File recordingsDirectory = new File(folderPath);
+            recordingsDirectory.mkdirs();
         }
 
         // Vytvor unikatni jmeno nahravky z casu iniciace nahravani ukolu.
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String taskRecordName = "nahravka_" + timeStamp;
-        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
+        String taskRecordingName = "nahravka_" + timeStamp;
+        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + taskRecordingName + ".3gp";
 
-        mediaRecorder.setOutputFile(taskRecordPath);
+        mediaRecorder.setOutputFile(taskRecordingPath);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         try {
@@ -64,7 +64,7 @@ public class AudioController {
         mediaRecorder.start();
 
         // Pridani zaznamu o nahravce do databaze.
-        task.setRecordName(taskRecordName);
+        task.setRecordingName(taskRecordingName);
         dm.updateTask(task);
     }
 
@@ -81,14 +81,17 @@ public class AudioController {
     /**
      * Metoda pro spusteni prehravani nahravky.
      */
-    public static void startPlaying(Task task, MediaPlayer mediaPlayer, Context context) {
-        String taskRecordName = task.getRecordName();
-        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
+    public static void startPlaying(DataModel dm, int taskId, MediaPlayer mediaPlayer, Context context) {
+        // Je potreba nacist novou instanci ukolu, protoze uzivatel muze chtit prehrat nove nahranou zvukovou nahravku v jedne aktivite.
+        Task task = dm.getTask(taskId);
+
+        String taskRecordingName = task.getRecordingName();
+        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + taskRecordingName + ".3gp";
 
         try {
-            if (!taskRecordName.equals("")) {
+            if (!taskRecordingName.equals("")) {
                 mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDataSource(taskRecordPath);
+                mediaPlayer.setDataSource(taskRecordingPath);
                 mediaPlayer.prepare();
                 mediaPlayer.start();
             } else {

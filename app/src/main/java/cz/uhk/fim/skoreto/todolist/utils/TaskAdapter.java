@@ -55,7 +55,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
             // Prirazeni nahledu fotografie k ukolu.
             if (!task.getPhotoName().equals("")) {
-                String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/MultiListPhotos/" + task.getPhotoName() + ".jpg";
+                String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
                 Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 80, 80);
                 holder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
             }

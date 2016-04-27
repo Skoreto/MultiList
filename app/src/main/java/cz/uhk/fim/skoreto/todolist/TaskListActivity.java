@@ -21,6 +21,9 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
+/**
+ * Trida aktivity prezentujici seznam ukolu.
+ */
 public class TaskListActivity extends AppCompatActivity {
 
     Toolbar tlbTaskListActivity;
@@ -66,17 +69,15 @@ public class TaskListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
                 Task task = (Task) listView.getItemAtPosition(position);
-                Intent editTaskIntent = new Intent(getApplication(), TaskDetailActivity.class);
+                Intent taskDetailIntent = new Intent(getApplication(), TaskDetailActivity.class);
                 // Predej ID ukolu do intentu editTaskIntent.
-                editTaskIntent.putExtra("taskId", task.getId());
+                taskDetailIntent.putExtra("taskId", task.getId());
                 // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
-                editTaskIntent.putExtra("listId", listId);
-                editTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(editTaskIntent);
+                taskDetailIntent.putExtra("listId", listId);
+//                editTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(taskDetailIntent);
             }
         });
-
-
 
         // Pridani noveho ukolu.
         FloatingActionButton btnAddTask = (FloatingActionButton) findViewById(R.id.btnAddTask);
@@ -139,5 +140,6 @@ public class TaskListActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
 }
