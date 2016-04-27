@@ -45,7 +45,7 @@ import cz.uhk.fim.skoreto.todolist.utils.AudioController;
  * Aktivita pro zmenu a smazani ukolu.
  * Created by Tomas.
  */
-public class EditTaskActivity extends AppCompatActivity {
+public class TaskDetailActivity extends AppCompatActivity {
 
     Toolbar tlbEditTaskActivity;
     ActionBar actionBar;
@@ -70,7 +70,7 @@ public class EditTaskActivity extends AppCompatActivity {
      */
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edit_task_activity);
+        setContentView(R.layout.task_detail_activity);
 
         // Implementace ActionBaru.
         tlbEditTaskActivity = (Toolbar) findViewById(R.id.tlbEditTaskListActivity);
@@ -147,7 +147,7 @@ public class EditTaskActivity extends AppCompatActivity {
         ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
-                   Toast.makeText(EditTaskActivity.this, "Zobraz fotku", Toast.LENGTH_SHORT).show();
+                   Toast.makeText(TaskDetailActivity.this, "Zobraz fotku", Toast.LENGTH_SHORT).show();
                }
            }
         );
@@ -200,7 +200,7 @@ public class EditTaskActivity extends AppCompatActivity {
 
         dm.updateTask(task);
         // Informovani uzivatele o uspesnem upraveni ukolu.
-        Toast.makeText(EditTaskActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
         this.activateTaskListActivity(listId);
     }
@@ -211,7 +211,7 @@ public class EditTaskActivity extends AppCompatActivity {
     public void deleteTask(){
         dm.deleteTask(taskId);
         // Informovani uzivatele o uspesnem smazani ukolu.
-        Toast.makeText(EditTaskActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
         this.activateTaskListActivity(listId);
     }
@@ -238,12 +238,12 @@ public class EditTaskActivity extends AppCompatActivity {
             try {
                 photoFile = createPhotoFile();
             } catch (IOException ex) {
-                Toast.makeText(EditTaskActivity.this, "Vyskytla se chyba při vytváření souboru fotografie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskDetailActivity.this, "Vyskytla se chyba při vytváření souboru fotografie", Toast.LENGTH_SHORT).show();
             }
 
             // Pokracuj pouze, pokud byl soubor uspesne vytvoren.
             if (photoFile != null) {
-                Toast.makeText(EditTaskActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskDetailActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
                 takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 // Bude obslouzeno metodou onActivityResult.
                 startActivityForResult(takePhotoIntent, REQUEST_TAKE_PHOTO);
@@ -274,7 +274,7 @@ public class EditTaskActivity extends AppCompatActivity {
         task.setPhotoName(photoFileName);
         dm.updateTask(task);
 
-        Toast.makeText(EditTaskActivity.this, photoFileName, Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskDetailActivity.this, photoFileName, Toast.LENGTH_SHORT).show();
         return photoFile;
     }
 
@@ -284,10 +284,10 @@ public class EditTaskActivity extends AppCompatActivity {
 
         // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Intent editTaskIntent = new Intent(getApplication(), EditTaskActivity.class);
+            Intent editTaskIntent = new Intent(getApplication(), TaskDetailActivity.class);
             // Predej ID ukolu do intentu editTaskIntent.
             editTaskIntent.putExtra("taskId", task.getId());
-            // Predej ID seznamu pro prechod do aktivity EditTaskActivity.
+            // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
             editTaskIntent.putExtra("listId", listId);
             startActivity(editTaskIntent);
         }
@@ -324,7 +324,7 @@ public class EditTaskActivity extends AppCompatActivity {
      * Metoda pro obsluhu tlacitka pro spusteni nahravani zvuku.
      */
     private void onRecordPressed(boolean bReady) {
-        if (bReady) AudioController.startRecording(task, mediaRecorder, audioManager, dm, EditTaskActivity.this);
+        if (bReady) AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
         else {
             AudioController.stopRecording(mediaRecorder);
             mediaRecorder = null;
@@ -335,7 +335,7 @@ public class EditTaskActivity extends AppCompatActivity {
      * Metoda pro obsluhu tlacitka spusteni prehravani.
      */
     private void onPlayPressed(boolean bReady) {
-        if (bReady) AudioController.startPlaying(task, mediaPlayer, EditTaskActivity.this);
+        if (bReady) AudioController.startPlaying(task, mediaPlayer, TaskDetailActivity.this);
         else {
             AudioController.stopPlaying(mediaPlayer);
             mediaPlayer = null;

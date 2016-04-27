@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -67,10 +66,10 @@ public class TaskListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
                 Task task = (Task) listView.getItemAtPosition(position);
-                Intent editTaskIntent = new Intent(getApplication(), EditTaskActivity.class);
+                Intent editTaskIntent = new Intent(getApplication(), TaskDetailActivity.class);
                 // Predej ID ukolu do intentu editTaskIntent.
                 editTaskIntent.putExtra("taskId", task.getId());
-                // Predej ID seznamu pro prechod do aktivity EditTaskActivity.
+                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
                 editTaskIntent.putExtra("listId", listId);
                 editTaskIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(editTaskIntent);

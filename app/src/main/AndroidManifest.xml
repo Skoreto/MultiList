@@ -24,7 +24,7 @@
                 android:value=".TaskListsActivity" />
         </activity>
 
-        <activity android:name=".EditTaskActivity"
+        <activity android:name=".TaskDetailActivity"
             android:parentActivityName=".TaskListActivity">
 
             <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
