@@ -17,16 +17,19 @@ public class Task {
 
     private String photoName;
 
+    private String recordName;
+
     public Task(){
     }
 
-    public Task(int id, String name, String description, int listId, int completed, String photoName) {
+    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordName) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.listId = listId;
         this.completed = completed;
         this.photoName = photoName;
+        this.recordName = recordName;
     }
 
     public int getId() {
@@ -75,5 +78,13 @@ public class Task {
 
     public void setPhotoName(String photoName) {
         this.photoName = photoName;
+    }
+
+    public String getRecordName() {
+        return recordName;
+    }
+
+    public void setRecordName(String recordName) {
+        this.recordName = recordName;
     }
 }

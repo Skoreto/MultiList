@@ -89,7 +89,7 @@ public class TaskListActivity extends AppCompatActivity {
                 // Pokud neni prazdny nazev noveho ukolu.
                 if (!etTaskName.getText().toString().equals("")){
                     // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny.
-                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "");
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "");
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");

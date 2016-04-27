@@ -60,8 +60,6 @@ public class EditTaskActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
-    private String taskRecordName;
-    private String taskRecordPath;
 
     ImageView ivTaskPhoto;
     static final int REQUEST_TAKE_PHOTO = 888;
@@ -175,17 +173,27 @@ public class EditTaskActivity extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.requestAudioFocus(afcListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-
-        taskRecordName = "record1";
-        taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
     }
 
+    /**
+     * Metoda pro obsluhu tlacitka pro spusteni nahravani zvuku.
+     */
     private void onRecordPressed(boolean bReady) {
         if (bReady) startRecording();
         else stopRecording();
     }
 
+    /**
+     * Metoda pro spusteni nahravani zvuku.
+     */
     private void startRecording() {
+        // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
+        if (!task.getRecordName().equals("")) {
+            String oldTaskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + task.getRecordName() + ".3gp";
+            File oldTaskRecord = new File(oldTaskRecordPath);
+            boolean isTaskRecordDeleted = oldTaskRecord.delete();
+        }
+
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -198,6 +206,11 @@ public class EditTaskActivity extends AppCompatActivity {
             photosDirectory.mkdirs();
         }
 
+        // Vytvor unikatni jmeno nahravky z casu iniciace nahravani ukolu.
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String taskRecordName = "nahravka_" + timeStamp;
+        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
+
         mediaRecorder.setOutputFile(taskRecordPath);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
@@ -208,8 +221,15 @@ public class EditTaskActivity extends AppCompatActivity {
         }
 
         mediaRecorder.start();
+
+        // Pridani zaznamu o nahravce do databaze.
+        task.setRecordName(taskRecordName);
+        dm.updateTask(task);
     }
 
+    /**
+     * Metoda pro zastaveni nahravani nahravky.
+     */
     private void stopRecording() {
         if (mediaRecorder != null) {
             mediaRecorder.stop();
@@ -218,23 +238,38 @@ public class EditTaskActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Metoda pro obsluhu tlacitka spusteni prehravani.
+     */
     private void onPlayPressed(boolean bReady) {
         if (bReady) startPlaying();
         else stopPlaying();
     }
 
+    /**
+     * Metoda pro spusteni prehravani nahravky.
+     */
     private void startPlaying() {
-        mediaPlayer = new MediaPlayer();
+        String taskRecordName = task.getRecordName();
+        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
 
         try {
-            mediaPlayer.setDataSource(taskRecordPath);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+            if (!taskRecordName.equals("")) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(taskRecordPath);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } else {
+                Toast.makeText(EditTaskActivity.this, "K úkolu neexistuje nahrávka", Toast.LENGTH_SHORT).show();
+            }
         } catch (IOException e) {
             Toast.makeText(EditTaskActivity.this, "CHYBA MediaPlayer prehravani", Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * Metoda pro zastaveni prehravani nahravky.
+     */
     private void stopPlaying() {
 //        if (null != canvas) {
             if (mediaPlayer.isPlaying()) mediaPlayer.stop();
@@ -253,14 +288,19 @@ public class EditTaskActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Ochrana pro uvolneni zdroju prehravace a mikrofonu po preruseni aktivity.
+     */
     @Override
     public void onPause() {
         super.onPause();
+        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
         if (mediaRecorder != null) {
             mediaRecorder.release();
             mediaRecorder = null;
         }
 
+        // Uvolni mediaPlayer, pokud zustala instance vytvorena.
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -274,9 +314,6 @@ public class EditTaskActivity extends AppCompatActivity {
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
-
-        // Ziskani upravovaneho ukolu.
-//        Task task = dm.getTask(taskId);
 
         // Uprava atributu ukolu dle editacnich poli.
         task.setId(taskId);
