@@ -38,6 +38,7 @@ import java.util.List;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
+import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 
 
 /**
@@ -176,138 +177,6 @@ public class EditTaskActivity extends AppCompatActivity {
     }
 
     /**
-     * Metoda pro obsluhu tlacitka pro spusteni nahravani zvuku.
-     */
-    private void onRecordPressed(boolean bReady) {
-        if (bReady) startRecording();
-        else stopRecording();
-    }
-
-    /**
-     * Metoda pro spusteni nahravani zvuku.
-     */
-    private void startRecording() {
-        // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
-        if (!task.getRecordName().equals("")) {
-            String oldTaskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + task.getRecordName() + ".3gp";
-            File oldTaskRecord = new File(oldTaskRecordPath);
-            boolean isTaskRecordDeleted = oldTaskRecord.delete();
-        }
-
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-
-        // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListRecordings" pokud neexistuji.
-        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings";
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            File photosDirectory = new File(folderPath);
-            photosDirectory.mkdirs();
-        }
-
-        // Vytvor unikatni jmeno nahravky z casu iniciace nahravani ukolu.
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String taskRecordName = "nahravka_" + timeStamp;
-        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
-
-        mediaRecorder.setOutputFile(taskRecordPath);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        try {
-            mediaRecorder.prepare();
-        } catch (IOException e) {
-            Toast.makeText(EditTaskActivity.this, "CHYBA MediaRecorder nahravani", Toast.LENGTH_SHORT).show();
-        }
-
-        mediaRecorder.start();
-
-        // Pridani zaznamu o nahravce do databaze.
-        task.setRecordName(taskRecordName);
-        dm.updateTask(task);
-    }
-
-    /**
-     * Metoda pro zastaveni nahravani nahravky.
-     */
-    private void stopRecording() {
-        if (mediaRecorder != null) {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-        }
-    }
-
-    /**
-     * Metoda pro obsluhu tlacitka spusteni prehravani.
-     */
-    private void onPlayPressed(boolean bReady) {
-        if (bReady) startPlaying();
-        else stopPlaying();
-    }
-
-    /**
-     * Metoda pro spusteni prehravani nahravky.
-     */
-    private void startPlaying() {
-        String taskRecordName = task.getRecordName();
-        String taskRecordPath = Environment.getExternalStorageDirectory() + "/MultiList/MultiListRecordings/" + taskRecordName + ".3gp";
-
-        try {
-            if (!taskRecordName.equals("")) {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDataSource(taskRecordPath);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } else {
-                Toast.makeText(EditTaskActivity.this, "K úkolu neexistuje nahrávka", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            Toast.makeText(EditTaskActivity.this, "CHYBA MediaPlayer prehravani", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Metoda pro zastaveni prehravani nahravky.
-     */
-    private void stopPlaying() {
-//        if (null != canvas) {
-            if (mediaPlayer.isPlaying()) mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-//        }
-    }
-
-    AudioManager.OnAudioFocusChangeListener afcListener = new AudioManager.OnAudioFocusChangeListener() {
-        @Override
-        public void onAudioFocusChange(int focusChange) {
-            if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-                audioManager.abandonAudioFocus(afcListener);
-                if (mediaPlayer.isPlaying()) stopPlaying();
-            }
-        }
-    };
-
-    /**
-     * Ochrana pro uvolneni zdroju prehravace a mikrofonu po preruseni aktivity.
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
-        if (mediaRecorder != null) {
-            mediaRecorder.release();
-            mediaRecorder = null;
-        }
-
-        // Uvolni mediaPlayer, pokud zustala instance vytvorena.
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    /**
      * Metoda pro zmenu atributu ukolu.
      */
     public void editTask(){
@@ -422,7 +291,6 @@ public class EditTaskActivity extends AppCompatActivity {
             editTaskIntent.putExtra("listId", listId);
             startActivity(editTaskIntent);
         }
-
     }
 
     /**
@@ -449,6 +317,57 @@ public class EditTaskActivity extends AppCompatActivity {
             default:
                 // Vyvolani superclass pro obsluhu nerozpoznane akce.
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Metoda pro obsluhu tlacitka pro spusteni nahravani zvuku.
+     */
+    private void onRecordPressed(boolean bReady) {
+        if (bReady) AudioController.startRecording(task, mediaRecorder, audioManager, dm, EditTaskActivity.this);
+        else {
+            AudioController.stopRecording(mediaRecorder);
+            mediaRecorder = null;
+        }
+    }
+
+    /**
+     * Metoda pro obsluhu tlacitka spusteni prehravani.
+     */
+    private void onPlayPressed(boolean bReady) {
+        if (bReady) AudioController.startPlaying(task, mediaPlayer, EditTaskActivity.this);
+        else {
+            AudioController.stopPlaying(mediaPlayer);
+            mediaPlayer = null;
+        }
+    }
+
+    AudioManager.OnAudioFocusChangeListener afcListener = new AudioManager.OnAudioFocusChangeListener() {
+        @Override
+        public void onAudioFocusChange(int focusChange) {
+            if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                audioManager.abandonAudioFocus(afcListener);
+                if (mediaPlayer.isPlaying()) AudioController.stopPlaying(mediaPlayer);
+            }
+        }
+    };
+
+    /**
+     * Ochrana pro uvolneni zdroju prehravace a mikrofonu po preruseni aktivity.
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
+        if (mediaRecorder != null) {
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+
+        // Uvolni mediaPlayer, pokud zustala instance vytvorena.
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 
