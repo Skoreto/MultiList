@@ -89,6 +89,7 @@ public class TaskDetailActivity extends AppCompatActivity {
             // Povoleni tlacitka Zpet.
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setTitle("Detail úkolu");
         }
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);

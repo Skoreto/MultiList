@@ -25,6 +25,7 @@ import java.util.Date;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
+import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
 /**
@@ -54,6 +55,7 @@ public class TaskListActivity extends AppCompatActivity {
 
             // Ziskani podpory ActionBaru korespondujiciho s Toolbarem.
             actionBar = getSupportActionBar();
+
             // Povoleni tlacitka Zpet.
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
@@ -65,6 +67,10 @@ public class TaskListActivity extends AppCompatActivity {
         // Nastaveni listId pro filtraci ukolu v seznamu.
         // Ve vychozim pripade 1 (Inbox) - pokud IntExtra neprijde ze zadneho intentu.
         listId = anyIntent.getIntExtra("listId", 1);
+
+        // Nastaveni nazvu aktualniho listu do hlavicky ActionBaru.
+        TaskList taskList = dataModel.getTaskListById(listId);
+        actionBar.setTitle(taskList.getName());
 
         arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId));
         listView.setAdapter(arrayAdapter);

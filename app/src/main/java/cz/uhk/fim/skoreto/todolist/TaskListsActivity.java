@@ -2,6 +2,7 @@ package cz.uhk.fim.skoreto.todolist;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -22,6 +23,7 @@ import cz.uhk.fim.skoreto.todolist.utils.TaskListAdapter;
 public class TaskListsActivity extends AppCompatActivity {
 
     Toolbar tlbTaskListsActivity;
+    ActionBar actionBar;
     ListView lvTaskLists;
     ArrayAdapter<TaskList> arrayAdapter;
     DataModel dataModel;
@@ -35,6 +37,13 @@ public class TaskListsActivity extends AppCompatActivity {
         tlbTaskListsActivity = (Toolbar) findViewById(R.id.tlbTaskListsActivity);
         if (tlbTaskListsActivity != null) {
             setSupportActionBar(tlbTaskListsActivity);
+
+            // Ziskani podpory ActionBaru korespondujiciho s Toolbarem.
+            actionBar = getSupportActionBar();
+
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_USE_LOGO);
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
+            actionBar.setIcon(R.drawable.ic_action_launch);
         }
 
         dataModel = new DataModel(this);

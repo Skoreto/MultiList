@@ -51,9 +51,10 @@
             android:inputType="date"
             android:layout_row="1"
             android:layout_column="1"
-            android:ems="13"
+            android:ems="8"
             android:layout_gravity="center_horizontal"
-            android:focusable="false" />
+            android:focusable="false"
+            android:editable="true" />
 
         <TextView
             android:id="@+id/tvTaskDescription"
