@@ -15,14 +15,11 @@
     <string name="tv_task_completed">Splněno</string>
     <string name="btn_take_photo">Vyfoť</string>
 
-    <!-- Aktivita seznamu Task Listu -->
-    <string name="et_task_list_name_hint">Nový seznam&#8230;</string>
-    <string name="btn_add_task_list">Přidat seznam</string>
-
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
 
     <!-- ActionBary -->
+    <string name="action_add_task_list">Přidat seznam</string>
     <string name="action_sort">Seřadit</string>
     <string name="action_settings">Nastavení</string>
     <string name="action_done">Potvrdit</string>

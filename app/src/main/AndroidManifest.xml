@@ -15,25 +15,25 @@
         android:theme="@style/AppTheme.NoActionBar">
 
         <activity
-            android:name=".TaskListActivity"
-            android:parentActivityName=".TaskListsActivity">
+            android:name="cz.uhk.fim.skoreto.todolist.TaskListActivity"
+            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
 
             <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".TaskListsActivity" />
+                android:value="cz.uhk.fim.skoreto.todolist.TaskListsActivity" />
         </activity>
 
-        <activity android:name=".TaskDetailActivity"
-            android:parentActivityName=".TaskListActivity">
+        <activity android:name="cz.uhk.fim.skoreto.todolist.TaskDetailActivity"
+            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListActivity">
 
             <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".TaskListActivity" />
+                android:value="cz.uhk.fim.skoreto.todolist.TaskListActivity" />
         </activity>
 
-        <activity android:name=".TaskListsActivity">
+        <activity android:name="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

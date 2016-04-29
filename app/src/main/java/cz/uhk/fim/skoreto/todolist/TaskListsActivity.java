@@ -1,14 +1,19 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -44,6 +49,7 @@ public class TaskListsActivity extends AppCompatActivity {
             actionBar.setDisplayOptions(ActionBar.DISPLAY_USE_LOGO);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
             actionBar.setIcon(R.drawable.ic_action_launch);
+            actionBar.setTitle("MultiList");
         }
 
         dataModel = new DataModel(this);
@@ -64,37 +70,72 @@ public class TaskListsActivity extends AppCompatActivity {
             }
         });
 
-        // Pridani noveho ukolu.
-        Button btnAddTaskList = (Button) findViewById(R.id.btnAddTaskList);
-        btnAddTaskList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                etTaskListName = (EditText) findViewById(R.id.etTaskListName);
-
-                // Pokud neni prazdny nazev noveho seznamu ukolu.
-                if (!etTaskListName.getText().toString().equals("")) {
-                    // Ve vychozim pripade prida novy seznam ukolu s prazdnym popisem do Inboxu jako nesplneny.
-                    dataModel.addTaskList(etTaskListName.getText().toString());
-
-                    // Vyprazdneni pole po pridani seznamu ukolu.
-                    etTaskListName.setText("");
-                    etTaskListName.clearFocus();
-                    etTaskListName.clearComposingText();
-
-                    // Aktualizace seznamu ukolu.
-                    arrayAdapter.clear();
-                    arrayAdapter.addAll(dataModel.getAllTaskLists());
-
-                    // Informovani uzivatele o uspesnem pridani seznamu ukolu.
-                    Toast.makeText(TaskListsActivity.this, "Seznam přidán", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Informovani uzivatele o nutnosti vyplnit nazev seznamu ukolu.
-                    Toast.makeText(TaskListsActivity.this, "Prázdný název seznamu!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
     }
 
+    /**
+     * Metoda pro inicializaci layoutu ActionBaru.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.task_lists_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Metoda pro obluhu tlacitek v ActionBaru.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_task_list:
+                // Dialog pro pridani noveho seznamu.
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Název seznamu");
+
+                etTaskListName = new EditText(this);
+                etTaskListName.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(etTaskListName);
+
+                // Obsluha tlacitka OK dialogu.
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        etTaskListName.getText().toString();
+
+                        // Pokud neni prazdny nazev noveho seznamu ukolu.
+                        if (!etTaskListName.getText().toString().equals("")) {
+                            // Ve vychozim pripade prida novy seznam ukolu s prazdnym popisem do Inboxu jako nesplneny.
+                            dataModel.addTaskList(etTaskListName.getText().toString());
+
+                            // Aktualizace seznamu ukolu.
+                            arrayAdapter.clear();
+                            arrayAdapter.addAll(dataModel.getAllTaskLists());
+
+                            // Informovani uzivatele o uspesnem pridani seznamu ukolu.
+                            Toast.makeText(TaskListsActivity.this, "Seznam přidán", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Informovani uzivatele o nutnosti vyplnit nazev seznamu ukolu.
+                            Toast.makeText(TaskListsActivity.this, "Prázdný název seznamu!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                // Obsluha tlacitka Zrusit dialogu.
+                builder.setNegativeButton("Zrušit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+                return true;
+
+            default:
+                // Vyvolani superclass pro obsluhu nerozpoznane akce.
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 }
