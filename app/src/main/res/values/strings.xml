@@ -23,4 +23,8 @@
     <string name="action_sort">Seřadit</string>
     <string name="action_settings">Nastavení</string>
     <string name="action_done">Potvrdit</string>
+
+    <!-- ContextMenu -->
+    <string name="task_list_rename">Přejmenovat</string>
+    <string name="task_list_delete">Smazat</string>
 </resources>

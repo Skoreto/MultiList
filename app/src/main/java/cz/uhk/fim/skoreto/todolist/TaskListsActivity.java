@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -70,6 +72,8 @@ public class TaskListsActivity extends AppCompatActivity {
             }
         });
 
+        // Registrace vsech itemu List View pro Context Menu.
+        registerForContextMenu(lvTaskLists);
     }
 
     /**
@@ -83,7 +87,7 @@ public class TaskListsActivity extends AppCompatActivity {
     }
 
     /**
-     * Metoda pro obluhu tlacitek v ActionBaru.
+     * Metoda pro obsluhu tlacitek v ActionBaru.
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -137,5 +141,40 @@ public class TaskListsActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    /**
+     * Metoda pro inicializaci layoutu ContextMenu.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, view, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.task_lists_context_menu, menu);
+    }
+
+    /**
+     * Metoda pro obsluhu tlacitek v ContextMenu.
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.task_list_rename:
+                // TODO prejmenovani seznamu
+                Toast.makeText(TaskListsActivity.this, "Přejmenovat id:" + info.id, Toast.LENGTH_SHORT).show();
+                return true;
+
+            case R.id.task_list_delete:
+                // TODO smazani seznamu
+                Toast.makeText(TaskListsActivity.this, "Smazat id:" + info.id, Toast.LENGTH_SHORT).show();
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+
+
 
 }

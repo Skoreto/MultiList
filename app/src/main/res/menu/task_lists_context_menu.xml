@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/task_list_rename"
+        android:icon="@drawable/ic_add_white_48dp"
+        android:title="@string/task_list_rename" />
+
+    <item
+        android:id="@+id/task_list_delete"
+        android:icon="@drawable/ic_add_white_48dp"
+        android:title="@string/task_list_delete" />
+
+</menu>
