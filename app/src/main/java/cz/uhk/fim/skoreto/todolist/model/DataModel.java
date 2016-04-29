@@ -5,8 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,7 +20,7 @@ import java.util.List;
 public class DataModel extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "MULTILIST";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public DataModel(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -25,7 +29,7 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda pro ulozeni noveho ukolu do databaze.
      */
-    public void addTask(String name, String description, int listId, int completed, String photoName, String recordingName){
+    public void addTask(String name, String description, int listId, int completed, String photoName, String recordingName, Date dueDate){
         ContentValues contentValues = new ContentValues();
         contentValues.put("NAME", name);
         contentValues.put("DESCRIPTION", description);
@@ -33,6 +37,10 @@ public class DataModel extends SQLiteOpenHelper {
         contentValues.put("COMPLETED", completed);
         contentValues.put("PHOTO_NAME", photoName);
         contentValues.put("RECORDING_NAME", recordingName);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDueDate = sdf.format(dueDate);
+        contentValues.put("DUE_DATE", sDueDate);
 
         getWritableDatabase().insert("TASKS", null, contentValues);
     }
@@ -53,15 +61,19 @@ public class DataModel extends SQLiteOpenHelper {
      */
     public int updateTask(Task task){
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contVal = new ContentValues();
-        contVal.put("NAME", task.getName());
-        contVal.put("DESCRIPTION", task.getDescription());
-        contVal.put("LIST_ID", task.getListId());
-        contVal.put("COMPLETED", task.getCompleted());
-        contVal.put("PHOTO_NAME", task.getPhotoName());
-        contVal.put("RECORDING_NAME", task.getRecordingName());
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("NAME", task.getName());
+        contentValues.put("DESCRIPTION", task.getDescription());
+        contentValues.put("LIST_ID", task.getListId());
+        contentValues.put("COMPLETED", task.getCompleted());
+        contentValues.put("PHOTO_NAME", task.getPhotoName());
+        contentValues.put("RECORDING_NAME", task.getRecordingName());
 
-        return db.update("TASKS", contVal, "ID = ?",  new String[] {String.valueOf(task.getId())});
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String sDueDate = sdf.format(task.getDueDate());
+        contentValues.put("DUE_DATE", sDueDate);
+
+        return db.update("TASKS", contentValues, "ID = ?",  new String[] {String.valueOf(task.getId())});
     }
 
     /**
@@ -93,7 +105,7 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda pro vraceni konkretniho ukolu (dle id) z databaze.
      */
-    public Task getTask(int id){
+    public Task getTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE ID=" + id, null);
         Task task = new Task();
@@ -106,6 +118,7 @@ public class DataModel extends SQLiteOpenHelper {
                 int completed = cursor.getInt(4);
                 String photoName = cursor.getString(5);
                 String recordingName = cursor.getString(6);
+                String sDueDate = cursor.getString(7);
 
                 task.setId(taskId);
                 task.setName(name);
@@ -114,6 +127,16 @@ public class DataModel extends SQLiteOpenHelper {
                 task.setCompleted(completed);
                 task.setPhotoName(photoName);
                 task.setRecordingName(recordingName);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date dueDate = null;
+                try {
+                    dueDate = sdf.parse(sDueDate);
+                } catch (ParseException e) {
+                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTask");
+                }
+                task.setDueDate(dueDate);
+
             } while (cursor.moveToNext());
         }
         return task;
@@ -172,8 +195,17 @@ public class DataModel extends SQLiteOpenHelper {
                 int completed = cursor.getInt(4);
                 String photoName = cursor.getString(5);
                 String recordingName = cursor.getString(6);
+                String sDueDate = cursor.getString(7);
 
-                Task task = new Task(id, name, description, listId, completed, photoName, recordingName);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date dueDate = null;
+                try {
+                    dueDate = sdf.parse(sDueDate);
+                } catch (ParseException e) {
+                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getAllTasks");
+                }
+
+                Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate);
                 tasks.add(task);
             } while (cursor.moveToNext());
         }
@@ -195,8 +227,17 @@ public class DataModel extends SQLiteOpenHelper {
                 int completed = cursor.getInt(4);
                 String photoName = cursor.getString(5);
                 String recordingName = cursor.getString(6);
+                String sDueDate = cursor.getString(7);
 
-                Task task = new Task(id, name, description, listId, completed, photoName, recordingName);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date dueDate = null;
+                try {
+                    dueDate = sdf.parse(sDueDate);
+                } catch (ParseException e) {
+                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTasksByListId");
+                }
+
+                Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate);
                 tasks.add(task);
             } while (cursor.moveToNext());
         }
@@ -227,7 +268,7 @@ public class DataModel extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER, PHOTO_NAME TEXT, RECORDING_NAME TEXT)");
+        db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER, PHOTO_NAME TEXT, RECORDING_NAME TEXT, DUE_DATE TEXT)");
         db.execSQL("CREATE TABLE TASK_LISTS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT)");
 
         // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox - ziska ID 1.

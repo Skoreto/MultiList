@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,6 +17,11 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
@@ -88,8 +94,12 @@ public class TaskListActivity extends AppCompatActivity {
 
                 // Pokud neni prazdny nazev noveho ukolu.
                 if (!etTaskName.getText().toString().equals("")){
-                    // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny.
-                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "");
+                    // Ziskani aktualniho casu a vytvoreni instance datumu.
+                    Calendar calendar = Calendar.getInstance();
+                    Date dueDate = calendar.getTime();
+
+                    // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny a s datumem splneni do dnes.
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", dueDate);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");

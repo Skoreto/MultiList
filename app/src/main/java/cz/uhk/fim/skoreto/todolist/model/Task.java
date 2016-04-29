@@ -1,5 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.model;
 
+import java.util.Date;
+
 /**
  * Created by Tomas.
  */
@@ -19,10 +21,12 @@ public class Task {
 
     private String recordingName;
 
+    private Date dueDate;
+
     public Task(){
     }
 
-    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordingName) {
+    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordingName, Date dueDate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -30,6 +34,7 @@ public class Task {
         this.completed = completed;
         this.photoName = photoName;
         this.recordingName = recordingName;
+        this.dueDate = dueDate;
     }
 
     public int getId() {
@@ -86,5 +91,13 @@ public class Task {
 
     public void setRecordingName(String recordingName) {
         this.recordingName = recordingName;
+    }
+
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
     }
 }

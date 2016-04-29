@@ -1,5 +1,6 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -23,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -31,7 +33,9 @@ import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +43,6 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
-
 
 /**
  * Aktivita pro zmenu, smazani a zobrazeni detailu ukolu.
@@ -51,6 +54,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     ActionBar actionBar;
     Task task;
     EditText etTaskName;
+    EditText etTaskDueDate;
     EditText etTaskDescription;
     CheckBox chbTaskCompleted;
     Spinner spinTaskLists;
@@ -65,10 +69,13 @@ public class TaskDetailActivity extends AppCompatActivity {
     ImageView ivTaskPhoto;
     static final int REQUEST_TAKE_PHOTO = 888;
 
+    Calendar calendar;
+    DatePickerDialog datePickerDialog;
+
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
      */
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(final Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_detail_activity);
 
@@ -85,6 +92,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
+        etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -100,6 +108,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         task = dm.getTask(taskId);
 
         etTaskName.setText(task.getName());
+        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+        etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
         etTaskDescription.setText(task.getDescription());
 
         // Zaskrtnuti checkbocu podle toho zda ukol je/neni splnen.
@@ -137,6 +147,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         if (!task.getPhotoName().equals("")) {
             String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            // TODO Prirazeni prave miniatury
 //            String photoDir = task.getPhotoName();
 //            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoDir));
 
@@ -174,6 +185,43 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.requestAudioFocus(afcListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+
+        // DATE PICKER - DUE DATE
+        calendar = Calendar.getInstance();
+
+        // Listener pro potvrzeni vybraneho datumu v dialogu kalendare.
+        final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                // Sestaveni noveho datumu.
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, monthOfYear);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                Date newDueDate = calendar.getTime();
+
+                // Nastaveni datumu aktualni instanci ukolu.
+                task.setDueDate(newDueDate);
+
+                // Zobrazeni noveho datumu v EditTextu.
+                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+            }
+        };
+
+        etTaskDueDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Zjisteni aktualniho roku, mesice, dne.
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                // Pouzit aktualni datum jako vychozi datum v datepickeru.
+                datePickerDialog = new DatePickerDialog(TaskDetailActivity.this, datePickerListener, year, month, day);
+                datePickerDialog.show();
+            }
+        });
+
     }
 
     /**
@@ -202,8 +250,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
-//        this.activateTaskListActivity(listId);
-        finish();
+        this.activateTaskListActivity(listId);
+//        finish();
     }
 
     /**
@@ -228,8 +276,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
-        finish();
-//        this.activateTaskListActivity(listId);
+//        finish();
+        this.activateTaskListActivity(listId);
     }
 
     /**
@@ -245,7 +293,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     /**
      * Metoda pro otevreni fotoaparatu po kliknuti na tlacitko Vyfot a sejmuti fotografie.
      */
-    public void takePhoto(View view) {
+    public void takePhoto() {
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
