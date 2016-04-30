@@ -84,6 +84,13 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda pro smazani seznamu ukolu z databaze.
+     */
+    public void deleteTaskList(int id){
+        getWritableDatabase().delete("TASK_LISTS", "ID=" + id, null);
+    }
+
+    /**
      * Metoda vrati konkretni ukol podle zadaneho id.
      * Ukol je vracen jako objekt typu HashMap.
      */

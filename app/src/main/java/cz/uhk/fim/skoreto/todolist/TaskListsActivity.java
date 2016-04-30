@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,7 +21,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.List;
+
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
+import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.TaskListAdapter;
 
@@ -161,20 +166,50 @@ public class TaskListsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.task_list_rename:
                 // TODO prejmenovani seznamu
-                Toast.makeText(TaskListsActivity.this, "Přejmenovat id:" + info.id, Toast.LENGTH_SHORT).show();
+                TaskList selectedTaskList2 = (TaskList) lvTaskLists.getItemAtPosition((int) info.id);
+
+                Toast.makeText(TaskListsActivity.this, "Pozice id: " + info.id + " Item id: " + item.getItemId() + " Id seznamu: " + selectedTaskList2.getId(), Toast.LENGTH_SHORT).show();
                 return true;
 
+            // Smaz vybrany seznam vcetne jeho ukolu.
             case R.id.task_list_delete:
-                // TODO smazani seznamu
-                Toast.makeText(TaskListsActivity.this, "Smazat id:" + info.id, Toast.LENGTH_SHORT).show();
+                // Ziskani instance vybraneho seznamu.
+                TaskList selectedTaskList = (TaskList) lvTaskLists.getItemAtPosition((int) info.id);
+
+                // Ziskani vsech ukolu v mazanem seznamu.
+                List<Task> tasksInList = dataModel.getTasksByListId(selectedTaskList.getId());
+
+                // Postupne mazani vsech ukolu v seznamu vcetne fotografii a nahravek.
+                for (Task task: tasksInList) {
+                    // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
+                    if (!task.getPhotoName().equals("")) {
+                        String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                        File oldTaskPhoto = new File(oldTaskPhotoPath);
+                        boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
+                    }
+
+                    // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
+                    if (!task.getRecordingName().equals("")) {
+                        String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+                        File oldTaskRecording = new File(oldTaskRecordingPath);
+                        boolean isTaskRecordingDeleted = oldTaskRecording.delete();
+                    }
+
+                    dataModel.deleteTask(task.getId());
+                }
+
+                // Smazani seznamu z databaze.
+                dataModel.deleteTaskList(selectedTaskList.getId());
+                // Aktualizace seznamu ukolu.
+                arrayAdapter.clear();
+                arrayAdapter.addAll(dataModel.getAllTaskLists());
+
+                Toast.makeText(TaskListsActivity.this, "Seznam s úkoly smazán", Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
                 return super.onContextItemSelected(item);
         }
     }
-
-
-
 
 }
