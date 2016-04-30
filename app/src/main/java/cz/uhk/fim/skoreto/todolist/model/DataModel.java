@@ -77,6 +77,18 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda pro zmenu seznamu ukolu v databazi.
+     * Vraci pocet aktualizovanych zaznamu.
+     */
+    public int updateTaskList(TaskList taskList){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("NAME", taskList.getName());
+
+        return db.update("TASK_LISTS", contentValues, "ID = ?",  new String[] {String.valueOf(taskList.getId())});
+    }
+
+    /**
      * Metoda pro smazani ukolu z databaze.
      */
     public void deleteTask(int id){

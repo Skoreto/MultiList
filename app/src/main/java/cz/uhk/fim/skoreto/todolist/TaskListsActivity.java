@@ -1,7 +1,6 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -163,19 +162,59 @@ public class TaskListsActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()) {
-            case R.id.task_list_rename:
-                // TODO prejmenovani seznamu
-                TaskList selectedTaskList2 = (TaskList) lvTaskLists.getItemAtPosition((int) info.id);
+        // Ziskani instance vybraneho seznamu.
+        final TaskList selectedTaskList = (TaskList) lvTaskLists.getItemAtPosition((int) info.id);
 
-                Toast.makeText(TaskListsActivity.this, "Pozice id: " + info.id + " Item id: " + item.getItemId() + " Id seznamu: " + selectedTaskList2.getId(), Toast.LENGTH_SHORT).show();
+        switch (item.getItemId()) {
+            // Prejmenovat vybrany seznam.
+            case R.id.task_list_rename:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Nový název seznamu");
+
+                etTaskListName = new EditText(this);
+                etTaskListName.setInputType(InputType.TYPE_CLASS_TEXT);
+                etTaskListName.setText(selectedTaskList.getName());
+                builder.setView(etTaskListName);
+
+                // Obsluha tlacitka OK dialogu.
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        etTaskListName.getText().toString();
+
+                        // Pokud neni prazdny nazev noveho seznamu ukolu.
+                        if (!etTaskListName.getText().toString().equals("")) {
+                            // Prirazeni noveho nazvu seznamu.
+                            selectedTaskList.setName(etTaskListName.getText().toString());
+                            // Update v databazi.
+                            dataModel.updateTaskList(selectedTaskList);
+
+                            // Aktualizace seznamu ukolu.
+                            arrayAdapter.clear();
+                            arrayAdapter.addAll(dataModel.getAllTaskLists());
+
+                            // Informovani uzivatele o uspesnem pridani seznamu ukolu.
+                            Toast.makeText(TaskListsActivity.this, "Seznam přejmenován", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Informovani uzivatele o nutnosti vyplnit nazev seznamu ukolu.
+                            Toast.makeText(TaskListsActivity.this, "Prázdný název seznamu!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                // Obsluha tlacitka Zrusit dialogu.
+                builder.setNegativeButton("Zrušit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
                 return true;
 
             // Smaz vybrany seznam vcetne jeho ukolu.
             case R.id.task_list_delete:
-                // Ziskani instance vybraneho seznamu.
-                TaskList selectedTaskList = (TaskList) lvTaskLists.getItemAtPosition((int) info.id);
-
                 // Ziskani vsech ukolu v mazanem seznamu.
                 List<Task> tasksInList = dataModel.getTasksByListId(selectedTaskList.getId());
 
