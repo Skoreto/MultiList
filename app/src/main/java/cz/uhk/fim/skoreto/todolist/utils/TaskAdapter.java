@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Icon;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -69,9 +70,9 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                        }
                    }
                 );
+            } else {
+                holder.ivPhotoThumbnail.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
             }
-
-
 
             // Odskrtni checkboxy ukolu, podle toho, zda jsou splneny.
             if (task.getCompleted() == 0){
