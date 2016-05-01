@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import cz.uhk.fim.skoreto.todolist.R;
+import cz.uhk.fim.skoreto.todolist.SinglePhotoActivity;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 
@@ -55,16 +57,21 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
             // Prirazeni nahledu fotografie k ukolu.
             if (!task.getPhotoName().equals("")) {
-                String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                final String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
                 Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 80, 80);
                 holder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
+
+                holder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
+                       public void onClick(View v) {
+                           Intent sendPhotoDirectoryIntent = new Intent(getContext(), SinglePhotoActivity.class);
+                           sendPhotoDirectoryIntent.putExtra("photoDir", photoDir);
+                           getContext().startActivity(sendPhotoDirectoryIntent);
+                       }
+                   }
+                );
             }
 
-            holder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
-                   public void onClick(View v) {
-                       Toast.makeText(getContext(), "Kliknuto na obrazek - " + task.getName(), Toast.LENGTH_SHORT).show();
-                   }}
-            );
+
 
             // Odskrtni checkboxy ukolu, podle toho, zda jsou splneny.
             if (task.getCompleted() == 0){

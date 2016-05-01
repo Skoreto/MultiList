@@ -1,5 +1,6 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -58,6 +60,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     EditText etTaskDescription;
     CheckBox chbTaskCompleted;
     Spinner spinTaskLists;
+    Button btnTakePhoto;
     DataModel dm = new DataModel(this);
     int taskId;
     int listId;
@@ -147,22 +150,25 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
 
         if (!task.getPhotoName().equals("")) {
-            String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            final String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             // TODO Prirazeni prave miniatury
 //            String photoDir = task.getPhotoName();
 //            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoDir));
 
             Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 200, 356);
             ivTaskPhoto.setImageBitmap(photoThumbnail);
-        }
 
-        ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {
-                   Toast.makeText(TaskDetailActivity.this, "Zobraz fotku", Toast.LENGTH_SHORT).show();
+            ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View view) {
+                       // Zobrazeni velke fotografie.
+                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
+                       sendPhotoDirectoryIntent.putExtra("photoDir", photoDir);
+                       startActivity(sendPhotoDirectoryIntent);
+                   }
                }
-           }
-        );
+            );
+        }
 
         // NAHRAVANI / PREHRAVANI ZVUKU
         final ToggleButton btnRecordTask = (ToggleButton) findViewById(R.id.btnRecordTask);
@@ -223,6 +229,14 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
         });
 
+        btnTakePhoto = (Button) findViewById(R.id.btnTakePhoto);
+        btnTakePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePhoto();
+            }
+        });
+
     }
 
     /**
@@ -251,8 +265,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
-        this.activateTaskListActivity(listId);
-//        finish();
+        finish();
     }
 
     /**
@@ -277,8 +290,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
-//        finish();
-        this.activateTaskListActivity(listId);
+        finish();
     }
 
     /**
@@ -293,6 +305,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     /**
      * Metoda pro otevreni fotoaparatu po kliknuti na tlacitko Vyfot a sejmuti fotografie.
+     * Pro volani metody z XML nutne predate argument takePhoto(View view) !!!
      */
     public void takePhoto() {
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -356,12 +369,12 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Intent editTaskIntent = new Intent(getApplication(), TaskDetailActivity.class);
+            Intent taskDetailActivityIntent = new Intent(getApplication(), TaskDetailActivity.class);
             // Predej ID ukolu do intentu editTaskIntent.
-            editTaskIntent.putExtra("taskId", task.getId());
+            taskDetailActivityIntent.putExtra("taskId", task.getId());
             // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
-            editTaskIntent.putExtra("listId", listId);
-            startActivity(editTaskIntent);
+            taskDetailActivityIntent.putExtra("listId", listId);
+            startActivity(taskDetailActivityIntent);
         }
     }
 
