@@ -22,7 +22,7 @@
         android:alignmentMode="alignBounds"
         android:columnOrderPreserved="false"
         android:columnCount="2"
-        android:rowCount="9" >
+        android:rowCount="8" >
 
         <TextView
             android:id="@+id/tvTaskName"
@@ -124,14 +124,6 @@
             android:textOff="Přehrávání START"
             android:layout_row="6"
             android:layout_column="1" />
-
-        <Button
-            android:id="@+id/btnDeleteTask"
-            android:onClick="deleteTask"
-            android:text="@string/btn_delete_task"
-            android:layout_row="7"
-            android:layout_column="1"
-            android:layout_gravity="bottom|start" />
 
     </GridLayout>
 

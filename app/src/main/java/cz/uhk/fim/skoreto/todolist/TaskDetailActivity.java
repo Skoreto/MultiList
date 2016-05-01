@@ -1,6 +1,5 @@
 package cz.uhk.fim.skoreto.todolist;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -384,7 +383,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.edit_task_activity_menu, menu);
+        inflater.inflate(R.menu.task_detail_activity_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -394,8 +393,14 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_done:
+            // Smazat ukol.
+            case R.id.action_delete_task:
                 // Potvrdit zmeny a ulozit do databaze.
+                deleteTask();
+                return true;
+
+            // Potvrdit zmeny a ulozit do databaze.
+            case R.id.action_done:
                 editTask();
                 return true;
 

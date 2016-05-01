@@ -112,6 +112,7 @@ public class TaskListActivity extends AppCompatActivity {
                     // Aktualizace seznamu ukolu.
                     arrayAdapter.clear();
                     arrayAdapter.addAll(dataModel.getTasksByListId(listId));
+                    listView.setAdapter(arrayAdapter);
 
                     // Informovani uzivatele o uspesnem pridani ukolu.
                     Toast.makeText(TaskListActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
@@ -154,5 +155,13 @@ public class TaskListActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Aktualizace seznamu ukolu.
+        arrayAdapter.clear();
+        arrayAdapter.addAll(dataModel.getTasksByListId(listId));
+        listView.setAdapter(arrayAdapter);
+    }
 
 }

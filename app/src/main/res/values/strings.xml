@@ -10,7 +10,6 @@
     <string name="tv_task_description">Popis</string>
     <string name="tv_due_date">Splnit do</string>
     <string name="btn_edit_task">Upravit</string>
-    <string name="btn_delete_task">Smaž</string>
     <string name="tv_task_list">Seznam</string>
     <string name="tv_task_completed">Splněno</string>
     <string name="btn_take_photo">Vyfoť</string>
@@ -23,6 +22,7 @@
     <string name="action_sort">Seřadit</string>
     <string name="action_settings">Nastavení</string>
     <string name="action_done">Potvrdit</string>
+    <string name="action_delete_task">Smazat</string>
 
     <!-- ContextMenu -->
     <string name="task_list_rename">Přejmenovat</string>
