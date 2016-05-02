@@ -234,9 +234,18 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda vraci seznam vsech ukolu ve vybranem seznamu ukolu identifikovanem pomoci listId.
      */
-    public ArrayList<Task> getTasksByListId(int listId){
+    public ArrayList<Task> getTasksByListId(int listId, boolean orderAscendingDueDate){
         ArrayList<Task> tasks = new ArrayList<>();
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId, null);
+
+        // Razeni dle data splneni vzestupne/sestupne.
+        String chosenOrder;
+        if (orderAscendingDueDate == true) {
+            chosenOrder = "ASC";
+        } else {
+            chosenOrder = "DESC";
+        }
+
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId + " ORDER BY COMPLETED, DUE_DATE " + chosenOrder, null);
 
         if (cursor.moveToFirst()){
             do {
@@ -266,9 +275,18 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda vraci seznam vsech ukolu ve vybranem seznamu ukolu identifikovanem pomoci listId.
      */
-    public ArrayList<Task> getIncompletedTasksByListId(int listId){
+    public ArrayList<Task> getIncompletedTasksByListId(int listId, boolean orderAscendingDueDate){
         ArrayList<Task> tasks = new ArrayList<>();
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId + " AND COMPLETED=0", null);
+
+        // Razeni dle data splneni vzestupne/sestupne.
+        String chosenOrder;
+        if (orderAscendingDueDate == true) {
+            chosenOrder = "ASC";
+        } else {
+            chosenOrder = "DESC";
+        }
+
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId + " AND COMPLETED=0" + " ORDER BY DUE_DATE " + chosenOrder, null);
 
         if (cursor.moveToFirst()){
             do {

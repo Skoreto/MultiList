@@ -38,6 +38,7 @@ public class TaskListActivity extends AppCompatActivity {
     EditText etTaskName;
     int listId;
     boolean hideCompleted;
+    boolean orderAscendingDueDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +71,13 @@ public class TaskListActivity extends AppCompatActivity {
         TaskList taskList = dataModel.getTaskListById(listId);
         actionBar.setTitle(taskList.getName());
 
+        orderAscendingDueDate = true;
         // Zobrazit vsechny / pouze splnene ukoly.
         hideCompleted = false;
         if (!hideCompleted) {
-            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId));
+            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId, orderAscendingDueDate));
         } else {
-            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId));
+            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
 
         listView.setAdapter(arrayAdapter);
@@ -118,9 +120,7 @@ public class TaskListActivity extends AppCompatActivity {
                     etTaskName.clearComposingText();
 
                     // Aktualizace seznamu ukolu.
-                    arrayAdapter.clear();
-                    arrayAdapter.addAll(dataModel.getTasksByListId(listId));
-                    listView.setAdapter(arrayAdapter);
+                    refreshTasksInTaskList();
 
                     // Informovani uzivatele o uspesnem pridani ukolu.
                     Toast.makeText(TaskListActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
@@ -150,11 +150,14 @@ public class TaskListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort:
-                // TODO implementace řazení
-                return true;
+                // Razeni dle data splneni vzestupne/sestupne.
+                if (orderAscendingDueDate == true) {
+                    orderAscendingDueDate = false;
+                } else {
+                    orderAscendingDueDate = true;
+                }
 
-            case R.id.action_settings:
-                // implementace nastavení
+                refreshTasksInTaskList();
                 return true;
 
             case R.id.action_show_all_tasks:
@@ -165,6 +168,10 @@ public class TaskListActivity extends AppCompatActivity {
             case R.id.action_hide_completed:
                 hideCompleted = true;
                 refreshTasksInTaskList();
+                return true;
+
+            case R.id.action_settings:
+                // implementace nastavení
                 return true;
 
             default:
@@ -187,9 +194,9 @@ public class TaskListActivity extends AppCompatActivity {
         arrayAdapter.clear();
 
         if (!hideCompleted) {
-            arrayAdapter.addAll(dataModel.getTasksByListId(listId));
+            arrayAdapter.addAll(dataModel.getTasksByListId(listId, orderAscendingDueDate));
         } else {
-            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId));
+            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
 
         listView.setAdapter(arrayAdapter);

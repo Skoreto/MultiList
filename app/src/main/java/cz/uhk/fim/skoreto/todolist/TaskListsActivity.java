@@ -216,7 +216,7 @@ public class TaskListsActivity extends AppCompatActivity {
             // Smaz vybrany seznam vcetne jeho ukolu.
             case R.id.task_list_delete:
                 // Ziskani vsech ukolu v mazanem seznamu.
-                List<Task> tasksInList = dataModel.getTasksByListId(selectedTaskList.getId());
+                List<Task> tasksInList = dataModel.getTasksByListId(selectedTaskList.getId(), true);
 
                 // Postupne mazani vsech ukolu v seznamu vcetne fotografii a nahravek.
                 for (Task task: tasksInList) {
