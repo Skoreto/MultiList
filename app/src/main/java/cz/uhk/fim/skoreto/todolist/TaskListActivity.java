@@ -37,6 +37,7 @@ public class TaskListActivity extends AppCompatActivity {
     DataModel dataModel;
     EditText etTaskName;
     int listId;
+    boolean hideCompleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,14 @@ public class TaskListActivity extends AppCompatActivity {
         TaskList taskList = dataModel.getTaskListById(listId);
         actionBar.setTitle(taskList.getName());
 
-        arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId));
+        // Zobrazit vsechny / pouze splnene ukoly.
+        hideCompleted = false;
+        if (!hideCompleted) {
+            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId));
+        } else {
+            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId));
+        }
+
         listView.setAdapter(arrayAdapter);
 
         // Editace ukolu po klepnuti v seznamu ukolu.
@@ -141,12 +149,22 @@ public class TaskListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_sort:
+                // TODO implementace řazení
+                return true;
+
             case R.id.action_settings:
                 // implementace nastavení
                 return true;
 
-            case R.id.action_sort:
-                // TODO implementace řazení
+            case R.id.action_show_all_tasks:
+                hideCompleted = false;
+                refreshTasksInTaskList();
+                return true;
+
+            case R.id.action_hide_completed:
+                hideCompleted = true;
+                refreshTasksInTaskList();
                 return true;
 
             default:
@@ -158,10 +176,24 @@ public class TaskListActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        refreshTasksInTaskList();
+    }
+
+    /**
+     * Metoda pro aktualizaci seznamu ukolu dle nastavenych parametru.
+     */
+    public void refreshTasksInTaskList() {
         // Aktualizace seznamu ukolu.
         arrayAdapter.clear();
-        arrayAdapter.addAll(dataModel.getTasksByListId(listId));
+
+        if (!hideCompleted) {
+            arrayAdapter.addAll(dataModel.getTasksByListId(listId));
+        } else {
+            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId));
+        }
+
         listView.setAdapter(arrayAdapter);
     }
+
 
 }

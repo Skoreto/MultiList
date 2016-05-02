@@ -46,8 +46,8 @@ public class TaskListAdapter extends ArrayAdapter<TaskList> {
             holder.tvTaskListName = (TextView) convertView.findViewById(R.id.tvTaskListName);
             holder.tvTasksCount = (TextView) convertView.findViewById(R.id.tvTasksCount);
 
-            // Zjisti pocet ukolu v seznamu.
-            List<Task> tasksByListId = dm.getTasksByListId(taskList.getId());
+            // Zjisti pocet nedokoncenych ukolu v seznamu.
+            List<Task> tasksByListId = dm.getIncompletedTasksByListId(taskList.getId());
             int tasksCount = tasksByListId.size();
             holder.tvTasksCount.setText("(" + tasksCount + ")");
 

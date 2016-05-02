@@ -264,6 +264,38 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
+     * Metoda vraci seznam vsech ukolu ve vybranem seznamu ukolu identifikovanem pomoci listId.
+     */
+    public ArrayList<Task> getIncompletedTasksByListId(int listId){
+        ArrayList<Task> tasks = new ArrayList<>();
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS WHERE LIST_ID=" + listId + " AND COMPLETED=0", null);
+
+        if (cursor.moveToFirst()){
+            do {
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+                String description = cursor.getString(2);
+                int completed = cursor.getInt(4);
+                String photoName = cursor.getString(5);
+                String recordingName = cursor.getString(6);
+                String sDueDate = cursor.getString(7);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date dueDate = null;
+                try {
+                    dueDate = sdf.parse(sDueDate);
+                } catch (ParseException e) {
+                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTasksByListId");
+                }
+
+                Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate);
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
+        return tasks;
+    }
+
+    /**
      * Metoda vraci seznam vsech seznamu ukolu v databazi.
      */
     public ArrayList<TaskList> getAllTaskLists(){
