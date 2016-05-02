@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Icon;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
@@ -72,6 +74,8 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                 );
             } else {
                 holder.ivPhotoThumbnail.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
+//                holder.ivPhotoThumbnail.setColorFilter(Color.rgb(189, 189, 189), PorterDuff.Mode.SRC_ATOP);
+                holder.ivPhotoThumbnail.setColorFilter(Color.rgb(158, 158, 158), PorterDuff.Mode.SRC_ATOP);
             }
 
             // Odskrtni checkboxy ukolu, podle toho, zda jsou splneny.

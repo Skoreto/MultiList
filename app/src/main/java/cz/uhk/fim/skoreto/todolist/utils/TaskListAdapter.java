@@ -8,9 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.R;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
+import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 
 /**
@@ -22,6 +24,7 @@ public class TaskListAdapter extends ArrayAdapter<TaskList> {
 
     private class ViewHolder {
         TextView tvTaskListName;
+        TextView tvTasksCount;
     }
 
     public TaskListAdapter(Context context, ArrayList<TaskList> taskLists) {
@@ -41,6 +44,12 @@ public class TaskListAdapter extends ArrayAdapter<TaskList> {
 
             holder = new ViewHolder();
             holder.tvTaskListName = (TextView) convertView.findViewById(R.id.tvTaskListName);
+            holder.tvTasksCount = (TextView) convertView.findViewById(R.id.tvTasksCount);
+
+            // Zjisti pocet ukolu v seznamu.
+            List<Task> tasksByListId = dm.getTasksByListId(taskList.getId());
+            int tasksCount = tasksByListId.size();
+            holder.tvTasksCount.setText("(" + tasksCount + ")");
 
             convertView.setTag(holder);
         } else {
