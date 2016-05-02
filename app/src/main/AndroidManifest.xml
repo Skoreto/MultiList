@@ -16,7 +16,8 @@
 
         <activity
             android:name="cz.uhk.fim.skoreto.todolist.TaskListActivity"
-            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
+            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListsActivity"
+            android:screenOrientation="portrait">
 
             <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
             <meta-data
@@ -25,7 +26,8 @@
         </activity>
 
         <activity android:name="cz.uhk.fim.skoreto.todolist.TaskDetailActivity"
-            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListActivity">
+            android:parentActivityName="cz.uhk.fim.skoreto.todolist.TaskListActivity"
+            android:screenOrientation="portrait">
 
             <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
             <meta-data
@@ -33,7 +35,8 @@
                 android:value="cz.uhk.fim.skoreto.todolist.TaskListActivity" />
         </activity>
 
-        <activity android:name="cz.uhk.fim.skoreto.todolist.TaskListsActivity">
+        <activity android:name="cz.uhk.fim.skoreto.todolist.TaskListsActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -27,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -59,7 +60,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     EditText etTaskDescription;
     CheckBox chbTaskCompleted;
     Spinner spinTaskLists;
-    Button btnTakePhoto;
+    ImageButton imgbtnTakePhoto;
     DataModel dm = new DataModel(this);
     int taskId;
     int listId;
@@ -228,8 +229,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
         });
 
-        btnTakePhoto = (Button) findViewById(R.id.btnTakePhoto);
-        btnTakePhoto.setOnClickListener(new View.OnClickListener() {
+        imgbtnTakePhoto = (ImageButton) findViewById(R.id.imgbtnTakePhoto);
+        imgbtnTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 takePhoto();
@@ -414,7 +415,10 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Metoda pro obsluhu tlacitka pro spusteni nahravani zvuku.
      */
     private void onRecordPressed(boolean bReady) {
-        if (bReady) AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
+        if (bReady) {
+            mediaRecorder = new MediaRecorder();
+            AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
+        }
         else {
             AudioController.stopRecording(mediaRecorder);
             mediaRecorder = null;
@@ -425,7 +429,10 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Metoda pro obsluhu tlacitka spusteni prehravani.
      */
     private void onPlayPressed(boolean bReady) {
-        if (bReady) AudioController.startPlaying(dm, taskId, mediaPlayer, TaskDetailActivity.this);
+        if (bReady) {
+            mediaPlayer = new MediaPlayer();
+            AudioController.startPlaying(dm, taskId, mediaPlayer, TaskDetailActivity.this);
+        }
         else {
             AudioController.stopPlaying(mediaPlayer);
             mediaPlayer = null;
@@ -448,6 +455,26 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
+        if (mediaRecorder != null) {
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+
+        // Uvolni mediaPlayer, pokud zustala instance vytvorena.
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+        if (audioManager != null) {
+            audioManager = null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         // Uvolni mediaRecorder, pokud zustala instance vytvorena.
         if (mediaRecorder != null) {
             mediaRecorder.release();

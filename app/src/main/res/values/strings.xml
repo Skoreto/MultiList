@@ -5,14 +5,14 @@
     <string name="btn_add_task">Přidat</string>
     <string name="btn_task_lists">Seznamy</string>
 
-    <!-- Aktivita editace ukolu -->
+    <!-- Aktivita Detail ukolu -->
     <string name="tv_task_name">Název</string>
     <string name="tv_task_description">Popis</string>
     <string name="tv_due_date">Splnit do</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="tv_task_list">Seznam</string>
     <string name="tv_task_completed">Splněno</string>
-    <string name="btn_take_photo">Vyfoť</string>
+    <string name="tv_recording">Nahrávka</string>
 
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
