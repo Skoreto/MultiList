@@ -22,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -132,7 +131,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         spinTaskLists.setAdapter(taskListsAdapter);
 
         // Vychozi nastaveni zvoleneho seznamu.
-        // TODO NEFUNGUJE
+        // TODO PREDELAT
         spinTaskLists.setSelection(taskListsAdapter.getPosition(dm.getTaskListById(listId)), true);
 
         // Listener pro kliknuti na spinner.
@@ -151,7 +150,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         if (!task.getPhotoName().equals("")) {
             final String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
-            // TODO Prirazeni prave miniatury
+            // TODO Prirazeni prave miniatury - pripadne pouzit MediaStore
 //            String photoDir = task.getPhotoName();
 //            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoDir));
 
@@ -191,7 +190,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        audioManager.requestAudioFocus(afcListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         // DATE PICKER - DUE DATE
         calendar = Calendar.getInstance();
@@ -457,35 +455,20 @@ public class TaskDetailActivity extends AppCompatActivity {
         super.onPause();
         // Uvolni mediaRecorder, pokud zustala instance vytvorena.
         if (mediaRecorder != null) {
+            // Clearne nastaveni recorderu.
+            mediaRecorder.reset();
+            // Uvolneni instance recorderu.
             mediaRecorder.release();
             mediaRecorder = null;
         }
 
         // Uvolni mediaPlayer, pokud zustala instance vytvorena.
         if (mediaPlayer != null) {
+            mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
         }
 
-        if (audioManager != null) {
-            audioManager = null;
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
-        if (mediaRecorder != null) {
-            mediaRecorder.release();
-            mediaRecorder = null;
-        }
-
-        // Uvolni mediaPlayer, pokud zustala instance vytvorena.
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
     }
 
 
