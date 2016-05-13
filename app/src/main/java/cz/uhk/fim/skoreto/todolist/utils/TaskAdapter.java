@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Icon;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -26,6 +25,7 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 
 /**
+ * Vlastni ArrayAdapter pro definici aplikacni logiky polozky v seznamu ukolu.
  * Created by Tomas.
  */
 public class TaskAdapter extends ArrayAdapter<Task> {
@@ -44,7 +44,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder = null;
+        ViewHolder holder;
 
         // Ziskej data pro ukol z teto pozice.
         final Task task = getItem(position);
@@ -60,21 +60,23 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
             // Prirazeni nahledu fotografie k ukolu.
             if (!task.getPhotoName().equals("")) {
-                final String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
-                Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 80, 80);
+                String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+                final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+
+                // Optimalizace dekodovani a nacteni miniatury z nahledu v externim ulozisti do pameti.
+                Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(decodeSampledBitmapFromFile(photoThumbnailPath, 90, 90), 90, 90);
                 holder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
 
                 holder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
                        public void onClick(View v) {
                            Intent sendPhotoDirectoryIntent = new Intent(getContext(), SinglePhotoActivity.class);
-                           sendPhotoDirectoryIntent.putExtra("photoDir", photoDir);
+                           sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
                            getContext().startActivity(sendPhotoDirectoryIntent);
                        }
                    }
                 );
             } else {
                 holder.ivPhotoThumbnail.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
-//                holder.ivPhotoThumbnail.setColorFilter(Color.rgb(189, 189, 189), PorterDuff.Mode.SRC_ATOP);
                 holder.ivPhotoThumbnail.setColorFilter(Color.rgb(158, 158, 158), PorterDuff.Mode.SRC_ATOP);
             }
 
@@ -124,6 +126,46 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         return convertView;
     }
 
+    /**
+     * Prepocet rozmeru vzorku vzhledem k poradovanym rozmerum miniatury.
+     */
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Vyska a sirka puvodni plne fotografie.
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 2;
+
+        // Pokud je nutne fotografii pro nahled zmensit.
+        if (height > reqHeight || width > reqWidth) {
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Spocita nejvetsi moznou velikost inSampleSize, ktera je nasobkem 2
+            // a rozmery vzorku vetsi nez jsou pozadovane rozmery miniatury.
+            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    /**
+     * Vrati vzorek bitmapy z puvodni plne fotografie.
+     */
+    public static Bitmap decodeSampledBitmapFromFile(String res, int reqWidth, int reqHeight) {
+        // Nejprve dekoduj s inJustDEcodeBounds=true pro overeni rozmeru.
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(res, options);
+
+        // Spocitej inSampleSize.
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Dekoduj bitmapu s nastavenou inSampleSize.
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(res, options);
+    }
 
 
 }

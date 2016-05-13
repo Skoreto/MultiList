@@ -33,7 +33,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -70,6 +72,10 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     ImageView ivTaskPhoto;
     static final int REQUEST_TAKE_PHOTO = 888;
+    String photoFileName;
+    String photoThumbnailFileName;
+    String folderPath;
+    String thumbnailFolderPath;
 
     Calendar calendar;
     DatePickerDialog datePickerDialog;
@@ -149,20 +155,17 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
 
         if (!task.getPhotoName().equals("")) {
-            final String photoDir = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
-            // TODO Prirazeni prave miniatury - pripadne pouzit MediaStore
-//            String photoDir = task.getPhotoName();
-//            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoDir));
-
-            Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(photoDir), 200, 356);
-            ivTaskPhoto.setImageBitmap(photoThumbnail);
+            // Prime prirazeni nahledu fotografie do ImageView.
+            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
                    @Override
                    public void onClick(View view) {
-                       // Zobrazeni velke fotografie.
+                       // Zobrazeni velke fotografie po kliknuti na nahled.
                        Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
-                       sendPhotoDirectoryIntent.putExtra("photoDir", photoDir);
+                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
                        startActivity(sendPhotoDirectoryIntent);
                    }
                }
@@ -319,7 +322,6 @@ public class TaskDetailActivity extends AppCompatActivity {
 
             // Pokracuj pouze, pokud byl soubor uspesne vytvoren.
             if (photoFile != null) {
-                Toast.makeText(TaskDetailActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
                 takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 // Bude obslouzeno metodou onActivityResult.
                 startActivityForResult(takePhotoIntent, REQUEST_TAKE_PHOTO);
@@ -340,14 +342,22 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // Vytvor unikatni jmeno fotografie z casu iniciace vyfoceni ukolu.
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String photoFileName = "JPEG_" + timeStamp;
+        photoFileName = timeStamp;
+        photoThumbnailFileName = "THUMBNAIL_" + timeStamp;
 
-        // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListPhotos" pokud neexistuji.
-        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos";
+        // Vytvor potrebne slozky "Internal storage: /MultiList/Photos" pokud neexistuji.
+        folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos";
         File folder = new File(folderPath);
         if (!folder.exists()) {
             File photosDirectory = new File(folderPath);
             photosDirectory.mkdirs();
+        }
+
+        thumbnailFolderPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails";
+        File thumbnailFolder = new File(thumbnailFolderPath);
+        if (!thumbnailFolder.exists()) {
+            File photoThumbnailsDirectory = new File(thumbnailFolderPath);
+            photoThumbnailsDirectory.mkdirs();
         }
 
         // Uloz soubor fotografie do slozky MultiListPhotos.
@@ -357,7 +367,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         task.setPhotoName(photoFileName);
         dm.updateTask(task);
 
-        Toast.makeText(TaskDetailActivity.this, photoFileName, Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskDetailActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
         return photoFile;
     }
 
@@ -367,6 +377,18 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            // Vytvoreni zmenseneho nahledu z porizene fotografie.
+            Bitmap photoBitmap = BitmapFactory.decodeFile(folderPath + File.separator + photoFileName + ".jpg");
+            Bitmap photoThumbnail = Bitmap.createScaledBitmap(photoBitmap, 200, 356, true);
+
+            // Ulozeni nahledu do externiho uloziste.
+            try {
+                OutputStream stream = new FileOutputStream(thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
+                photoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            } catch (IOException e) {
+                Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
+            }
+
             Intent taskDetailActivityIntent = new Intent(getApplication(), TaskDetailActivity.class);
             // Predej ID ukolu do intentu editTaskIntent.
             taskDetailActivityIntent.putExtra("taskId", task.getId());

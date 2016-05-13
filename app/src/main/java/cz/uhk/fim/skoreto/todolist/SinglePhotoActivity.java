@@ -30,7 +30,7 @@ public class SinglePhotoActivity extends Activity {
 
         setContentView(imageView);
 
-        File photoFile = new File(getIntent().getStringExtra("photoDir"));
+        File photoFile = new File(getIntent().getStringExtra("photoPath"));
 
         SinglePhotoWorkerTask workerTask = new SinglePhotoWorkerTask(imageView, displayWidth, displayHeight);
         workerTask.execute(photoFile);
