@@ -62,7 +62,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     CheckBox chbTaskCompleted;
     Spinner spinTaskLists;
     ImageButton imgbtnTakePhoto;
-    DataModel dm = new DataModel(this);
+    DataModel dm;
     int taskId;
     int listId;
 
@@ -86,6 +86,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     public void onCreate(final Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_detail_activity);
+        dm = new DataModel(this);
 
         // Implementace ActionBaru.
         tlbEditTaskActivity = (Toolbar) findViewById(R.id.tlbEditTaskListActivity);
@@ -271,6 +272,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     /**
      * Metoda pro smazani ukolu.
+     * Kaskadne vymaze pripojene fotografie a nahravky z externiho uloziste.
      */
     public void deleteTask(){
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
@@ -278,6 +280,11 @@ public class TaskDetailActivity extends AppCompatActivity {
             String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
+
+            // Smazani prislusne miniatury stare fotografie.
+            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
+            boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
 
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
