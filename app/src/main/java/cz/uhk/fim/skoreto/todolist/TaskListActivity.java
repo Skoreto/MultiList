@@ -1,5 +1,6 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -26,19 +27,20 @@ import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
 /**
- * Trida aktivity prezentujici seznam ukolu.
+ * Aktivita prezentujici seznam ukolu.
+ * Created by Tomas.
  */
 public class TaskListActivity extends AppCompatActivity {
 
-    Toolbar tlbTaskListActivity;
-    ActionBar actionBar;
-    ListView listView;
-    ArrayAdapter<Task> arrayAdapter;
-    DataModel dataModel;
-    EditText etTaskName;
-    int listId;
-    boolean hideCompleted;
-    boolean orderAscendingDueDate;
+    private Toolbar tlbTaskListActivity;
+    private ActionBar actionBar;
+    private ListView listView;
+    private ArrayAdapter<Task> arrayAdapter;
+    private DataModel dataModel;
+    private EditText etTaskName;
+    private int listId;
+    private boolean hideCompleted;
+    private boolean orderAscendingDueDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +95,7 @@ public class TaskListActivity extends AppCompatActivity {
                 taskDetailIntent.putExtra("taskId", task.getId());
                 // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
                 taskDetailIntent.putExtra("listId", listId);
-//                taskDetailIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(taskDetailIntent);
+                startActivityForResult(taskDetailIntent, 777);
             }
         });
 
@@ -170,9 +171,9 @@ public class TaskListActivity extends AppCompatActivity {
                 refreshTasksInTaskList();
                 return true;
 
-            case R.id.action_settings:
-                // implementace nastavení
-                return true;
+//            case R.id.action_settings:
+//                // implementace nastavení
+//                return true;
 
             default:
                 // Vyvolani superclass pro obsluhu nerozpoznane akce.
@@ -202,5 +203,19 @@ public class TaskListActivity extends AppCompatActivity {
         listView.setAdapter(arrayAdapter);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Po navratu z detailu ukolu.
+        if (requestCode == 777) {
+            if(resultCode == Activity.RESULT_OK){
+                listId = data.getIntExtra("listId", 1);
+
+                // Refresh nastaveni nazvu aktualniho listu do hlavicky ActionBaru.
+                TaskList taskList = dataModel.getTaskListById(listId);
+                actionBar.setTitle(taskList.getName());
+            }
+            // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
+        }
+    }
 
 }

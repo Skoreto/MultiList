@@ -1,5 +1,6 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -52,32 +53,32 @@ import cz.uhk.fim.skoreto.todolist.utils.AudioController;
  */
 public class TaskDetailActivity extends AppCompatActivity {
 
-    Toolbar tlbEditTaskActivity;
-    ActionBar actionBar;
-    Task task;
-    EditText etTaskName;
-    EditText etTaskDueDate;
-    EditText etTaskDescription;
-    CheckBox chbTaskCompleted;
-    Spinner spinTaskLists;
-    ImageButton imgbtnTakePhoto;
-    DataModel dm;
-    int taskId;
-    int listId;
+    private Toolbar tlbEditTaskActivity;
+    private ActionBar actionBar;
+    private Task task;
+    private EditText etTaskName;
+    private EditText etTaskDueDate;
+    private EditText etTaskDescription;
+    private CheckBox chbTaskCompleted;
+    private Spinner spinTaskLists;
+    private ImageButton imgbtnTakePhoto;
+    private DataModel dm;
+    private int taskId;
+    private int listId;
 
     private AudioManager audioManager;
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
 
-    ImageView ivTaskPhoto;
-    static final int REQUEST_TAKE_PHOTO = 888;
-    String photoFileName;
-    String photoThumbnailFileName;
-    String folderPath;
-    String thumbnailFolderPath;
+    private ImageView ivTaskPhoto;
+    private static final int REQUEST_TAKE_PHOTO = 888;
+    private String photoFileName;
+    private String photoThumbnailFileName;
+    private String folderPath;
+    private String thumbnailFolderPath;
 
-    Calendar calendar;
-    DatePickerDialog datePickerDialog;
+    private Calendar calendar;
+    private DatePickerDialog datePickerDialog;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -137,20 +138,17 @@ public class TaskDetailActivity extends AppCompatActivity {
         spinTaskLists.setAdapter(taskListsAdapter);
 
         // Vychozi nastaveni zvoleneho seznamu.
-        // TODO PREDELAT
         spinTaskLists.setSelection(taskListsAdapter.getPosition(dm.getTaskListById(listId)), true);
 
         // Listener pro kliknuti na spinner.
         spinTaskLists.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // TODO nejspis neni potreba
                 TaskList taskList = (TaskList) spinTaskLists.getItemAtPosition(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // TODO automaticky generovana metoda
             }
         });
 
@@ -266,6 +264,10 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem upraveni ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
+        // Presmerovani na seznam ukolu, odkud ukol pochazi.
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("listId", taskList.getId());
+        setResult(Activity.RESULT_OK, returnIntent);
         finish();
     }
 
@@ -297,17 +299,11 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Informovani uzivatele o uspesnem smazani ukolu.
         Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
+        // Presmerovani na seznam ukolu, odkud ukol pochazi.
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("listId", listId);
+        setResult(Activity.RESULT_OK, returnIntent);
         finish();
-    }
-
-    /**
-     * Metoda pro intent prechodu na TaskListActivity.
-     */
-    public void activateTaskListActivity(int listId){
-        Intent taskListActivityIntent = new Intent(getApplication(), TaskListActivity.class);
-        // Predej ID seznamu pro prechod do aktivity TaskListActivity.
-        taskListActivityIntent.putExtra("listId", listId);
-        startActivity(taskListActivityIntent);
     }
 
     /**
@@ -400,8 +396,13 @@ public class TaskDetailActivity extends AppCompatActivity {
                 Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
             }
 
+            // Presmerovani na seznam ukolu, odkud ukol pochazi.
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("listId", listId);
+            setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
+
     }
 
     /**

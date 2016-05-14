@@ -16,6 +16,7 @@ import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 
 /**
+ * Vlastni ArrayAdapter pro definici aplikacni logiky polozky v listu seznamu ukolu.
  * Created by Tomas.
  */
 public class TaskListAdapter extends ArrayAdapter<TaskList> {
@@ -33,7 +34,7 @@ public class TaskListAdapter extends ArrayAdapter<TaskList> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder = null;
+        ViewHolder holder;
 
         // Ziskej data pro seznam ukolu z teto pozice.
         final TaskList taskList = getItem(position);

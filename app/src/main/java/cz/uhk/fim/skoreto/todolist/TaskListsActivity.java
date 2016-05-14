@@ -29,16 +29,17 @@ import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.TaskListAdapter;
 
 /**
+ * Aktivita reprezentujici seznam seznamu ukolu.
  * Created by Tomas.
  */
 public class TaskListsActivity extends AppCompatActivity {
 
-    Toolbar tlbTaskListsActivity;
-    ActionBar actionBar;
-    ListView lvTaskLists;
-    ArrayAdapter<TaskList> arrayAdapter;
-    DataModel dataModel;
-    EditText etTaskListName;
+    private Toolbar tlbTaskListsActivity;
+    private ActionBar actionBar;
+    private ListView lvTaskLists;
+    private ArrayAdapter<TaskList> arrayAdapter;
+    private DataModel dataModel;
+    private EditText etTaskListName;
 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);

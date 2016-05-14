@@ -35,7 +35,6 @@ public class AudioController {
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
 
-//        mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
@@ -90,7 +89,6 @@ public class AudioController {
 
         try {
             if (!taskRecordingName.equals("")) {
-//                mediaPlayer = new MediaPlayer();
                 mediaPlayer.setDataSource(taskRecordingPath);
                 mediaPlayer.prepare();
                 mediaPlayer.start();

@@ -7,9 +7,9 @@
         android:title="@string/action_add_task_list"
         app:showAsAction="ifRoom"/>
 
-    <!-- Polozka Nastaveni vzdy schovana - never -->
+    <!-- Polozka Nastaveni vzdy schovana - never
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
-
+    -->
 </menu>

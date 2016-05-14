@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.model;
 
 /**
+ * Trida reprezentujici seznam ukolu.
  * Created by Tomas.
  */
 public class TaskList {
@@ -34,7 +35,7 @@ public class TaskList {
     }
 
     /**
-     * Přepsání pro účely zobrazeni nazvu seznamu ukolu ve spinneru editace ukolu.
+     * Prepsani pro ucely zobrazeni nazvu seznamu ukolu ve spinneru detailu ukolu.
      */
     @Override
     public String toString() {

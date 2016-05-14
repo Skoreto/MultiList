@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * Databazovy model aplikace.
  * Created by Tomas.
  */
 public class DataModel extends SQLiteOpenHelper {
@@ -103,25 +104,6 @@ public class DataModel extends SQLiteOpenHelper {
     }
 
     /**
-     * Metoda vrati konkretni ukol podle zadaneho id.
-     * Ukol je vracen jako objekt typu HashMap.
-     */
-    public HashMap<String, String> getTaskHashMap(String id){
-        HashMap<String, String> hm = new HashMap<String, String>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM TASKS WHERE ID=" + id, null);
-
-        if (cursor.moveToFirst()){
-            do {
-                hm.put("NAME", cursor.getString(1));
-                hm.put("DESCRIPTION", cursor.getString(2));
-                hm.put("LIST_ID", cursor.getString(3));
-            } while (cursor.moveToNext());
-        }
-        return hm;
-    }
-
-    /**
      * Metoda pro vraceni konkretniho ukolu (dle id) z databaze.
      */
     public Task getTask(int id) {
@@ -178,24 +160,6 @@ public class DataModel extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
         return taskList;
-    }
-
-    /**
-     * Metoda vraci seznam vsech nazvu ukolu v databazi.
-     */
-    public List<String> getNameAllTasks(){
-        List<String> tasks = new ArrayList<>();
-
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM TASKS", null);
-
-        if (cursor.moveToFirst()){
-            do {
-                String task = cursor.getInt(0) + ". " + cursor.getString(1);
-                tasks.add(task);
-            } while (cursor.moveToNext());
-        }
-
-        return tasks;
     }
 
     /**

@@ -3,6 +3,7 @@ package cz.uhk.fim.skoreto.todolist.model;
 import java.util.Date;
 
 /**
+ * Trida reprezentujici zadany ukol.
  * Created by Tomas.
  */
 public class Task {
