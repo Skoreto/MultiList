@@ -3,7 +3,6 @@ package cz.uhk.fim.skoreto.todolist.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.ThumbnailUtils;
@@ -64,7 +63,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
                 final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
 
                 // Optimalizace dekodovani a nacteni miniatury z nahledu v externim ulozisti do pameti.
-                Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(decodeSampledBitmapFromFile(photoThumbnailPath, 90, 90), 90, 90);
+                Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapHelper.decodeSampledBitmapFromPath(photoThumbnailPath, 90, 90), 90, 90);
                 holder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
 
                 holder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
@@ -125,47 +124,5 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
         return convertView;
     }
-
-    /**
-     * Prepocet rozmeru vzorku vzhledem k poradovanym rozmerum miniatury.
-     */
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Vyska a sirka puvodni plne fotografie.
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 2;
-
-        // Pokud je nutne fotografii pro nahled zmensit.
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Spocita nejvetsi moznou velikost inSampleSize, ktera je nasobkem 2
-            // a rozmery vzorku vetsi nez jsou pozadovane rozmery miniatury.
-            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
-
-    /**
-     * Vrati vzorek bitmapy z puvodni plne fotografie.
-     */
-    public static Bitmap decodeSampledBitmapFromFile(String res, int reqWidth, int reqHeight) {
-        // Nejprve dekoduj s inJustDEcodeBounds=true pro overeni rozmeru.
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(res, options);
-
-        // Spocitej inSampleSize.
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Dekoduj bitmapu s nastavenou inSampleSize.
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(res, options);
-    }
-
 
 }

@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -345,6 +344,11 @@ public class TaskDetailActivity extends AppCompatActivity {
             String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
+
+            // Smazani prislusne miniatury stare fotografie.
+            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
+            boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
 
         // Vytvor unikatni jmeno fotografie z casu iniciace vyfoceni ukolu.
@@ -396,12 +400,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
             }
 
-            Intent taskDetailActivityIntent = new Intent(getApplication(), TaskDetailActivity.class);
-            // Predej ID ukolu do intentu editTaskIntent.
-            taskDetailActivityIntent.putExtra("taskId", task.getId());
-            // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
-            taskDetailActivityIntent.putExtra("listId", listId);
-            startActivity(taskDetailActivityIntent);
+            finish();
         }
     }
 

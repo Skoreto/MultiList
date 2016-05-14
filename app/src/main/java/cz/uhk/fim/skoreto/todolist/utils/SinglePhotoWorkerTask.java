@@ -1,7 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
@@ -25,10 +25,13 @@ public class SinglePhotoWorkerTask extends AsyncTask<File, Void, Bitmap> {
         imageViewReferences = new WeakReference<ImageView>(imageView);
     }
 
+    /**
+     * Ziskani bitmapy fotografie.
+     */
     @Override
     protected Bitmap doInBackground(File... params) {
         mImageFile = params[0];
-        Bitmap bitmap = decodeBitmapFromFile(mImageFile);
+        Bitmap bitmap = BitmapHelper.decodeBitmapFromFile(mImageFile, displayWidth, displayHeight);
         return bitmap;
     }
 
@@ -37,33 +40,11 @@ public class SinglePhotoWorkerTask extends AsyncTask<File, Void, Bitmap> {
         if (bitmap != null && imageViewReferences != null) {
             ImageView imageView = imageViewReferences.get();
             if (imageView != null) {
+                // Nastaveni cerneho pozadi, pokud fotografie nevyplnuje rozmery celou obrazovku.
+                imageView.setBackgroundColor(Color.rgb(0, 0, 0));
                 imageView.setImageBitmap(bitmap);
             }
         }
-    }
-
-    private int calculateInSampleSize(BitmapFactory.Options bmOptions) {
-        final int photoWidth = bmOptions.outWidth;
-        final int photoHeight = bmOptions.outHeight;
-        int scaleFactor = 1;
-
-        if (photoWidth > displayWidth || photoHeight > displayHeight) {
-            final int halfPhotoWidth = photoWidth/2;
-            final int halfPhotoHeight = photoHeight/2;
-            while (halfPhotoWidth/scaleFactor > displayWidth || halfPhotoHeight/scaleFactor > displayHeight) {
-                scaleFactor *= 2;
-            }
-        }
-        return scaleFactor;
-    }
-
-    private Bitmap decodeBitmapFromFile(File imageFile) {
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imageFile.getAbsolutePath(), bmOptions);
-        bmOptions.inSampleSize = calculateInSampleSize(bmOptions);
-        bmOptions.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imageFile.getAbsolutePath(), bmOptions);
     }
 
 }
