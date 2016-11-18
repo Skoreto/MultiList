@@ -1,9 +1,11 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -13,6 +15,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -79,6 +83,9 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private Calendar calendar;
     private DatePickerDialog datePickerDialog;
+
+    private final int PERMISSIONS_REQUEST_CAMERA = 102;
+    private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -232,7 +239,24 @@ public class TaskDetailActivity extends AppCompatActivity {
         imgbtnTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePhoto();
+                // Kontrola permission k fotoaparatu
+                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                        Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                            Manifest.permission.CAMERA)) {
+                        Toast.makeText(TaskDetailActivity.this,
+                                "Povolení přístupu ke kameře je nutné pro vyfocení úkolu." ,
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                PERMISSIONS_REQUEST_CAMERA);
+                        // V pripade ziskani povoleni spustit fotoaparat v onRequestPermissionsResult
+                    }
+                }
             }
         });
 
@@ -443,8 +467,24 @@ public class TaskDetailActivity extends AppCompatActivity {
      */
     private void onRecordPressed(boolean bReady) {
         if (bReady) {
-            mediaRecorder = new MediaRecorder();
-            AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
+            // Kontrola permission k mikrofonu
+            if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                    Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                        Manifest.permission.RECORD_AUDIO)) {
+                    Toast.makeText(TaskDetailActivity.this,
+                            "Povolení přístupu k mikrofonu je nutné pro nahrání úkolu." ,
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO},
+                            PERMISSIONS_REQUEST_RECORD_AUDIO);
+                    // V pripade ziskani povoleni nahravat zvuk v onRequestPermissionsResult
+                }
+            }
         }
         else {
             AudioController.stopRecording(mediaRecorder);
@@ -500,6 +540,40 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Metoda handlujici request pristupu k dangerous zdrojum.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CAMERA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Povoleni udeleno, spustit fotoaparat
+                    takePhoto();
+                } else {
+                    Toast.makeText(TaskDetailActivity.this,
+                            "Povolení nebylo uděleno, nelze spustit fotoaparát.",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case PERMISSIONS_REQUEST_RECORD_AUDIO: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Povoleni udeleno, spustit nahravani zvuku
+                    mediaRecorder = new MediaRecorder();
+                    AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
+                } else {
+                    Toast.makeText(TaskDetailActivity.this,
+                            "Povolení k mikrofonu nebylo uděleno, nelze nahrávat zvuk.",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
 
 }
 

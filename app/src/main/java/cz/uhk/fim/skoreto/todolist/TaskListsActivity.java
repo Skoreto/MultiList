@@ -1,10 +1,14 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -41,9 +45,33 @@ public class TaskListsActivity extends AppCompatActivity {
     private DataModel dataModel;
     private EditText etTaskListName;
 
+    private final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 101;
+
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_lists_activity);
+
+        // Kontrola permission k ulozisti
+        if (ContextCompat.checkSelfPermission(TaskListsActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(TaskListsActivity.this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                Toast.makeText(TaskListsActivity.this,
+                        "Povolení přístupu k zápisu do úložiště je vyžadováno." ,
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                ActivityCompat.requestPermissions(TaskListsActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
+        } else {
+            Toast.makeText(TaskListsActivity.this,
+                    "Povolení přístupu k zápisu do úložiště bylo již uděleno." ,
+                    Toast.LENGTH_SHORT).show();
+        }
 
         // Implementace ActionBaru.
         tlbTaskListsActivity = (Toolbar) findViewById(R.id.tlbTaskListsActivity);
@@ -249,6 +277,25 @@ public class TaskListsActivity extends AppCompatActivity {
 
             default:
                 return super.onContextItemSelected(item);
+        }
+    }
+
+    /**
+     * Metoda handlujici request pristupu k dangerous zdrojum.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(TaskListsActivity.this, "Povolení uděleno" , Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(TaskListsActivity.this, "Povolení k přístupu do uložiště nebylo uděleno" , Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
         }
     }
 
