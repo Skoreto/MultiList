@@ -65,6 +65,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
+    private ImageButton imgbtnChoosePlace;
     private ImageButton imgbtnTakePhoto;
     private DataModel dm;
     private int taskId;
@@ -232,6 +233,15 @@ public class TaskDetailActivity extends AppCompatActivity {
                 // Pouzit aktualni datum jako vychozi datum v datepickeru.
                 datePickerDialog = new DatePickerDialog(TaskDetailActivity.this, datePickerListener, year, month, day);
                 datePickerDialog.show();
+            }
+        });
+
+        imgbtnChoosePlace = (ImageButton) findViewById(R.id.imgbtnChoosePlace);
+        imgbtnChoosePlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent taskDetailIntent = new Intent(TaskDetailActivity.this, ChoosePlaceActivity.class);
+                startActivityForResult(taskDetailIntent, 778);
             }
         });
 

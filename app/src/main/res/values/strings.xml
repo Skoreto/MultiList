@@ -29,4 +29,5 @@
     <!-- ContextMenu -->
     <string name="task_list_rename">Přejmenovat</string>
     <string name="task_list_delete">Smazat</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
