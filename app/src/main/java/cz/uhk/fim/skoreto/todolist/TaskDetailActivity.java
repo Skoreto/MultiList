@@ -36,6 +36,11 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,6 +92,10 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private final int PERMISSIONS_REQUEST_CAMERA = 102;
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
+    private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 104;
+
+    private int REQUEST_PLACE_PICKER = 1;
+    private String selectedPlace;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -240,8 +249,33 @@ public class TaskDetailActivity extends AppCompatActivity {
         imgbtnChoosePlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent taskDetailIntent = new Intent(TaskDetailActivity.this, ChoosePlaceActivity.class);
-                startActivityForResult(taskDetailIntent, 778);
+                // Kontrola permission k GPS
+                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        Toast.makeText(TaskDetailActivity.this,
+                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy." ,
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                        // V pripade ziskani povoleni prejit na intent mapy
+                    }
+                } else {
+                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+                    try {
+                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
+                    } catch (GooglePlayServicesRepairableException e) {
+                        e.printStackTrace();
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
@@ -412,33 +446,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         return photoFile;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
-        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            // Vytvoreni zmenseneho nahledu z porizene fotografie.
-            Bitmap photoBitmap = BitmapFactory.decodeFile(folderPath + File.separator + photoFileName + ".jpg");
-            Bitmap photoThumbnail = Bitmap.createScaledBitmap(photoBitmap, 200, 356, true);
-
-            // Ulozeni nahledu do externiho uloziste.
-            try {
-                OutputStream stream = new FileOutputStream(thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
-                photoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            } catch (IOException e) {
-                Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
-            }
-
-            // Presmerovani na seznam ukolu, odkud ukol pochazi.
-            Intent returnIntent = new Intent();
-            returnIntent.putExtra("listId", listId);
-            setResult(Activity.RESULT_OK, returnIntent);
-            finish();
-        }
-
-    }
-
     /**
      * Metoda pro inicializaci layoutu ActionBaru.
      */
@@ -581,6 +588,64 @@ public class TaskDetailActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 }
                 return;
+            }
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Povoleni udeleno, prejit na PlacePicker
+//                    Intent taskDetailIntent = new Intent(TaskDetailActivity.this, ChoosePlaceActivity.class);
+//                    startActivityForResult(taskDetailIntent, 778);
+
+                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+                    try {
+                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
+                    } catch (GooglePlayServicesRepairableException e) {
+                        e.printStackTrace();
+                    } catch (GooglePlayServicesNotAvailableException e) {
+                        e.printStackTrace();
+                    }
+
+
+                } else {
+                    Toast.makeText(TaskDetailActivity.this,
+                            "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            // Vytvoreni zmenseneho nahledu z porizene fotografie.
+            Bitmap photoBitmap = BitmapFactory.decodeFile(folderPath + File.separator + photoFileName + ".jpg");
+            Bitmap photoThumbnail = Bitmap.createScaledBitmap(photoBitmap, 200, 356, true);
+
+            // Ulozeni nahledu do externiho uloziste.
+            try {
+                OutputStream stream = new FileOutputStream(thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
+                photoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            } catch (IOException e) {
+                Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
+            }
+
+            // Presmerovani na seznam ukolu, odkud ukol pochazi.
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("listId", listId);
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+        }
+        if (requestCode == REQUEST_PLACE_PICKER) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(data, this);
+                String toastMsg = String.format("Place: %s", place.getName());
+                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
             }
         }
     }
