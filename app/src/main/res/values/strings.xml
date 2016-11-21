@@ -9,6 +9,7 @@
     <string name="tv_task_name">Název</string>
     <string name="tv_task_description">Popis</string>
     <string name="tv_due_date">Splnit do</string>
+    <string name="tv_place">Místo</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="tv_task_list">Seznam</string>
     <string name="tv_task_completed">Splněno</string>
@@ -31,8 +32,4 @@
     <string name="task_list_delete">Smazat</string>
     <string name="title_activity_maps">Map</string>
 
-    <!-- Google API -->
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo
-    </string>
 </resources>

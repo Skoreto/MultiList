@@ -67,6 +67,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private Task task;
     private EditText etTaskName;
     private EditText etTaskDueDate;
+    private EditText etPlace;
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
@@ -94,8 +95,8 @@ public class TaskDetailActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
     private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 104;
 
-    private int REQUEST_PLACE_PICKER = 1;
-    private String selectedPlace;
+    private int REQUEST_PLACE_PICKER = 801;
+    private String chosenPlace;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -120,6 +121,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
+        etPlace = (EditText) findViewById(R.id.etPlace);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -641,11 +643,11 @@ public class TaskDetailActivity extends AppCompatActivity {
             setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
+        // Nacteni adresy vybraneho mista z Place Pickeru
         if (requestCode == REQUEST_PLACE_PICKER) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(data, this);
-                String toastMsg = String.format("Place: %s", place.getName());
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+                Place place = PlacePicker.getPlace(TaskDetailActivity.this, data);
+                etPlace.setText(place.getAddress());
             }
         }
     }
