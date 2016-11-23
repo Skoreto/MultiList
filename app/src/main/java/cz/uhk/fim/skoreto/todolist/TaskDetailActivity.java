@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Criteria;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -15,11 +20,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,25 +44,40 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
+
+import static com.google.android.gms.location.places.Places.PLACE_DETECTION_API;
 
 /**
  * Aktivita pro zmenu, smazani a zobrazeni detailu ukolu.
@@ -62,6 +85,12 @@ import cz.uhk.fim.skoreto.todolist.utils.AudioController;
  */
 public class TaskDetailActivity extends AppCompatActivity {
 
+    //    public static final String "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
+//                        @Override
+//                        public void onResponse(JSONObject response) {
+//                            String address = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
+//                        }
+//                    } = "";
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
     private Task task;
@@ -71,6 +100,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
+    private ImageButton imgbtnCurrentPlace;
     private ImageButton imgbtnChoosePlace;
     private ImageButton imgbtnTakePhoto;
     private DataModel dm;
@@ -94,14 +124,16 @@ public class TaskDetailActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_CAMERA = 102;
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
     private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 104;
+    private final int PERMISSIONS_REQUEST_CURRENT_PLACE = 105;
 
     private int REQUEST_PLACE_PICKER = 801;
     private String chosenPlace;
+    private RequestQueue requestQueue;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
      */
-    public void onCreate(final Bundle savedInstanceState){
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.task_detail_activity);
         dm = new DataModel(this);
@@ -178,14 +210,14 @@ public class TaskDetailActivity extends AppCompatActivity {
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                   @Override
-                   public void onClick(View view) {
-                       // Zobrazeni velke fotografie po kliknuti na nahled.
-                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
-                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-                       startActivity(sendPhotoDirectoryIntent);
-                   }
-               }
+                                               @Override
+                                               public void onClick(View view) {
+                                                   // Zobrazeni velke fotografie po kliknuti na nahled.
+                                                   Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
+                                                   sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+                                                   startActivity(sendPhotoDirectoryIntent);
+                                               }
+                                           }
             );
         }
 
@@ -247,6 +279,65 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
         });
 
+        imgbtnCurrentPlace = (ImageButton) findViewById(R.id.imgbtnCurrentPlace);
+        imgbtnCurrentPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Kontrola permission k GPS
+                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        Toast.makeText(TaskDetailActivity.this,
+                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                PERMISSIONS_REQUEST_CURRENT_PLACE);
+                        // V pripade ziskani povoleni prejit na intent mapy
+                    }
+                } else {
+                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+                    // Create a criteria object to retrieve provider
+                    Criteria criteria = new Criteria();
+                    // Get the name of the best provider
+                    String provider = locationManager.getBestProvider(criteria, true);
+                    // Get Current Location
+                    Location myLocation = locationManager.getLastKnownLocation(provider);
+
+                    // Ziskani adresy soucasne pozice z coordinates
+                    // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
+                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
+
+                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                            + myLocation.getLatitude() + "," + myLocation.getLongitude()
+                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
+                                        .getString("formatted_address");
+                                etPlace.setText(currentPlaceAddress);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    requestQueue.add(request);
+                }
+            }
+        });
+
         imgbtnChoosePlace = (ImageButton) findViewById(R.id.imgbtnChoosePlace);
         imgbtnChoosePlace.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,7 +350,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)) {
                         Toast.makeText(TaskDetailActivity.this,
-                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy." ,
+                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
                         ActivityCompat.requestPermissions(TaskDetailActivity.this,
@@ -294,7 +385,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
                             Manifest.permission.CAMERA)) {
                         Toast.makeText(TaskDetailActivity.this,
-                                "Povolení přístupu ke kameře je nutné pro vyfocení úkolu." ,
+                                "Povolení přístupu ke kameře je nutné pro vyfocení úkolu.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
                         ActivityCompat.requestPermissions(TaskDetailActivity.this,
@@ -311,7 +402,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     /**
      * Metoda pro zmenu atributu ukolu.
      */
-    public void editTask(){
+    public void editTask() {
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
@@ -345,7 +436,7 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Metoda pro smazani ukolu.
      * Kaskadne vymaze pripojene fotografie a nahravky z externiho uloziste.
      */
-    public void deleteTask(){
+    public void deleteTask() {
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
             String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
@@ -495,7 +586,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
                         Manifest.permission.RECORD_AUDIO)) {
                     Toast.makeText(TaskDetailActivity.this,
-                            "Povolení přístupu k mikrofonu je nutné pro nahrání úkolu." ,
+                            "Povolení přístupu k mikrofonu je nutné pro nahrání úkolu.",
                             Toast.LENGTH_SHORT).show();
                 } else {
                     ActivityCompat.requestPermissions(TaskDetailActivity.this,
@@ -504,8 +595,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     // V pripade ziskani povoleni nahravat zvuk v onRequestPermissionsResult
                 }
             }
-        }
-        else {
+        } else {
             AudioController.stopRecording(mediaRecorder);
             mediaRecorder = null;
         }
@@ -518,8 +608,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (bReady) {
             mediaPlayer = new MediaPlayer();
             AudioController.startPlaying(dm, taskId, mediaPlayer, TaskDetailActivity.this);
-        }
-        else {
+        } else {
             AudioController.stopPlaying(mediaPlayer);
             mediaPlayer = null;
         }
@@ -609,6 +698,54 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }
 
 
+                } else {
+                    Toast.makeText(TaskDetailActivity.this,
+                            "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
+                            Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            case PERMISSIONS_REQUEST_CURRENT_PLACE: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Povoleni udeleno, vyplnit soucasnou pozici
+                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+                    // Create a criteria object to retrieve provider
+                    Criteria criteria = new Criteria();
+                    // Get the name of the best provider
+                    String provider = locationManager.getBestProvider(criteria, true);
+                    // Get Current Location
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    Location myLocation = locationManager.getLastKnownLocation(provider);
+
+                    // Ziskani adresy soucasne pozice z coordinates
+                    // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
+                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
+
+                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                            + myLocation.getLatitude() + "," + myLocation.getLongitude()
+                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
+                                        .getString("formatted_address");
+                                etPlace.setText(currentPlaceAddress);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    requestQueue.add(request);
                 } else {
                     Toast.makeText(TaskDetailActivity.this,
                             "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
