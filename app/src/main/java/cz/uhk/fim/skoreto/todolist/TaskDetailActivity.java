@@ -111,6 +111,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private int REQUEST_PLACE_PICKER = 801;
     private TaskPlace chosenTaskPlace = null;
+    private boolean chosenTaskPlaceChanged = false;
     private RequestQueue requestQueue;
 
     /**
@@ -307,23 +308,15 @@ public class TaskDetailActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
-                                        .getString("formatted_address");
+                                String currentPlaceAddress = response.getJSONArray("results")
+                                        .getJSONObject(0).getString("formatted_address");
 
-                                // Bylo-li misto ukolu jiz drive zvoleno, smaz nejprve puvodni misto z databaze.
-                                if (chosenTaskPlace != null)
-                                    dm.deleteTaskPlace(chosenTaskPlace.getId());
-
-                                //  Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci chosenTaskPlace.
-                                long newTaskPlaceId = dm.addTaskPlaceReturnId(currentLocation.getLatitude(), currentLocation.getLongitude(), currentPlaceAddress);
-
-                                if (newTaskPlaceId == -1)
-                                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
-                                else {
-                                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
-                                    task.setTaskPlaceId((int) newTaskPlaceId);
-                                    etTaskPlace.setText(chosenTaskPlace.getAddress());
-                                }
+                                // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
+                                // pred pripadnym updatem databaze po potvrzeni editace ukolu.
+                                chosenTaskPlaceChanged = true;
+                                chosenTaskPlace = new TaskPlace(currentLocation.getLatitude(),
+                                        currentLocation.getLongitude(), currentPlaceAddress);
+                                etTaskPlace.setText(chosenTaskPlace.getAddress());
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -331,10 +324,10 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
-
                     requestQueue.add(request);
                 }
             }
@@ -419,10 +412,45 @@ public class TaskDetailActivity extends AppCompatActivity {
         else
             task.setCompleted(0);
 
-        if (chosenTaskPlace == null)
-            task.setTaskPlaceId(-1);
-        else
-            task.setTaskPlaceId(chosenTaskPlace.getId());
+        if (task.getTaskPlaceId() == -1) {
+            // Pokud nebylo drive zvoleno misto ukolu
+            if (chosenTaskPlaceChanged) {
+                // A nyni je zvoleno misto ukolu
+                // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
+                // chosenTaskPlace s id.
+                long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
+                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
+                if (newTaskPlaceId == -1)
+                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                else {
+                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
+                    task.setTaskPlaceId((int) newTaskPlaceId);
+                }
+            }
+        } else {
+            // Pokud bylo jiz drive zvoleno misto ukolu
+            if (chosenTaskPlaceChanged) {
+                // Smaz puvodni misto z databaze.
+                dm.deleteTaskPlace(task.getTaskPlaceId());
+
+                if (chosenTaskPlace == null) {
+                    // Ale bylo pouze odebrano
+                    task.setTaskPlaceId(-1);
+                } else {
+                    // A nyni se misto ukolu zmenilo na nove
+                    // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
+                    // chosenTaskPlace s id.
+                    long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
+                            chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
+                    if (newTaskPlaceId == -1)
+                        Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                    else {
+                        chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
+                        task.setTaskPlaceId((int) newTaskPlaceId);
+                    }
+                }
+            }
+        }
 
         // Ziskani vybraneho seznamu ukolu a dle nej prirazeni ukolu do prislusneho seznamu.
         TaskList taskList = (TaskList) spinTaskLists.getSelectedItem();
@@ -794,20 +822,12 @@ public class TaskDetailActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(TaskDetailActivity.this, data);
 
-                // Bylo-li misto ukolu jiz drive zvoleno, smaz nejprve puvodni misto z databaze.
-                if (chosenTaskPlace != null)
-                    dm.deleteTaskPlace(chosenTaskPlace.getId());
-
-                //  Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci chosenTaskPlace.
-                long newTaskPlaceId = dm.addTaskPlaceReturnId(place.getLatLng().latitude, place.getLatLng().longitude, place.getAddress().toString());
-
-                if (newTaskPlaceId == -1)
-                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
-                else {
-                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
-                    task.setTaskPlaceId((int) newTaskPlaceId);
-                    etTaskPlace.setText(chosenTaskPlace.getAddress());
-                }
+                // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
+                // pred pripadnym updatem databaze po potvrzeni editace ukolu.
+                chosenTaskPlaceChanged = true;
+                chosenTaskPlace = new TaskPlace(place.getLatLng().latitude,
+                        place.getLatLng().longitude, place.getAddress().toString());
+                etTaskPlace.setText(chosenTaskPlace.getAddress());
             }
         }
     }

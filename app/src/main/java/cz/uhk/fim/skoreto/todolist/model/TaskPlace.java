@@ -18,6 +18,12 @@ public class TaskPlace {
     public TaskPlace() {
     }
 
+    public TaskPlace(double latitude, double longitude, String address) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.address = address;
+    }
+
     public TaskPlace(int id, double latitude, double longitude, String address) {
         this.id = id;
         this.latitude = latitude;
