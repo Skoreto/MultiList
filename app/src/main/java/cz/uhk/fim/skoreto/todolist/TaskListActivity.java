@@ -113,7 +113,7 @@ public class TaskListActivity extends AppCompatActivity {
                     Date dueDate = calendar.getTime();
 
                     // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny a s datumem splneni do dnes.
-                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", dueDate);
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", dueDate, -1);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");

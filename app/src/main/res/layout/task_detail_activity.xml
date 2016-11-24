@@ -86,7 +86,7 @@
                 android:rowCount="1">
 
                 <EditText
-                    android:id="@+id/etPlace"
+                    android:id="@+id/etTaskPlace"
                     android:inputType="textShortMessage"
                     android:ems="8"
                     android:layout_gravity="start"
@@ -99,7 +99,7 @@
                     android:layout_gravity="center_horizontal" />
 
                 <ImageButton
-                    android:id="@+id/imgbtnChoosePlace"
+                    android:id="@+id/imgbtnChooseTaskPlace"
                     android:src="@drawable/ic_photo_camera_black_24dp"
                     android:drawablePadding="2dp"
                     android:layout_gravity="center_horizontal" />

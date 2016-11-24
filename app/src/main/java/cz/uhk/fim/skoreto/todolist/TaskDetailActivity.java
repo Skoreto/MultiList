@@ -8,9 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Address;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -20,14 +18,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -49,7 +44,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -59,25 +53,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
+import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
-
-import static com.google.android.gms.location.places.Places.PLACE_DETECTION_API;
 
 /**
  * Aktivita pro zmenu, smazani a zobrazeni detailu ukolu.
@@ -85,23 +74,17 @@ import static com.google.android.gms.location.places.Places.PLACE_DETECTION_API;
  */
 public class TaskDetailActivity extends AppCompatActivity {
 
-    //    public static final String "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
-//                        @Override
-//                        public void onResponse(JSONObject response) {
-//                            String address = response.getJSONArray("results").getJSONObject(0).getString("formatted_address");
-//                        }
-//                    } = "";
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
     private Task task;
     private EditText etTaskName;
     private EditText etTaskDueDate;
-    private EditText etPlace;
+    private EditText etTaskPlace;
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
     private ImageButton imgbtnCurrentPlace;
-    private ImageButton imgbtnChoosePlace;
+    private ImageButton imgbtnChooseTaskPlace;
     private ImageButton imgbtnTakePhoto;
     private DataModel dm;
     private int taskId;
@@ -127,7 +110,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private final int PERMISSIONS_REQUEST_CURRENT_PLACE = 105;
 
     private int REQUEST_PLACE_PICKER = 801;
-    private String chosenPlace;
+    private TaskPlace chosenTaskPlace = null;
     private RequestQueue requestQueue;
 
     /**
@@ -153,7 +136,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
-        etPlace = (EditText) findViewById(R.id.etPlace);
+        etTaskPlace = (EditText) findViewById(R.id.etTaskPlace);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -173,11 +156,17 @@ public class TaskDetailActivity extends AppCompatActivity {
         etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
         etTaskDescription.setText(task.getDescription());
 
-        // Zaskrtnuti checkbocu podle toho zda ukol je/neni splnen.
+        // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
         if (task.getCompleted() == 1)
             chbTaskCompleted.setChecked(true);
         if (task.getCompleted() == 0)
             chbTaskCompleted.setChecked(false);
+
+        // Pokud bylo vybrano misto ukolu, inicializuj ho
+        if (task.getTaskPlaceId() != -1) {
+            chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            etTaskPlace.setText(chosenTaskPlace.getAddress());
+        }
 
         // SPINNER seznamu ukolu
         List<TaskList> taskLists = dm.getAllTaskLists();
@@ -210,14 +199,14 @@ public class TaskDetailActivity extends AppCompatActivity {
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                                               @Override
-                                               public void onClick(View view) {
-                                                   // Zobrazeni velke fotografie po kliknuti na nahled.
-                                                   Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
-                                                   sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-                                                   startActivity(sendPhotoDirectoryIntent);
-                                               }
-                                           }
+                   @Override
+                   public void onClick(View view) {
+                       // Zobrazeni velke fotografie po kliknuti na nahled.
+                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
+                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+                       startActivity(sendPhotoDirectoryIntent);
+                   }
+               }
             );
         }
 
@@ -301,27 +290,40 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }
                 } else {
                     LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
                     // Create a criteria object to retrieve provider
                     Criteria criteria = new Criteria();
                     // Get the name of the best provider
                     String provider = locationManager.getBestProvider(criteria, true);
-                    // Get Current Location
-                    Location myLocation = locationManager.getLastKnownLocation(provider);
+                    // Get current location
+                    final Location currentLocation = locationManager.getLastKnownLocation(provider);
 
                     // Ziskani adresy soucasne pozice z coordinates
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
                     requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
 
                     JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                            + myLocation.getLatitude() + "," + myLocation.getLongitude()
+                            + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
                             + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
                                         .getString("formatted_address");
-                                etPlace.setText(currentPlaceAddress);
+
+                                // Bylo-li misto ukolu jiz drive zvoleno, smaz nejprve puvodni misto z databaze.
+                                if (chosenTaskPlace != null)
+                                    dm.deleteTaskPlace(chosenTaskPlace.getId());
+
+                                //  Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci chosenTaskPlace.
+                                long newTaskPlaceId = dm.addTaskPlaceReturnId(currentLocation.getLatitude(), currentLocation.getLongitude(), currentPlaceAddress);
+
+                                if (newTaskPlaceId == -1)
+                                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                                else {
+                                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
+                                    task.setTaskPlaceId((int) newTaskPlaceId);
+                                    etTaskPlace.setText(chosenTaskPlace.getAddress());
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -338,8 +340,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
         });
 
-        imgbtnChoosePlace = (ImageButton) findViewById(R.id.imgbtnChoosePlace);
-        imgbtnChoosePlace.setOnClickListener(new View.OnClickListener() {
+        imgbtnChooseTaskPlace = (ImageButton) findViewById(R.id.imgbtnChooseTaskPlace);
+        imgbtnChooseTaskPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Kontrola permission k GPS
@@ -417,6 +419,11 @@ public class TaskDetailActivity extends AppCompatActivity {
         else
             task.setCompleted(0);
 
+        if (chosenTaskPlace == null)
+            task.setTaskPlaceId(-1);
+        else
+            task.setTaskPlaceId(chosenTaskPlace.getId());
+
         // Ziskani vybraneho seznamu ukolu a dle nej prirazeni ukolu do prislusneho seznamu.
         TaskList taskList = (TaskList) spinTaskLists.getSelectedItem();
         task.setListId(taskList.getId());
@@ -455,6 +462,10 @@ public class TaskDetailActivity extends AppCompatActivity {
             File oldTaskRecording = new File(oldTaskRecordingPath);
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
+
+        // Smazani mista nalezejicimu k ukolu z databaze
+        if (task.getTaskPlaceId() != -1)
+            dm.deleteTaskPlace(task.getTaskPlaceId());
 
         dm.deleteTask(taskId);
         // Informovani uzivatele o uspesnem smazani ukolu.
@@ -645,7 +656,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-
     }
 
     /**
@@ -710,30 +720,29 @@ public class TaskDetailActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Povoleni udeleno, vyplnit soucasnou pozici
                     LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
                     // Create a criteria object to retrieve provider
                     Criteria criteria = new Criteria();
                     // Get the name of the best provider
                     String provider = locationManager.getBestProvider(criteria, true);
-                    // Get Current Location
+                    // Get current location
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
-                    Location myLocation = locationManager.getLastKnownLocation(provider);
+                    Location currentLocation = locationManager.getLastKnownLocation(provider);
 
                     // Ziskani adresy soucasne pozice z coordinates
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
                     requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
 
                     JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                            + myLocation.getLatitude() + "," + myLocation.getLongitude()
+                            + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
                             + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
                                         .getString("formatted_address");
-                                etPlace.setText(currentPlaceAddress);
+                                etTaskPlace.setText(currentPlaceAddress);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -780,11 +789,25 @@ public class TaskDetailActivity extends AppCompatActivity {
             setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
-        // Nacteni adresy vybraneho mista z Place Pickeru
+        // Nacteni adresy vybraneho mista z TaskPlace Pickeru
         if (requestCode == REQUEST_PLACE_PICKER) {
             if (resultCode == RESULT_OK) {
                 Place place = PlacePicker.getPlace(TaskDetailActivity.this, data);
-                etPlace.setText(place.getAddress());
+
+                // Bylo-li misto ukolu jiz drive zvoleno, smaz nejprve puvodni misto z databaze.
+                if (chosenTaskPlace != null)
+                    dm.deleteTaskPlace(chosenTaskPlace.getId());
+
+                //  Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci chosenTaskPlace.
+                long newTaskPlaceId = dm.addTaskPlaceReturnId(place.getLatLng().latitude, place.getLatLng().longitude, place.getAddress().toString());
+
+                if (newTaskPlaceId == -1)
+                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                else {
+                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
+                    task.setTaskPlaceId((int) newTaskPlaceId);
+                    etTaskPlace.setText(chosenTaskPlace.getAddress());
+                }
             }
         }
     }
