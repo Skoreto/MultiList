@@ -95,19 +95,15 @@
                 <ImageButton
                     android:id="@+id/imgbtnCurrentPlace"
                     android:src="@drawable/ic_mic_black_24dp"
-                    android:drawablePadding="2dp"
+                    android:drawablePadding="0dp"
                     android:layout_gravity="center_horizontal" />
 
                 <ImageButton
                     android:id="@+id/imgbtnChooseTaskPlace"
                     android:src="@drawable/ic_photo_camera_black_24dp"
-                    android:drawablePadding="2dp"
+                    android:drawablePadding="0dp"
                     android:layout_gravity="center_horizontal" />
-
             </GridLayout>
-
-
-
 
             <TextView
                 android:id="@+id/tvTaskDescription"
@@ -183,7 +179,6 @@
                     android:textOff="START"
                     android:drawableStart="@drawable/ic_play_arrow_black_24dp"
                     android:drawablePadding="4dp" />
-
             </GridLayout>
 
             <ImageButton

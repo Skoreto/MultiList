@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -151,14 +152,9 @@ public class TaskListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort:
-                // Razeni dle data splneni vzestupne/sestupne.
-                if (orderAscendingDueDate == true) {
-                    orderAscendingDueDate = false;
-                } else {
-                    orderAscendingDueDate = true;
-                }
-
-                refreshTasksInTaskList();
+                View actionSortView = findViewById(R.id.action_sort);
+                registerForContextMenu(actionSortView);
+                openContextMenu(actionSortView);
                 return true;
 
             case R.id.action_show_all_tasks:
@@ -178,6 +174,44 @@ public class TaskListActivity extends AppCompatActivity {
             default:
                 // Vyvolani superclass pro obsluhu nerozpoznane akce.
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Metoda pro inicializaci layoutu Sort ContextMenu.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, view, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.sort_context_menu, menu);
+    }
+
+    /**
+     * Metoda pro obsluhu tlacitek v Sort ContextMenu.
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Seradit seznam ukolu vzestupne dle data splneni.
+            case R.id.sort_by_due_date_ascending:
+                orderAscendingDueDate = true;
+                refreshTasksInTaskList();
+                return true;
+
+            // Seradit seznam ukolu vzestupne dle data splneni.
+            case R.id.sort_by_due_date_descending:
+                orderAscendingDueDate = false;
+                refreshTasksInTaskList();
+                return true;
+
+            // Seradit seznam ukolu dle vzdalenosti od soucasne polohy.
+            case R.id.sort_by_distance:
+                // TODO implementace razeni dle vzdalenosti
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 

@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sort_by_due_date_ascending"
+        android:title="@string/sort_by_due_date_ascending" />
+    <item
+        android:id="@+id/sort_by_due_date_descending"
+        android:title="@string/sort_by_due_date_descending" />
+    <item
+        android:id="@+id/sort_by_distance"
+        android:title="@string/sort_by_distance" />
+</menu>
