@@ -1,8 +1,15 @@
 package cz.uhk.fim.skoreto.todolist;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,12 +26,34 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
+import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
 
 /**
@@ -42,6 +71,9 @@ public class TaskListActivity extends AppCompatActivity {
     private int listId;
     private boolean hideCompleted;
     private boolean orderAscendingDueDate;
+
+    private TaskPlace currentTaskPlace;
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +140,7 @@ public class TaskListActivity extends AppCompatActivity {
                 etTaskName = (EditText) findViewById(R.id.etTaskName);
 
                 // Pokud neni prazdny nazev noveho ukolu.
-                if (!etTaskName.getText().toString().equals("")){
+                if (!etTaskName.getText().toString().equals("")) {
                     // Ziskani aktualniho casu a vytvoreni instance datumu.
                     Calendar calendar = Calendar.getInstance();
                     Date dueDate = calendar.getTime();
@@ -128,7 +160,7 @@ public class TaskListActivity extends AppCompatActivity {
                     Toast.makeText(TaskListActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
                 } else {
                     // Informovani uzivatele o nutnosti vyplnit název úkolu.
-                    Toast.makeText(TaskListActivity.this, "Prázdný název úkolu!" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskListActivity.this, "Prázdný název úkolu!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -207,7 +239,54 @@ public class TaskListActivity extends AppCompatActivity {
 
             // Seradit seznam ukolu dle vzdalenosti od soucasne polohy.
             case R.id.sort_by_distance:
-                // TODO implementace razeni dle vzdalenosti
+                // Kontrola permission k lokalizaci
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+                // Zjisti soucasnou pozici
+                LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                Criteria criteria = new Criteria();
+                String provider = locationManager.getBestProvider(criteria, true);
+                Location currentLocation = locationManager.getLastKnownLocation(provider);
+
+                List<Task> listTasks = dataModel.getTasksByListId(listId, orderAscendingDueDate);
+                List<Task> tasksWithoutTaskPlace = new ArrayList<Task>();
+
+                // Pouziti TreeMap - prvek vzdy zarazen na pozici dle vzdalenosti.
+                // K = currentPlace to TaskPlace distance, V = taskId
+                TreeMap<Float, Integer> mapDistance = new TreeMap<Float, Integer>();
+                for (Task task : listTasks) {
+                    if (task.getTaskPlaceId() != -1) {
+                        // Ukol s vyplnenym mistem zarad do TreeMap
+                        // dle jeho vzdalenosti od soucasne pozice
+                        TaskPlace taskPlace = dataModel.getTaskPlace(task.getTaskPlaceId());
+
+                        Location endLocation = new Location("provider z databaze");
+                        endLocation.setLatitude(taskPlace.getLatitude());
+                        endLocation.setLongitude(taskPlace.getLongitude());
+
+                        // Vzdalenost mezi misty v metrech
+                        Float currentToEndDistance = currentLocation.distanceTo(endLocation);
+                        mapDistance.put(currentToEndDistance, task.getId());
+                    } else {
+                        // Pokud ukol nema vyplneno misto, odloz si ho do pomocneho seznamu
+                        tasksWithoutTaskPlace.add(task);
+                    }
+                }
+
+                List<Task> sortedTasksByDistance = new ArrayList<Task>();
+                for (Map.Entry<Float, Integer> entry : mapDistance.entrySet()) {
+                    Integer taskId = entry.getValue();
+                    sortedTasksByDistance.add(dataModel.getTask(taskId));
+                }
+                for (int i = 0; i < tasksWithoutTaskPlace.size(); i++) {
+                    sortedTasksByDistance.add(tasksWithoutTaskPlace.get(i));
+                }
+
+                // Aktualizace poradi v seznamu ukolu.
+                arrayAdapter.clear();
+                arrayAdapter.addAll(sortedTasksByDistance);
+                listView.setAdapter(arrayAdapter);
                 return true;
 
             default:
