@@ -153,8 +153,12 @@ public class TaskDetailActivity extends AppCompatActivity {
         task = dm.getTask(taskId);
 
         etTaskName.setText(task.getName());
-        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-        etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+        if (task.getDueDate() != null) {
+            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+            etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+        } else {
+            etTaskDueDate.setText("");
+        }
         etTaskDescription.setText(task.getDescription());
 
         // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.

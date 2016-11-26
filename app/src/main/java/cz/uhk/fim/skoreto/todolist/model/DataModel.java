@@ -37,9 +37,14 @@ public class DataModel extends SQLiteOpenHelper {
         contentValues.put("PHOTO_NAME", photoName);
         contentValues.put("RECORDING_NAME", recordingName);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String sDueDate = sdf.format(dueDate);
-        contentValues.put("DUE_DATE", sDueDate);
+        if (dueDate != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String sDueDate = sdf.format(dueDate);
+            contentValues.put("DUE_DATE", sDueDate);
+        } else {
+            // Defaultni hodnota prazdneho datumu - pro databazove razeni na konec seznamu
+            contentValues.put("DUE_DATE", "9999-12-31");
+        }
         contentValues.put("TASK_PLACE_ID", taskPlaceId);
 
         getWritableDatabase().insert("TASKS", null, contentValues);
@@ -95,9 +100,14 @@ public class DataModel extends SQLiteOpenHelper {
         contentValues.put("PHOTO_NAME", task.getPhotoName());
         contentValues.put("RECORDING_NAME", task.getRecordingName());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String sDueDate = sdf.format(task.getDueDate());
-        contentValues.put("DUE_DATE", sDueDate);
+        if (task.getDueDate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String sDueDate = sdf.format(task.getDueDate());
+            contentValues.put("DUE_DATE", sDueDate);
+        } else {
+            // Defaultni hodnota prazdneho datumu - pro databazove razeni na konec seznamu
+            contentValues.put("DUE_DATE", "9999-12-31");
+        }
         contentValues.put("TASK_PLACE_ID", task.getTaskPlaceId());
 
         return db.update("TASKS", contentValues, "ID = ?",  new String[] {String.valueOf(task.getId())});
@@ -177,12 +187,14 @@ public class DataModel extends SQLiteOpenHelper {
                 task.setPhotoName(photoName);
                 task.setRecordingName(recordingName);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date dueDate = null;
-                try {
-                    dueDate = sdf.parse(sDueDate);
-                } catch (ParseException e) {
-                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTask");
+                if (!sDueDate.equals("9999-12-31")) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        dueDate = sdf.parse(sDueDate);
+                    } catch (ParseException e) {
+                        Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTask");
+                    }
                 }
                 task.setDueDate(dueDate);
                 task.setTaskPlaceId(taskPlaceId);
@@ -252,12 +264,14 @@ public class DataModel extends SQLiteOpenHelper {
                 String sDueDate = cursor.getString(7);
                 int taskPlaceId = cursor.getInt(8);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date dueDate = null;
-                try {
-                    dueDate = sdf.parse(sDueDate);
-                } catch (ParseException e) {
-                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getAllTasks");
+                if (!sDueDate.equals("9999-12-31")) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        dueDate = sdf.parse(sDueDate);
+                    } catch (ParseException e) {
+                        Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getAllTasks");
+                    }
                 }
 
                 Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate, taskPlaceId);
@@ -294,12 +308,14 @@ public class DataModel extends SQLiteOpenHelper {
                 String sDueDate = cursor.getString(7);
                 int taskPlaceId = cursor.getInt(8);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date dueDate = null;
-                try {
-                    dueDate = sdf.parse(sDueDate);
-                } catch (ParseException e) {
-                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTasksByListId");
+                if (!sDueDate.equals("9999-12-31")) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        dueDate = sdf.parse(sDueDate);
+                    } catch (ParseException e) {
+                        Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTasksByListId");
+                    }
                 }
 
                 Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate, taskPlaceId);
@@ -336,12 +352,14 @@ public class DataModel extends SQLiteOpenHelper {
                 String sDueDate = cursor.getString(7);
                 int taskPlaceId = cursor.getInt(8);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date dueDate = null;
-                try {
-                    dueDate = sdf.parse(sDueDate);
-                } catch (ParseException e) {
-                    Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getTasksByListId");
+                if (!sDueDate.equals("9999-12-31")) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    try {
+                        dueDate = sdf.parse(sDueDate);
+                    } catch (ParseException e) {
+                        Log.e("Parsovani datumu", "Nepodarilo se naparsovat datum u metody getIncompletedTasksByListId");
+                    }
                 }
 
                 Task task = new Task(id, name, description, listId, completed, photoName, recordingName, dueDate, taskPlaceId);
