@@ -6,6 +6,9 @@
         android:id="@+id/sort_by_due_date_descending"
         android:title="@string/sort_by_due_date_descending" />
     <item
+        android:id="@+id/sort_by_due_date_then_by_distance"
+        android:title="@string/sort_by_due_date_then_by_distance" />
+    <item
         android:id="@+id/sort_by_distance"
         android:title="@string/sort_by_distance" />
 </menu>

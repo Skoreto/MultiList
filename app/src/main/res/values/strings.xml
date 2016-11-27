@@ -34,6 +34,7 @@
     <!-- Sort ContextMenu -->
     <string name="sort_by_due_date_ascending">Seřadit dle data splnění (vzestupně)</string>
     <string name="sort_by_due_date_descending">Seřadit dle data splnění (sestupně)</string>
+    <string name="sort_by_due_date_then_by_distance">Seřadit dle data splnění, poté dle vzdálenosti</string>
     <string name="sort_by_distance">Seřadit dle vzdálenosti</string>
 
     <string name="title_activity_maps">Map</string>

@@ -146,7 +146,7 @@ public class TaskListActivity extends AppCompatActivity {
                     Date dueDate = calendar.getTime();
 
                     // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny a s datumem splneni do dnes.
-                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", dueDate, -1);
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", null, -1);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");
@@ -237,8 +237,8 @@ public class TaskListActivity extends AppCompatActivity {
                 refreshTasksInTaskList();
                 return true;
 
-            // Seradit seznam ukolu dle vzdalenosti od soucasne polohy.
-            case R.id.sort_by_distance:
+            // Seradit seznam ukolu dle data splneni a pote dle vzdalenosti od soucasne polohy.
+            case R.id.sort_by_due_date_then_by_distance:
                 // Kontrola permission k lokalizaci
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return false;
@@ -248,6 +248,118 @@ public class TaskListActivity extends AppCompatActivity {
                 Criteria criteria = new Criteria();
                 String provider = locationManager.getBestProvider(criteria, true);
                 Location currentLocation = locationManager.getLastKnownLocation(provider);
+
+                List<Task> tasksSortedAscDueDate = dataModel.getTasksByListId(listId, orderAscendingDueDate);
+                List<Task> tasksWithoutDueDate = new ArrayList<Task>();
+
+                // Vytrid vsechny ukoly bez zadaneho datumu splneni
+                for (int i = 0; i < tasksSortedAscDueDate.size(); i++) {
+                    Task currentTask = tasksSortedAscDueDate.get(i);
+                    if (currentTask.getDueDate() == null) {
+                        tasksWithoutDueDate.add(currentTask);
+                        tasksSortedAscDueDate.remove(currentTask);
+                        i--;
+                    }
+                }
+
+                // Vychazime ze seznamu ukolu serazenych dle datumu splneni
+                // Ukoly se stejnym datumem budou setrideny do samostatneho seznamu
+                List<List<Task>> listEqualDatesLists = new ArrayList<List<Task>>();
+                for (int i = 0; i < tasksSortedAscDueDate.size(); i++) {
+                    Task currentTask = tasksSortedAscDueDate.get(i);
+
+                    // Zaloz seznam pro datum splneni zkoumaneho ukolu a ukol do nej pridej
+                    Date comparedDate = currentTask.getDueDate();
+                    List<Task> newListOfEqualDates = new ArrayList<Task>();
+                    newListOfEqualDates.add(currentTask);
+                    int equalDatesCounter = 0;
+
+                    // Ochrana preskoceni rozsahu - Skonci, pokud index ukolu,
+                    // na ktery se bude prechazet, je vyssi nez index posledniho ukolu v seznamu
+                    if (i + equalDatesCounter + 1 > tasksSortedAscDueDate.size() - 1)
+                        break;
+
+                    // Porovnej datum ukolu s datumem nasledujiciho ukolu
+                    // Jsou-li shodne, pridej ho do seznamu ukolu se stejnymi datumy
+                    // Zvys pocitadlo pridanych ukolu se stejnym datumem a zkoumej nasledujici ukol
+                    while (comparedDate.compareTo(tasksSortedAscDueDate.get(i + equalDatesCounter + 1).getDueDate()) == 0) {
+                        newListOfEqualDates.add(tasksSortedAscDueDate.get(i + equalDatesCounter + 1));
+                        equalDatesCounter++;
+
+                        // Ochrana preskoceni rozsahu
+                        if (i + equalDatesCounter + 1 > tasksSortedAscDueDate.size() - 1)
+                            break;
+                    }
+                    // Pridej seznam ukolu se stejnym datumem do souhrnneho seznamu
+                    listEqualDatesLists.add(newListOfEqualDates);
+
+                    // Ochrana preskoceni rozsahu
+                    if (i + equalDatesCounter + 1 > tasksSortedAscDueDate.size() - 1)
+                        break;
+
+                    // Neni-li zadny dalsi ukol se shodnym datumem, prejdi na nove datum
+                    // Zvys i o pocet ukolu pridanych navic, for cyklus navic zvysi na i++
+                    i += equalDatesCounter;
+                }
+
+                // Jako posledni seznam zarad seznam ukolu bez vyplneneho datumu splneni
+                // Ve finale budou ukoly bez datumu i mista na uplnem konci seznamu
+                listEqualDatesLists.add(tasksWithoutDueDate);
+
+                // Razeni dle vzdalenosti mista splneny od soucasne polohy
+                List<Task> listFinalSortedTasks = new ArrayList<Task>();
+                for (List<Task> listEqualDates: listEqualDatesLists) {
+                    // Pouziti TreeMap - prvek vzdy zarazen na pozici dle vzdalenosti.
+                    // Key = currentPlace to TaskPlace distance, Value = taskId
+                    TreeMap<Float, Integer> mapByDistance = new TreeMap<Float, Integer>();
+                    List<Task> tasksWithoutTaskPlace = new ArrayList<Task>();
+                    for (Task task : listEqualDates) {
+                        if (task.getTaskPlaceId() != -1) {
+                            // Ukol s vyplnenym mistem zarad do TreeMap
+                            // dle jeho vzdalenosti od soucasne pozice
+                            TaskPlace taskPlace = dataModel.getTaskPlace(task.getTaskPlaceId());
+
+                            Location endLocation = new Location("provider z databaze");
+                            endLocation.setLatitude(taskPlace.getLatitude());
+                            endLocation.setLongitude(taskPlace.getLongitude());
+
+                            // Vzdalenost mezi misty v metrech
+                            Float currentToEndDistance = currentLocation.distanceTo(endLocation);
+                            mapByDistance.put(currentToEndDistance, task.getId());
+                        } else {
+                            // Pokud ukol nema vyplneno misto, odloz si ho do pomocneho seznamu
+                            tasksWithoutTaskPlace.add(task);
+                        }
+                    }
+
+                    // Pridej ukoly daneho datumu s vyplnenym mistem do finalniho seznamu
+                    for (Map.Entry<Float, Integer> entry : mapByDistance.entrySet()) {
+                        Integer taskId = entry.getValue();
+                        listFinalSortedTasks.add(dataModel.getTask(taskId));
+                    }
+                    // Pridej ukoly daneho datumu bez vyplneneho mista do finalniho seznamu
+                    for (int i = 0; i < tasksWithoutTaskPlace.size(); i++) {
+                        listFinalSortedTasks.add(tasksWithoutTaskPlace.get(i));
+                    }
+                }
+
+                // Aktualizace poradi v seznamu ukolu.
+                arrayAdapter.clear();
+                arrayAdapter.addAll(listFinalSortedTasks);
+                listView.setAdapter(arrayAdapter);
+                return true;
+
+            // Seradit seznam ukolu dle vzdalenosti od soucasne polohy.
+            case R.id.sort_by_distance:
+                // Kontrola permission k lokalizaci
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+                // Zjisti soucasnou pozici
+                LocationManager locationManager2 = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                Criteria criteria2 = new Criteria();
+                String provider2 = locationManager2.getBestProvider(criteria2, true);
+                Location currentLocation2 = locationManager2.getLastKnownLocation(provider2);
 
                 List<Task> listTasks = dataModel.getTasksByListId(listId, orderAscendingDueDate);
                 List<Task> tasksWithoutTaskPlace = new ArrayList<Task>();
@@ -266,7 +378,7 @@ public class TaskListActivity extends AppCompatActivity {
                         endLocation.setLongitude(taskPlace.getLongitude());
 
                         // Vzdalenost mezi misty v metrech
-                        Float currentToEndDistance = currentLocation.distanceTo(endLocation);
+                        Float currentToEndDistance = currentLocation2.distanceTo(endLocation);
                         mapDistance.put(currentToEndDistance, task.getId());
                     } else {
                         // Pokud ukol nema vyplneno misto, odloz si ho do pomocneho seznamu
