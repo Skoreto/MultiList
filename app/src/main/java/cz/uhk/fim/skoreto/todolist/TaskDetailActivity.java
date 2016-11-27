@@ -726,7 +726,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Povoleni udeleno, prejit na PlacePicker
-//                    Intent taskDetailIntent = new Intent(TaskDetailActivity.this, ChoosePlaceActivity.class);
+//                    Intent taskDetailIntent = new Intent(TaskDetailActivity.this, TaskPlacesMapActivity.class);
 //                    startActivityForResult(taskDetailIntent, 778);
 
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();

@@ -15,6 +15,10 @@
     <item android:id="@+id/action_hide_completed"
         android:title="@string/action_hide_completed"
         app:showAsAction="never" />
+
+    <item android:id="@+id/action_task_places_map"
+        android:title="@string/action_task_places_map"
+        app:showAsAction="never" />
     <!--
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"

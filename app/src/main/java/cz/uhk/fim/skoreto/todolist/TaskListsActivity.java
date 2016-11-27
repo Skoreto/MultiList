@@ -56,7 +56,7 @@ public class TaskListsActivity extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
+            // Mame zobrazit objasneni duvodu?
             if (ActivityCompat.shouldShowRequestPermissionRationale(TaskListsActivity.this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 Toast.makeText(TaskListsActivity.this,
@@ -98,10 +98,10 @@ public class TaskListsActivity extends AppCompatActivity {
                 // Po klepnuti na polozku listu ziskej instanci zvoleneho seznamu ukolu.
                 TaskList taskList = (TaskList) lvTaskLists.getItemAtPosition(position);
 
-                Intent mainActivityIntent = new Intent(getApplication(), TaskListActivity.class);
+                Intent taskListActivityIntent = new Intent(getApplication(), TaskListActivity.class);
                 // Predej ID seznamu pro prechod do aktivity TaskListActivity.
-                mainActivityIntent.putExtra("listId", taskList.getId());
-                startActivity(mainActivityIntent);
+                taskListActivityIntent.putExtra("listId", taskList.getId());
+                startActivity(taskListActivityIntent);
             }
         });
 

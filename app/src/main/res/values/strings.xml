@@ -24,6 +24,7 @@
     <string name="action_settings">Nastavení</string>
     <string name="action_hide_completed">Schovat splněné</string>
     <string name="action_show_all_tasks">Všechny úkoly</string>
+    <string name="action_task_places_map">Mapa míst úkolů v seznamu</string>
     <string name="action_done">Potvrdit</string>
     <string name="action_delete_task">Smazat</string>
 

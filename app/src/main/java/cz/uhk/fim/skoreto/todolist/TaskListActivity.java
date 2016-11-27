@@ -26,29 +26,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
@@ -71,9 +54,6 @@ public class TaskListActivity extends AppCompatActivity {
     private int listId;
     private boolean hideCompleted;
     private boolean orderAscendingDueDate;
-
-    private TaskPlace currentTaskPlace;
-    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,6 +177,13 @@ public class TaskListActivity extends AppCompatActivity {
             case R.id.action_hide_completed:
                 hideCompleted = true;
                 refreshTasksInTaskList();
+                return true;
+
+            case R.id.action_task_places_map:
+                Intent taskPlacesMapActivityIntent = new Intent(getApplication(), TaskPlacesMapActivity.class);
+                // Predej ID seznamu pro prechod do aktivity TaskPlacesMapActivity.
+                taskPlacesMapActivityIntent.putExtra("listId", listId);
+                startActivity(taskPlacesMapActivityIntent);
                 return true;
 
 //            case R.id.action_settings:
