@@ -1,6 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
-import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -14,10 +15,14 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.R;
+import cz.uhk.fim.skoreto.todolist.SinglePhotoActivity;
+import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
+import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 
 /**
  * Created by Tomas.
@@ -25,20 +30,43 @@ import cz.uhk.fim.skoreto.todolist.model.Task;
 public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapter.ViewHolder> {
 
     private List<Task> tasks;
-    private Activity activity;
+    private Context context;
+    private DataModel dm;
 
-    public TaskRecyclerAdapter(Activity activity, List<Task> tasks) {
+    public TaskRecyclerAdapter(List<Task> tasks) {
         this.tasks = tasks;
-        this.activity = activity;
+    }
+
+    /**
+     * View holder pro zobrazeni jednotlivych itemu RecyclerView.
+     */
+    protected class ViewHolder extends RecyclerView.ViewHolder {
+        private ImageView ivPhotoThumbnail;
+        private TextView tvTaskName;
+        private TextView tvDueDate;
+        private TextView tvTaskPlace;
+        private CheckBox chbTaskCompleted;
+        private View container;
+
+        public ViewHolder(View view) {
+            super(view);
+            ivPhotoThumbnail = (ImageView) view.findViewById(R.id.ivPhotoThumbnail);
+            tvTaskName = (TextView) view.findViewById(R.id.tvTaskName);
+            tvDueDate = (TextView) view.findViewById(R.id.tvDueDate);
+            tvTaskPlace = (TextView) view.findViewById(R.id.tvTaskPlace);
+            chbTaskCompleted = (CheckBox) view.findViewById(R.id.chbTaskCompleted);
+            container = view.findViewById(R.id.card_view);
+        }
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        // Inflatuj layout a predej ho ViewHolderu.
-        LayoutInflater inflater = activity.getLayoutInflater();
-        View view = inflater.inflate(R.layout.recycler_item, viewGroup, false);
-        ViewHolder viewHolder = new ViewHolder(view);
+        context = viewGroup.getContext();
+        dm = new DataModel(context);
 
+        // Inflatuj layout a predej ho ViewHolderu.
+        View view = LayoutInflater.from(context).inflate(R.layout.recycler_item, viewGroup, false);
+        ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
 
@@ -56,17 +84,43 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapHelper.decodeSampledBitmapFromPath(photoThumbnailPath, 90, 90), 90, 90);
             viewHolder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
 
-//            viewHolder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
-//                   public void onClick(View v) {
-//                       Intent sendPhotoDirectoryIntent = new Intent(getContext(), SinglePhotoActivity.class);
-//                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-//                       getContext().startActivity(sendPhotoDirectoryIntent);
-//                   }
-//               }
-//            );
+            viewHolder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {
+                   public void onClick(View v) {
+                       Intent sendPhotoDirectoryIntent = new Intent(context, SinglePhotoActivity.class);
+                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+                       context.startActivity(sendPhotoDirectoryIntent);
+                   }
+               }
+            );
         } else {
             viewHolder.ivPhotoThumbnail.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
             viewHolder.ivPhotoThumbnail.setColorFilter(Color.rgb(158, 158, 158), PorterDuff.Mode.SRC_ATOP);
+        }
+
+        // Zamezeni preteceni nazvu ukolu v uvodnim seznamu.
+        if (task.getName().length() > 25) {
+            viewHolder.tvTaskName.setText(task.getName().substring(0, 25) + " ...");
+        } else {
+            viewHolder.tvTaskName.setText(task.getName());
+        }
+
+        if (task.getDueDate() != null) {
+            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context);
+            viewHolder.tvDueDate.setText(dateFormat.format(task.getDueDate()));
+        } else {
+            viewHolder.tvDueDate.setText("nezadáno");
+        }
+
+        // Zamezeni preteceni adresy mista ukolu v seznamu.
+        if (task.getTaskPlaceId() != -1) {
+            TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            if (taskPlace.getAddress().length() > 31) {
+                viewHolder.tvTaskPlace.setText(taskPlace.getAddress().substring(0, 31) + " ...");
+            } else {
+                viewHolder.tvTaskPlace.setText(taskPlace.getAddress());
+            }
+        } else {
+            viewHolder.tvTaskPlace.setText("nezadáno");
         }
 
         // Odskrtni checkboxy ukolu, podle toho, zda jsou splneny.
@@ -77,12 +131,6 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         }
 
 
-        // Zamezeni preteceni nazvu ukolu v uvodnim seznamu.
-        if (task.getName().length() > 25) {
-            viewHolder.tvTaskName.setText(task.getName().substring(0, 25) + " ...");
-        } else {
-            viewHolder.tvTaskName.setText(task.getName());
-        }
 
         // Nastaveni onClickListeneru pro kazdy element.
 //        viewHolder.container.setOnClickListener(onClickListener(position));
@@ -123,23 +171,5 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
 //            }
 //        };
 //    }
-
-    /**
-     * View holder pro zobrazeni jednotlivych itemu RecyclerView.
-     */
-    protected class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvTaskName;
-        private CheckBox chbTaskCompleted;
-        private ImageView ivPhotoThumbnail;
-        private View container;
-
-        public ViewHolder(View view) {
-            super(view);
-            tvTaskName = (TextView) view.findViewById(R.id.tvTaskName);
-            chbTaskCompleted = (CheckBox) view.findViewById(R.id.chbTaskCompleted);
-            ivPhotoThumbnail = (ImageView) view.findViewById(R.id.ivPhotoThumbnail);
-            container = view.findViewById(R.id.card_view);
-        }
-    }
 
 }

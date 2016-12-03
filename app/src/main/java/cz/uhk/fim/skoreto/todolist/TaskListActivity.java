@@ -92,9 +92,9 @@ public class TaskListActivity extends AppCompatActivity {
         // Zobrazit vsechny / pouze splnene ukoly.
         hideCompleted = false;
         if (!hideCompleted) {
-            taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getTasksByListId(listId, orderAscendingDueDate));
         } else {
-            taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
 
         rvTaskList.setAdapter(taskRecyclerAdapter);
@@ -333,7 +333,7 @@ public class TaskListActivity extends AppCompatActivity {
                 }
 
                 // Aktualizace poradi v seznamu ukolu.
-                taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, listFinalSortedTasks);
+                taskRecyclerAdapter = new TaskRecyclerAdapter(listFinalSortedTasks);
                 rvTaskList.setAdapter(taskRecyclerAdapter);
                 return true;
 
@@ -384,7 +384,7 @@ public class TaskListActivity extends AppCompatActivity {
                 }
 
                 // Aktualizace poradi v seznamu ukolu.
-                taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, sortedTasksByDistance);
+                taskRecyclerAdapter = new TaskRecyclerAdapter(sortedTasksByDistance);
                 rvTaskList.setAdapter(taskRecyclerAdapter);
                 return true;
 
