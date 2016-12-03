@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.R;
@@ -107,6 +109,20 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         if (task.getDueDate() != null) {
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context);
             viewHolder.tvDueDate.setText(dateFormat.format(task.getDueDate()));
+
+            Date currentDate = Calendar.getInstance().getTime();
+            int retValue = currentDate.compareTo(task.getDueDate());
+            if (retValue > 0) {
+                // Datum ukolu teprve v budoucnu nastane
+                viewHolder.tvDueDate.setTextColor(Color.rgb(183, 28, 28));
+            } else if (retValue == 0) {
+                // Datumy jsou stejne (dnes)
+                viewHolder.tvDueDate.setText("Dnes");
+                viewHolder.tvDueDate.setTextColor(Color.rgb(33, 150, 243));
+            } else {
+                // Datum ukolu je vetsi nez soucasne (uplynulo)
+                viewHolder.tvDueDate.setTextColor(Color.rgb(33, 150, 243));
+            }
         } else {
             viewHolder.tvDueDate.setText("nezadáno");
         }
