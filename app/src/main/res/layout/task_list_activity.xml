@@ -10,46 +10,65 @@
 
     <!-- Pomocny item pro zabraneni etTaskName ziskani uvodniho focusu
         :nextFocusUp and :nextFocusLeft u etTaskName brani znovuziskani focusu -->
+
     <LinearLayout
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:layout_width="0px"
         android:layout_height="0px" />
 
-    <LinearLayout
-        xmlns:local="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/tlbTaskListActivity"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            local:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            local:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:elevation="4dp" />
 
-        <EditText
-            android:id="@+id/etTaskName"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:ems="15"
-            android:inputType="textShortMessage"
-            android:hint="@string/et_task_name_hint"
-            android:nextFocusUp="@id/etTaskName"
-            android:nextFocusLeft="@id/etTaskName"
-            android:layout_marginTop="4dp"
-            android:layout_gravity="center_horizontal" />
 
-        <ListView
-            android:id="@+id/lvTasksList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-        </ListView>
 
+
+
+       <LinearLayout
+           xmlns:local="http://schemas.android.com/apk/res-auto"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:orientation="vertical" >
+
+
+
+
+                   <android.support.v7.widget.Toolbar
+                       android:id="@+id/tlbTaskListActivity"
+                       android:layout_width="match_parent"
+                       android:layout_height="?attr/actionBarSize"
+                       android:background="@color/colorPrimary"
+                       local:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                       local:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                       android:elevation="4dp" />
+
+                   <EditText
+                       android:id="@+id/etTaskName"
+                       android:layout_width="wrap_content"
+                       android:layout_height="50dp"
+                       android:ems="15"
+                       android:inputType="textShortMessage"
+                       android:hint="@string/et_task_name_hint"
+                       android:nextFocusUp="@id/etTaskName"
+                       android:nextFocusLeft="@id/etTaskName"
+                       android:layout_marginTop="4dp"
+                       android:layout_gravity="center_horizontal" />
+
+           <android.support.v7.widget.RecyclerView
+               android:id="@+id/rvTaskList"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_margin="5dp" />
+
+           <!--
+                   <ListView
+                       android:id="@+id/lvTasksList"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content">
+                   </ListView>
+           -->
     </LinearLayout>
+
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/btnAddTask"

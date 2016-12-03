@@ -27,4 +27,6 @@ dependencies {
     // Volley HTTP knihovna pro zjednoduseny a rychlejsi networking
     compile 'com.mcxiaoke.volley:library:1.0.19'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:cardview-v7:23.2.1'
+    compile 'com.android.support:recyclerview-v7:23.2.1'
 }

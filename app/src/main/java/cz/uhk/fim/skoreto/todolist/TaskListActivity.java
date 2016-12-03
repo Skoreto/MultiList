@@ -14,16 +14,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
-import cz.uhk.fim.skoreto.todolist.utils.TaskAdapter;
+import cz.uhk.fim.skoreto.todolist.utils.TaskRecyclerAdapter;
 
 /**
  * Aktivita prezentujici seznam ukolu.
@@ -47,8 +46,8 @@ public class TaskListActivity extends AppCompatActivity {
 
     private Toolbar tlbTaskListActivity;
     private ActionBar actionBar;
-    private ListView listView;
-    private ArrayAdapter<Task> arrayAdapter;
+    private RecyclerView rvTaskList;
+    private TaskRecyclerAdapter taskRecyclerAdapter;
     private DataModel dataModel;
     private EditText etTaskName;
     private int listId;
@@ -75,7 +74,10 @@ public class TaskListActivity extends AppCompatActivity {
             actionBar.setDisplayShowHomeEnabled(true);
         }
 
-        listView = (ListView) findViewById(R.id.lvTasksList);
+        rvTaskList = (RecyclerView) findViewById(R.id.rvTaskList);
+        rvTaskList.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        rvTaskList.setLayoutManager(layoutManager);
 
         Intent anyIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -90,27 +92,27 @@ public class TaskListActivity extends AppCompatActivity {
         // Zobrazit vsechny / pouze splnene ukoly.
         hideCompleted = false;
         if (!hideCompleted) {
-            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, dataModel.getTasksByListId(listId, orderAscendingDueDate));
         } else {
-            arrayAdapter = new TaskAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
 
-        listView.setAdapter(arrayAdapter);
+        rvTaskList.setAdapter(taskRecyclerAdapter);
 
         // Editace ukolu po klepnuti v seznamu ukolu.
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
-                Task task = (Task) listView.getItemAtPosition(position);
-                Intent taskDetailIntent = new Intent(TaskListActivity.this, TaskDetailActivity.class);
-                // Predej ID ukolu do intentu editTaskIntent.
-                taskDetailIntent.putExtra("taskId", task.getId());
-                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
-                taskDetailIntent.putExtra("listId", listId);
-                startActivityForResult(taskDetailIntent, 777);
-            }
-        });
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
+//                Task task = (Task) listView.getItemAtPosition(position);
+//                Intent taskDetailIntent = new Intent(TaskListActivity.this, TaskDetailActivity.class);
+//                // Predej ID ukolu do intentu editTaskIntent.
+//                taskDetailIntent.putExtra("taskId", task.getId());
+//                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
+//                taskDetailIntent.putExtra("listId", listId);
+//                startActivityForResult(taskDetailIntent, 777);
+//            }
+//        });
 
         // Pridani noveho ukolu.
         FloatingActionButton btnAddTask = (FloatingActionButton) findViewById(R.id.btnAddTask);
@@ -331,9 +333,8 @@ public class TaskListActivity extends AppCompatActivity {
                 }
 
                 // Aktualizace poradi v seznamu ukolu.
-                arrayAdapter.clear();
-                arrayAdapter.addAll(listFinalSortedTasks);
-                listView.setAdapter(arrayAdapter);
+                taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, listFinalSortedTasks);
+                rvTaskList.setAdapter(taskRecyclerAdapter);
                 return true;
 
             // Seradit seznam ukolu dle vzdalenosti od soucasne polohy.
@@ -383,9 +384,8 @@ public class TaskListActivity extends AppCompatActivity {
                 }
 
                 // Aktualizace poradi v seznamu ukolu.
-                arrayAdapter.clear();
-                arrayAdapter.addAll(sortedTasksByDistance);
-                listView.setAdapter(arrayAdapter);
+                taskRecyclerAdapter = new TaskRecyclerAdapter(TaskListActivity.this, sortedTasksByDistance);
+                rvTaskList.setAdapter(taskRecyclerAdapter);
                 return true;
 
             default:
@@ -404,15 +404,15 @@ public class TaskListActivity extends AppCompatActivity {
      */
     public void refreshTasksInTaskList() {
         // Aktualizace seznamu ukolu.
-        arrayAdapter.clear();
-
-        if (!hideCompleted) {
-            arrayAdapter.addAll(dataModel.getTasksByListId(listId, orderAscendingDueDate));
-        } else {
-            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
-        }
-
-        listView.setAdapter(arrayAdapter);
+//        arrayAdapter.clear();
+//
+//        if (!hideCompleted) {
+//            arrayAdapter.addAll(dataModel.getTasksByListId(listId, orderAscendingDueDate));
+//        } else {
+//            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
+//        }
+//
+//        listView.setAdapter(arrayAdapter);
     }
 
     @Override
