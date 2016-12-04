@@ -392,6 +392,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                                 PERMISSIONS_REQUEST_CAMERA);
                         // V pripade ziskani povoleni spustit fotoaparat v onRequestPermissionsResult
                     }
+                } else {
+                    takePhoto();
                 }
             }
         });

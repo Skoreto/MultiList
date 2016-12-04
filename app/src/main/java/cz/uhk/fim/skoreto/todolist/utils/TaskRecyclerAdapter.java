@@ -88,7 +88,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
 
             // Optimalizace dekodovani a nacteni miniatury z nahledu v externim ulozisti do pameti.
-            Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapHelper.decodeSampledBitmapFromPath(photoThumbnailPath, 90, 90), 90, 90);
+            Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapHelper.decodeSampledBitmapFromPath(photoThumbnailPath, 100, 100), 100, 100);
             viewHolder.ivPhotoThumbnail.setImageBitmap(photoThumbnail);
 
             viewHolder.ivPhotoThumbnail.setOnClickListener(new View.OnClickListener() {

@@ -189,6 +189,7 @@ public class TaskListActivity extends AppCompatActivity {
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, view, menuInfo);
         MenuInflater inflater = getMenuInflater();
+        menu.setHeaderTitle("Možnosti řazení");
         inflater.inflate(R.menu.sort_context_menu, menu);
     }
 
