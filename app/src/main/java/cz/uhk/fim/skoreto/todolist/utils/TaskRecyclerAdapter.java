@@ -1,10 +1,13 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
@@ -18,12 +21,16 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.R;
 import cz.uhk.fim.skoreto.todolist.SinglePhotoActivity;
+import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
+import cz.uhk.fim.skoreto.todolist.TaskListActivity;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
+import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 
 /**
@@ -50,7 +57,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         private CheckBox chbTaskCompleted;
         private View container;
 
-        public ViewHolder(View view) {
+        protected ViewHolder(View view) {
             super(view);
             ivPhotoThumbnail = (ImageView) view.findViewById(R.id.ivPhotoThumbnail);
             tvTaskName = (TextView) view.findViewById(R.id.tvTaskName);
@@ -110,17 +117,37 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context);
             viewHolder.tvDueDate.setText(dateFormat.format(task.getDueDate()));
 
-            Date currentDate = Calendar.getInstance().getTime();
-            int retValue = currentDate.compareTo(task.getDueDate());
+            // Obarveni ikon
+            viewHolder.tvDueDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_event_black_18dp, 0, 0, 0);
+            for (Drawable drawable : viewHolder.tvDueDate.getCompoundDrawables()) {
+                if (drawable != null) {
+                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(66, 66, 66), PorterDuff.Mode.SRC_IN));
+                }
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            Date currentDateTime = calendar.getTime();
+            // Priprav ciste datumy bez casu pro ucely porovnani
+            Date currentDate = new Date(currentDateTime.getYear(), currentDateTime.getMonth(), currentDateTime.getDay());
+            Date taskDueDate = new Date(task.getDueDate().getYear(), task.getDueDate().getMonth(), task.getDueDate().getDay());
+
+            int retValue = currentDate.compareTo(taskDueDate);
             if (retValue > 0) {
-                // Datum ukolu teprve v budoucnu nastane
+                // Datum ukolu je vetsi nez soucasne (uplynulo)
                 viewHolder.tvDueDate.setTextColor(Color.rgb(183, 28, 28));
             } else if (retValue == 0) {
                 // Datumy jsou stejne (dnes)
                 viewHolder.tvDueDate.setText("Dnes");
                 viewHolder.tvDueDate.setTextColor(Color.rgb(33, 150, 243));
             } else {
-                // Datum ukolu je vetsi nez soucasne (uplynulo)
+                // Datum ukolu teprve v budoucnu nastane
+                // Pridej 1 den (pro ziskani zitrejsiho datumu)
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                Date tomorrowDate = new Date(calendar.getTime().getYear(),
+                        calendar.getTime().getMonth(), calendar.getTime().getDay());
+                if (tomorrowDate.compareTo(taskDueDate) == 0)
+                    viewHolder.tvDueDate.setText("Zítra");
+
                 viewHolder.tvDueDate.setTextColor(Color.rgb(33, 150, 243));
             }
         } else {
@@ -146,46 +173,29 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             viewHolder.chbTaskCompleted.setChecked(true);
         }
 
-
-
         // Nastaveni onClickListeneru pro kazdy element.
-//        viewHolder.container.setOnClickListener(onClickListener(position));
+       viewHolder.container.setOnClickListener(onClickListener(position));
     }
 
-//    private void setDataToView(TextView name, TextView job, ImageView genderIcon, int position) {
-//        name.setText(friends.get(position).getName());
-//        job.setText(friends.get(position).getJob());
-//        if (friends.get(position).isGender()) {
-//            genderIcon.setImageResource(R.mipmap.male);
-//        } else {
-//            genderIcon.setImageResource(R.mipmap.female);
-//        }
-//    }
+    private View.OnClickListener onClickListener(final int position) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
+                Task task = (Task) tasks.get(position);
+                Intent taskDetailIntent = new Intent(context, TaskDetailActivity.class);
+                // Predej ID ukolu do intentu editTaskIntent.
+                taskDetailIntent.putExtra("taskId", task.getId());
+                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
+                taskDetailIntent.putExtra("listId", task.getListId());
+                ((Activity) context).startActivityForResult(taskDetailIntent, 777);
+            }
+        };
+    }
 
     @Override
     public int getItemCount() {
         return (null != tasks ? tasks.size() : 0);
     }
-
-//    private View.OnClickListener onClickListener(final int position) {
-//        return new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                final Dialog dialog = new Dialog(activity);
-//                dialog.setContentView(R.layout.item_recycler);
-//                dialog.setTitle("Position " + position);
-//                dialog.setCancelable(true); // dismiss when touching outside Dialog
-//
-//                // set the custom dialog components - texts and image
-//                TextView name = (TextView) dialog.findViewById(R.id.name);
-//                TextView job = (TextView) dialog.findViewById(R.id.job);
-//                ImageView icon = (ImageView) dialog.findViewById(R.id.image);
-//
-//                setDataToView(name, job, icon, position);
-//
-//                dialog.show();
-//            }
-//        };
-//    }
 
 }
