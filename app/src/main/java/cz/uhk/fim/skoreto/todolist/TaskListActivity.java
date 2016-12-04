@@ -96,23 +96,7 @@ public class TaskListActivity extends AppCompatActivity {
         } else {
             taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
-
         rvTaskList.setAdapter(taskRecyclerAdapter);
-
-        // Editace ukolu po klepnuti v seznamu ukolu.
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
-//                Task task = (Task) listView.getItemAtPosition(position);
-//                Intent taskDetailIntent = new Intent(TaskListActivity.this, TaskDetailActivity.class);
-//                // Predej ID ukolu do intentu editTaskIntent.
-//                taskDetailIntent.putExtra("taskId", task.getId());
-//                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
-//                taskDetailIntent.putExtra("listId", listId);
-//                startActivityForResult(taskDetailIntent, 777);
-//            }
-//        });
 
         // Pridani noveho ukolu.
         FloatingActionButton btnAddTask = (FloatingActionButton) findViewById(R.id.btnAddTask);
@@ -404,15 +388,12 @@ public class TaskListActivity extends AppCompatActivity {
      */
     public void refreshTasksInTaskList() {
         // Aktualizace seznamu ukolu.
-//        arrayAdapter.clear();
-//
-//        if (!hideCompleted) {
-//            arrayAdapter.addAll(dataModel.getTasksByListId(listId, orderAscendingDueDate));
-//        } else {
-//            arrayAdapter.addAll(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
-//        }
-//
-//        listView.setAdapter(arrayAdapter);
+        if (!hideCompleted) {
+            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getTasksByListId(listId, orderAscendingDueDate));
+        } else {
+            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
+        }
+        rvTaskList.setAdapter(taskRecyclerAdapter);
     }
 
     @Override

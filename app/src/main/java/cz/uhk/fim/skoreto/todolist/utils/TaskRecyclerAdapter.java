@@ -19,21 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 
 import cz.uhk.fim.skoreto.todolist.R;
 import cz.uhk.fim.skoreto.todolist.SinglePhotoActivity;
 import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
-import cz.uhk.fim.skoreto.todolist.TaskListActivity;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
-import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 
 /**
@@ -215,6 +210,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
        viewHolder.container.setOnClickListener(onClickListener(position));
     }
 
+    // Editace ukolu po klepnuti v seznamu ukolu.
     private View.OnClickListener onClickListener(final int position) {
         return new View.OnClickListener() {
             @Override
