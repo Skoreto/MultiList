@@ -84,7 +84,7 @@ public class TaskListsActivity extends AppCompatActivity {
             actionBar.setDisplayOptions(ActionBar.DISPLAY_USE_LOGO);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
             actionBar.setIcon(R.drawable.ic_action_launch);
-            actionBar.setTitle("MultiList");
+            actionBar.setTitle("SmartList");
         }
 
         dataModel = new DataModel(this);

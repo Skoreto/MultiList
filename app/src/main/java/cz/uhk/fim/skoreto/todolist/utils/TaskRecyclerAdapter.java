@@ -19,10 +19,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import cz.uhk.fim.skoreto.todolist.R;
 import cz.uhk.fim.skoreto.todolist.SinglePhotoActivity;
@@ -104,6 +106,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         } else {
             viewHolder.ivPhotoThumbnail.setImageResource(R.drawable.ic_add_a_photo_black_48dp);
             viewHolder.ivPhotoThumbnail.setColorFilter(Color.rgb(158, 158, 158), PorterDuff.Mode.SRC_ATOP);
+            viewHolder.ivPhotoThumbnail.setPadding(3, 0, 0, 0);
         }
 
         // Zamezeni preteceni nazvu ukolu v uvodnim seznamu.
@@ -113,9 +116,11 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             viewHolder.tvTaskName.setText(task.getName());
         }
 
+        // DATUM SPLNENI
         if (task.getDueDate() != null) {
-            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context);
-            viewHolder.tvDueDate.setText(dateFormat.format(task.getDueDate()));
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E dd.MM.");
+            String dueDate = simpleDateFormat.format(task.getDueDate());
+            viewHolder.tvDueDate.setText(dueDate);
 
             // Obarveni ikon
             viewHolder.tvDueDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_event_black_18dp, 0, 0, 0);
@@ -154,8 +159,16 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             viewHolder.tvDueDate.setText("nezadáno");
         }
 
-        // Zamezeni preteceni adresy mista ukolu v seznamu.
+        // MISTO UKOLU
         if (task.getTaskPlaceId() != -1) {
+            // Obarveni ikon
+            viewHolder.tvTaskPlace.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_room_black_18dp, 0, 0, 0);
+            for (Drawable drawable : viewHolder.tvTaskPlace.getCompoundDrawables()) {
+                if (drawable != null) {
+                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(66, 66, 66), PorterDuff.Mode.SRC_IN));
+                }
+            }
+            // Zamezeni preteceni adresy mista ukolu v seznamu.
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             if (taskPlace.getAddress().length() > 31) {
                 viewHolder.tvTaskPlace.setText(taskPlace.getAddress().substring(0, 31) + " ...");
