@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -126,7 +127,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             viewHolder.tvDueDate.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_event_black_18dp, 0, 0, 0);
             for (Drawable drawable : viewHolder.tvDueDate.getCompoundDrawables()) {
                 if (drawable != null) {
-                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(66, 66, 66), PorterDuff.Mode.SRC_IN));
+                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(97, 97, 97), PorterDuff.Mode.SRC_IN));
                 }
             }
 
@@ -165,7 +166,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             viewHolder.tvTaskPlace.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_room_black_18dp, 0, 0, 0);
             for (Drawable drawable : viewHolder.tvTaskPlace.getCompoundDrawables()) {
                 if (drawable != null) {
-                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(66, 66, 66), PorterDuff.Mode.SRC_IN));
+                    drawable.setColorFilter(new PorterDuffColorFilter(Color.rgb(97, 97, 97), PorterDuff.Mode.SRC_IN));
                 }
             }
             // Zamezeni preteceni adresy mista ukolu v seznamu.
@@ -185,6 +186,30 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         } else {
             viewHolder.chbTaskCompleted.setChecked(true);
         }
+
+        viewHolder.chbTaskCompleted.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                CheckBox chb = (CheckBox) v;
+
+                // Po kliknuti na checkbox zjisti jeho stav a dle toho prenastav splneni ukolu.
+                if (chb.isChecked()) {
+                    task.setCompleted(1);
+                } else {
+                    task.setCompleted(0);
+                }
+
+                // Aktualizuj ukol v databazi.
+                dm.updateTask(task);
+
+                // Informuj uzivatele o provedene zmene stavu ukolu.
+                String taskState = "neurcen";
+                if (task.getCompleted() == 0)
+                    taskState = "nesplněn";
+                if (task.getCompleted() == 1)
+                    taskState = "splněn";
+                Toast.makeText(context, "Úkol " + task.getName() + " je " + taskState, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Nastaveni onClickListeneru pro kazdy element.
        viewHolder.container.setOnClickListener(onClickListener(position));
