@@ -106,15 +106,15 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
         }
 
         // Zamezeni preteceni nazvu ukolu v uvodnim seznamu.
-        if (task.getName().length() > 25) {
-            viewHolder.tvTaskName.setText(task.getName().substring(0, 25) + " ...");
+        if (task.getName().length() > 30) {
+            viewHolder.tvTaskName.setText(task.getName().substring(0, 30) + " ...");
         } else {
             viewHolder.tvTaskName.setText(task.getName());
         }
 
         // DATUM SPLNENI
         if (task.getDueDate() != null) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E dd.MM.");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E d.M.");
             String dueDate = simpleDateFormat.format(task.getDueDate());
             viewHolder.tvDueDate.setText(dueDate);
 
@@ -127,10 +127,12 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
             }
 
             Calendar calendar = Calendar.getInstance();
-            Date currentDateTime = calendar.getTime();
+            Calendar calTaskDueDate = Calendar.getInstance();
+            calTaskDueDate.setTime(task.getDueDate());
+
             // Priprav ciste datumy bez casu pro ucely porovnani
-            Date currentDate = new Date(currentDateTime.getYear(), currentDateTime.getMonth(), currentDateTime.getDay());
-            Date taskDueDate = new Date(task.getDueDate().getYear(), task.getDueDate().getMonth(), task.getDueDate().getDay());
+            Date currentDate = new Date(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
+            Date taskDueDate = new Date(calTaskDueDate.get(Calendar.YEAR), calTaskDueDate.get(Calendar.MONTH) + 1, calTaskDueDate.get(Calendar.DAY_OF_MONTH));
 
             int retValue = currentDate.compareTo(taskDueDate);
             if (retValue > 0) {
@@ -144,8 +146,7 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
                 // Datum ukolu teprve v budoucnu nastane
                 // Pridej 1 den (pro ziskani zitrejsiho datumu)
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
-                Date tomorrowDate = new Date(calendar.getTime().getYear(),
-                        calendar.getTime().getMonth(), calendar.getTime().getDay());
+                Date tomorrowDate = new Date(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
                 if (tomorrowDate.compareTo(taskDueDate) == 0)
                     viewHolder.tvDueDate.setText("Zítra");
 
