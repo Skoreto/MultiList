@@ -221,9 +221,9 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
                 Intent taskDetailIntent = new Intent(context, TaskDetailActivity.class);
                 // Predej ID ukolu do intentu editTaskIntent.
                 taskDetailIntent.putExtra("taskId", task.getId());
-                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
+                // Predej ID seznamu pro prechod do aktivity TaskEditActivity.
                 taskDetailIntent.putExtra("listId", task.getListId());
-                ((Activity) context).startActivityForResult(taskDetailIntent, 777);
+                ((Activity) context).startActivityForResult(taskDetailIntent, 121);
             }
         };
     }

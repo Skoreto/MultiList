@@ -400,7 +400,7 @@ public class TaskListActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Po navratu z detailu ukolu.
-        if (requestCode == 777) {
+        if (requestCode == 121) {
             if(resultCode == Activity.RESULT_OK){
                 listId = data.getIntExtra("listId", 1);
 

@@ -69,10 +69,10 @@ import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 
 /**
- * Aktivita pro zobrazeni detailu ukolu.
+ * Aktivita pro upravu a smazani ukolu.
  * Created by Tomas Skorepa.
  */
-public class TaskDetailActivity extends AppCompatActivity {
+public class TaskEditActivity extends AppCompatActivity {
 
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
@@ -119,7 +119,7 @@ public class TaskDetailActivity extends AppCompatActivity {
      */
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.task_detail_activity);
+        setContentView(R.layout.task_edit_activity);
         dm = new DataModel(this);
 
         // Implementace ActionBaru.
@@ -132,7 +132,7 @@ public class TaskDetailActivity extends AppCompatActivity {
             // Povoleni tlacitka Zpet.
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setTitle("Detail úkolu");
+            actionBar.setTitle("Úprava úkolu");
         }
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
@@ -207,7 +207,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                    @Override
                    public void onClick(View view) {
                        // Zobrazeni velke fotografie po kliknuti na nahled.
-                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
+                       Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this, SinglePhotoActivity.class);
                        sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
                        startActivity(sendPhotoDirectoryIntent);
                    }
@@ -268,7 +268,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
 
                 // Pouzit aktualni datum jako vychozi datum v datepickeru.
-                datePickerDialog = new DatePickerDialog(TaskDetailActivity.this, datePickerListener, year, month, day);
+                datePickerDialog = new DatePickerDialog(TaskEditActivity.this, datePickerListener, year, month, day);
                 datePickerDialog.show();
             }
         });
@@ -278,17 +278,17 @@ public class TaskDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Kontrola permission k GPS
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                if (ContextCompat.checkSelfPermission(TaskEditActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
 
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskEditActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Toast.makeText(TaskDetailActivity.this,
+                        Toast.makeText(TaskEditActivity.this,
                                 "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                        ActivityCompat.requestPermissions(TaskEditActivity.this,
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 PERMISSIONS_REQUEST_CURRENT_PLACE);
                         // V pripade ziskani povoleni prejit na intent mapy
@@ -304,7 +304,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
                     // Ziskani adresy soucasne pozice z coordinates
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
-                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
+                    requestQueue = Volley.newRequestQueue(TaskEditActivity.this);
 
                     JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
                             + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
@@ -328,7 +328,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba",
+                            Toast.makeText(TaskEditActivity.this, "Volley networking chyba",
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -342,17 +342,17 @@ public class TaskDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Kontrola permission k GPS
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                if (ContextCompat.checkSelfPermission(TaskEditActivity.this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED) {
 
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskEditActivity.this,
                             Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Toast.makeText(TaskDetailActivity.this,
+                        Toast.makeText(TaskEditActivity.this,
                                 "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                        ActivityCompat.requestPermissions(TaskEditActivity.this,
                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                         // V pripade ziskani povoleni prejit na intent mapy
@@ -361,7 +361,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
                     try {
-                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
+                        startActivityForResult(builder.build(TaskEditActivity.this), REQUEST_PLACE_PICKER);
                     } catch (GooglePlayServicesRepairableException e) {
                         e.printStackTrace();
                     } catch (GooglePlayServicesNotAvailableException e) {
@@ -376,18 +376,18 @@ public class TaskDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Kontrola permission k fotoaparatu
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+                if (ContextCompat.checkSelfPermission(TaskEditActivity.this,
                         Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED) {
 
                     // Should we show an explanation?
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskEditActivity.this,
                             Manifest.permission.CAMERA)) {
-                        Toast.makeText(TaskDetailActivity.this,
+                        Toast.makeText(TaskEditActivity.this,
                                 "Povolení přístupu ke kameře je nutné pro vyfocení úkolu.",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                        ActivityCompat.requestPermissions(TaskEditActivity.this,
                                 new String[]{Manifest.permission.CAMERA},
                                 PERMISSIONS_REQUEST_CAMERA);
                         // V pripade ziskani povoleni spustit fotoaparat v onRequestPermissionsResult
@@ -427,7 +427,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
                         chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
                 if (newTaskPlaceId == -1)
-                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
                 else {
                     chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
                     task.setTaskPlaceId((int) newTaskPlaceId);
@@ -449,7 +449,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
                             chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
                     if (newTaskPlaceId == -1)
-                        Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
                     else {
                         chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
                         task.setTaskPlaceId((int) newTaskPlaceId);
@@ -464,7 +464,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         dm.updateTask(task);
         // Informovani uzivatele o uspesnem upraveni ukolu.
-        Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskEditActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
 
         // Presmerovani na seznam ukolu, odkud ukol pochazi.
         Intent returnIntent = new Intent();
@@ -503,7 +503,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         dm.deleteTask(taskId);
         // Informovani uzivatele o uspesnem smazani ukolu.
-        Toast.makeText(TaskDetailActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskEditActivity.this, "Úkol smazán", Toast.LENGTH_SHORT).show();
 
         // Presmerovani na seznam ukolu, odkud ukol pochazi.
         Intent returnIntent = new Intent();
@@ -525,7 +525,7 @@ public class TaskDetailActivity extends AppCompatActivity {
             try {
                 photoFile = createPhotoFile();
             } catch (IOException ex) {
-                Toast.makeText(TaskDetailActivity.this, "Vyskytla se chyba při vytváření souboru fotografie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskEditActivity.this, "Vyskytla se chyba při vytváření souboru fotografie", Toast.LENGTH_SHORT).show();
             }
 
             // Pokracuj pouze, pokud byl soubor uspesne vytvoren.
@@ -580,7 +580,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         task.setPhotoName(photoFileName);
         dm.updateTask(task);
 
-        Toast.makeText(TaskDetailActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
+        Toast.makeText(TaskEditActivity.this, "Vyfoť úkol", Toast.LENGTH_SHORT).show();
         return photoFile;
     }
 
@@ -590,7 +590,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.task_detail_activity_menu, menu);
+        inflater.inflate(R.menu.task_edit_activity_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -607,8 +607,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                 return true;
 
             // Potvrdit zmeny a ulozit do databaze.
-            case R.id.action_edit_task:
-//                editTask();
+            case R.id.action_done:
+                editTask();
                 return true;
 
             default:
@@ -623,18 +623,18 @@ public class TaskDetailActivity extends AppCompatActivity {
     private void onRecordPressed(boolean bReady) {
         if (bReady) {
             // Kontrola permission k mikrofonu
-            if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
+            if (ContextCompat.checkSelfPermission(TaskEditActivity.this,
                     Manifest.permission.RECORD_AUDIO)
                     != PackageManager.PERMISSION_GRANTED) {
 
                 // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
+                if (ActivityCompat.shouldShowRequestPermissionRationale(TaskEditActivity.this,
                         Manifest.permission.RECORD_AUDIO)) {
-                    Toast.makeText(TaskDetailActivity.this,
+                    Toast.makeText(TaskEditActivity.this,
                             "Povolení přístupu k mikrofonu je nutné pro nahrání úkolu.",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    ActivityCompat.requestPermissions(TaskDetailActivity.this,
+                    ActivityCompat.requestPermissions(TaskEditActivity.this,
                             new String[]{Manifest.permission.RECORD_AUDIO},
                             PERMISSIONS_REQUEST_RECORD_AUDIO);
                     // V pripade ziskani povoleni nahravat zvuk v onRequestPermissionsResult
@@ -652,7 +652,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private void onPlayPressed(boolean bReady) {
         if (bReady) {
             mediaPlayer = new MediaPlayer();
-            AudioController.startPlaying(dm, taskId, mediaPlayer, TaskDetailActivity.this);
+            AudioController.startPlaying(dm, taskId, mediaPlayer, TaskEditActivity.this);
         } else {
             AudioController.stopPlaying(mediaPlayer);
             mediaPlayer = null;
@@ -705,7 +705,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     // Povoleni udeleno, spustit fotoaparat
                     takePhoto();
                 } else {
-                    Toast.makeText(TaskDetailActivity.this,
+                    Toast.makeText(TaskEditActivity.this,
                             "Povolení nebylo uděleno, nelze spustit fotoaparát.",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -716,9 +716,9 @@ public class TaskDetailActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Povoleni udeleno, spustit nahravani zvuku
                     mediaRecorder = new MediaRecorder();
-                    AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
+                    AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskEditActivity.this);
                 } else {
-                    Toast.makeText(TaskDetailActivity.this,
+                    Toast.makeText(TaskEditActivity.this,
                             "Povolení k mikrofonu nebylo uděleno, nelze nahrávat zvuk.",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -734,7 +734,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
                     try {
-                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
+                        startActivityForResult(builder.build(TaskEditActivity.this), REQUEST_PLACE_PICKER);
                     } catch (GooglePlayServicesRepairableException e) {
                         e.printStackTrace();
                     } catch (GooglePlayServicesNotAvailableException e) {
@@ -743,7 +743,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
 
                 } else {
-                    Toast.makeText(TaskDetailActivity.this,
+                    Toast.makeText(TaskEditActivity.this,
                             "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -766,7 +766,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
                     // Ziskani adresy soucasne pozice z coordinates
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
-                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
+                    requestQueue = Volley.newRequestQueue(TaskEditActivity.this);
 
                     JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
                             + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
@@ -784,13 +784,13 @@ public class TaskDetailActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(TaskEditActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
                         }
                     });
 
                     requestQueue.add(request);
                 } else {
-                    Toast.makeText(TaskDetailActivity.this,
+                    Toast.makeText(TaskEditActivity.this,
                             "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
                             Toast.LENGTH_SHORT).show();
                 }
@@ -814,7 +814,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 OutputStream stream = new FileOutputStream(thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
                 photoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             } catch (IOException e) {
-                Toast.makeText(TaskDetailActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskEditActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
             }
 
             // Presmerovani na seznam ukolu, odkud ukol pochazi.
@@ -826,7 +826,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Nacteni adresy vybraneho mista z TaskPlace Pickeru
         if (requestCode == REQUEST_PLACE_PICKER) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(TaskDetailActivity.this, data);
+                Place place = PlacePicker.getPlace(TaskEditActivity.this, data);
 
                 // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
                 // pred pripadnym updatem databaze po potvrzeni editace ukolu.

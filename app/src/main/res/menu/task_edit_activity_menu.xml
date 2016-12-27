@@ -8,9 +8,9 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_edit_task"
-        android:icon="@drawable/ic_mode_edit_white_48dp"
-        android:title="@string/action_edit_task"
+        android:id="@+id/action_done"
+        android:icon="@drawable/ic_done_white_48dp"
+        android:title="@string/action_done"
         app:showAsAction="ifRoom" />
 
 </menu>

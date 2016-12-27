@@ -37,6 +37,16 @@
                 android:value="cz.uhk.fim.skoreto.todolist.TaskListActivity" />
         </activity>
         <activity
+            android:name=".TaskEditActivity"
+            android:parentActivityName=".TaskDetailActivity"
+            android:screenOrientation="portrait">
+
+            <!-- Parent activity meta-data pro podporu 4.0 a nizsich -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.uhk.fim.skoreto.todolist.TaskDetailActivity" />
+        </activity>
+        <activity
             android:name=".TaskListsActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
