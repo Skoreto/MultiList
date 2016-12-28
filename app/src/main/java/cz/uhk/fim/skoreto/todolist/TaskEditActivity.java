@@ -468,6 +468,7 @@ public class TaskEditActivity extends AppCompatActivity {
 
         // Presmerovani na seznam ukolu, odkud ukol pochazi.
         Intent returnIntent = new Intent();
+        returnIntent.putExtra("taskId", task.getId());
         returnIntent.putExtra("listId", taskList.getId());
         setResult(Activity.RESULT_OK, returnIntent);
         finish();

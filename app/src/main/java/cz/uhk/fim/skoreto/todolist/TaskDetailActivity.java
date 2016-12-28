@@ -401,79 +401,6 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Metoda pro zmenu atributu ukolu.
-     */
-    public void editTask() {
-        etTaskName = (EditText) findViewById(R.id.etTaskName);
-        etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
-        chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
-
-        // Uprava atributu ukolu dle editacnich poli.
-        task.setId(taskId);
-        task.setName(etTaskName.getText().toString());
-        task.setDescription(etTaskDescription.getText().toString());
-
-        if (chbTaskCompleted.isChecked())
-            task.setCompleted(1);
-        else
-            task.setCompleted(0);
-
-        if (task.getTaskPlaceId() == -1) {
-            // Pokud nebylo drive zvoleno misto ukolu
-            if (chosenTaskPlaceChanged) {
-                // A nyni je zvoleno misto ukolu
-                // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
-                // chosenTaskPlace s id.
-                long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
-                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
-                if (newTaskPlaceId == -1)
-                    Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
-                else {
-                    chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
-                    task.setTaskPlaceId((int) newTaskPlaceId);
-                }
-            }
-        } else {
-            // Pokud bylo jiz drive zvoleno misto ukolu
-            if (chosenTaskPlaceChanged) {
-                // Smaz puvodni misto z databaze.
-                dm.deleteTaskPlace(task.getTaskPlaceId());
-
-                if (chosenTaskPlace == null) {
-                    // Ale bylo pouze odebrano
-                    task.setTaskPlaceId(-1);
-                } else {
-                    // A nyni se misto ukolu zmenilo na nove
-                    // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
-                    // chosenTaskPlace s id.
-                    long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
-                            chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress());
-                    if (newTaskPlaceId == -1)
-                        Toast.makeText(TaskDetailActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
-                    else {
-                        chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
-                        task.setTaskPlaceId((int) newTaskPlaceId);
-                    }
-                }
-            }
-        }
-
-        // Ziskani vybraneho seznamu ukolu a dle nej prirazeni ukolu do prislusneho seznamu.
-        TaskList taskList = (TaskList) spinTaskLists.getSelectedItem();
-        task.setListId(taskList.getId());
-
-        dm.updateTask(task);
-        // Informovani uzivatele o uspesnem upraveni ukolu.
-        Toast.makeText(TaskDetailActivity.this, "Úkol upraven", Toast.LENGTH_SHORT).show();
-
-        // Presmerovani na seznam ukolu, odkud ukol pochazi.
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("listId", taskList.getId());
-        setResult(Activity.RESULT_OK, returnIntent);
-        finish();
-    }
-
-    /**
      * Metoda pro smazani ukolu.
      * Kaskadne vymaze pripojene fotografie a nahravky z externiho uloziste.
      */
@@ -608,7 +535,12 @@ public class TaskDetailActivity extends AppCompatActivity {
 
             // Potvrdit zmeny a ulozit do databaze.
             case R.id.action_edit_task:
-//                editTask();
+                Intent taskEditIntent = new Intent(TaskDetailActivity.this, TaskEditActivity.class);
+                // Predej ID ukolu do intentu taskEditIntent.
+                taskEditIntent.putExtra("taskId", task.getId());
+                // Predej ID seznamu pro prechod do aktivity TaskEditActivity.
+                taskEditIntent.putExtra("listId", task.getListId());
+                (TaskDetailActivity.this).startActivityForResult(taskEditIntent, 122);
                 return true;
 
             default:
@@ -802,7 +734,35 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Po navratu z upravy ukolu.
+        if (requestCode == 122) {
+            if(resultCode == Activity.RESULT_OK){
+                // Refreshni udaje nove upraveneho ukolu.
+                taskId = data.getIntExtra("taskId", 1);
+                task = dm.getTask(taskId);
 
+                etTaskName.setText(task.getName());
+                if (task.getDueDate() != null) {
+                    DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                    etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+                } else {
+                    etTaskDueDate.setText("");
+                }
+                etTaskDescription.setText(task.getDescription());
+
+                // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
+                if (task.getCompleted() == 1)
+                    chbTaskCompleted.setChecked(true);
+                if (task.getCompleted() == 0)
+                    chbTaskCompleted.setChecked(false);
+
+                // Pokud bylo vybrano misto ukolu, inicializuj ho
+                if (task.getTaskPlaceId() != -1) {
+                    chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+                    etTaskPlace.setText(chosenTaskPlace.getAddress());
+                }
+            }
+        }
         // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             // Vytvoreni zmenseneho nahledu z porizene fotografie.
@@ -836,6 +796,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 etTaskPlace.setText(chosenTaskPlace.getAddress());
             }
         }
+        // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
     }
 
 }

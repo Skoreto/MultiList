@@ -1,6 +1,5 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -219,11 +218,11 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
                 // Po klepnuti na polozku seznamu ziskej instanci zvoleneho ukolu.
                 Task task = (Task) tasks.get(position);
                 Intent taskDetailIntent = new Intent(context, TaskDetailActivity.class);
-                // Predej ID ukolu do intentu editTaskIntent.
+                // Predej ID ukolu do intentu taskDetailIntent.
                 taskDetailIntent.putExtra("taskId", task.getId());
-                // Predej ID seznamu pro prechod do aktivity TaskEditActivity.
+                // Predej ID seznamu pro prechod do aktivity TaskDetailActivity.
                 taskDetailIntent.putExtra("listId", task.getListId());
-                ((Activity) context).startActivityForResult(taskDetailIntent, 121);
+                context.startActivity(taskDetailIntent);
             }
         };
     }
