@@ -6,14 +6,14 @@
     <string name="btn_task_lists">Seznamy</string>
 
     <!-- Aktivita Detail ukolu -->
-    <string name="tv_task_name">Název</string>
-    <string name="tv_task_description">Popis</string>
-    <string name="tv_due_date">Splnit do</string>
-    <string name="tv_place">Místo</string>
+    <string name="tv_task_name_label">Název</string>
+    <string name="tv_task_description_label">Popis</string>
+    <string name="tv_due_date_label">Splnit do</string>
+    <string name="tv_place_label">Místo</string>
     <string name="btn_edit_task">Upravit</string>
-    <string name="tv_task_list">Seznam</string>
-    <string name="tv_task_completed">Splněno</string>
-    <string name="tv_recording">Nahrávka</string>
+    <string name="tv_task_list_label">Seznam</string>
+    <string name="tv_task_completed_label">Splněno</string>
+    <string name="tv_recording_label">Nahrávka</string>
 
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
@@ -40,4 +40,5 @@
     <string name="sort_by_distance">Seřadit dle vzdálenosti</string>
 
     <string name="title_activity_maps">Map</string>
+    <string name="hello_world">ahoj svetee</string>
 </resources>

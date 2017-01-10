@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -19,38 +16,35 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.ListFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlacePicker;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,7 +59,6 @@ import java.util.List;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
-import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 
 /**
@@ -77,15 +70,12 @@ public class TaskDetailActivity extends AppCompatActivity {
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
     private Task task;
-    private EditText etTaskName;
+    private TextView tvTaskName;
     private EditText etTaskDueDate;
-    private EditText etTaskPlace;
+
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
-    private ImageButton imgbtnCurrentPlace;
-    private ImageButton imgbtnChooseTaskPlace;
-    private ImageButton imgbtnTakePhoto;
     private DataModel dm;
     private int taskId;
     private int listId;
@@ -106,13 +96,10 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     private final int PERMISSIONS_REQUEST_CAMERA = 102;
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
-    private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 104;
-    private final int PERMISSIONS_REQUEST_CURRENT_PLACE = 105;
 
-    private int REQUEST_PLACE_PICKER = 801;
-    private TaskPlace chosenTaskPlace = null;
-    private boolean chosenTaskPlaceChanged = false;
-    private RequestQueue requestQueue;
+    static final int NUM_ITEMS = 2;
+    MyAdapter mAdapter;
+    ViewPager mPager;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -135,9 +122,27 @@ public class TaskDetailActivity extends AppCompatActivity {
             actionBar.setTitle("Detail úkolu");
         }
 
-        etTaskName = (EditText) findViewById(R.id.etTaskName);
+        mAdapter = new MyAdapter(getSupportFragmentManager());
+        mPager = (ViewPager)findViewById(R.id.pager);
+        mPager.setAdapter(mAdapter);
+
+        // Watch for button clicks.
+        Button button = (Button)findViewById(R.id.goto_first);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mPager.setCurrentItem(0);
+            }
+        });
+        button = (Button)findViewById(R.id.goto_last);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mPager.setCurrentItem(NUM_ITEMS-1);
+            }
+        });
+
+        tvTaskName = (TextView) findViewById(R.id.tvTaskName);
         etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
-        etTaskPlace = (EditText) findViewById(R.id.etTaskPlace);
+
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -152,7 +157,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         taskId = anyTaskListIntent.getIntExtra("taskId", 1);
         task = dm.getTask(taskId);
 
-        etTaskName.setText(task.getName());
+        tvTaskName.setText(task.getName());
         if (task.getDueDate() != null) {
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
             etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
@@ -166,12 +171,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             chbTaskCompleted.setChecked(true);
         if (task.getCompleted() == 0)
             chbTaskCompleted.setChecked(false);
-
-        // Pokud bylo vybrano misto ukolu, inicializuj ho
-        if (task.getTaskPlaceId() != -1) {
-            chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
-            etTaskPlace.setText(chosenTaskPlace.getAddress());
-        }
 
         // SPINNER seznamu ukolu
         List<TaskList> taskLists = dm.getAllTaskLists();
@@ -270,131 +269,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                 // Pouzit aktualni datum jako vychozi datum v datepickeru.
                 datePickerDialog = new DatePickerDialog(TaskDetailActivity.this, datePickerListener, year, month, day);
                 datePickerDialog.show();
-            }
-        });
-
-        imgbtnCurrentPlace = (ImageButton) findViewById(R.id.imgbtnCurrentPlace);
-        imgbtnCurrentPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Kontrola permission k GPS
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Toast.makeText(TaskDetailActivity.this,
-                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSIONS_REQUEST_CURRENT_PLACE);
-                        // V pripade ziskani povoleni prejit na intent mapy
-                    }
-                } else {
-                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    // Create a criteria object to retrieve provider
-                    Criteria criteria = new Criteria();
-                    // Get the name of the best provider
-                    String provider = locationManager.getBestProvider(criteria, true);
-                    // Get current location
-                    final Location currentLocation = locationManager.getLastKnownLocation(provider);
-
-                    // Ziskani adresy soucasne pozice z coordinates
-                    // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
-                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
-
-                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                            + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                String currentPlaceAddress = response.getJSONArray("results")
-                                        .getJSONObject(0).getString("formatted_address");
-
-                                // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
-                                // pred pripadnym updatem databaze po potvrzeni editace ukolu.
-                                chosenTaskPlaceChanged = true;
-                                chosenTaskPlace = new TaskPlace(currentLocation.getLatitude(),
-                                        currentLocation.getLongitude(), currentPlaceAddress);
-                                etTaskPlace.setText(chosenTaskPlace.getAddress());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    requestQueue.add(request);
-                }
-            }
-        });
-
-        imgbtnChooseTaskPlace = (ImageButton) findViewById(R.id.imgbtnChooseTaskPlace);
-        imgbtnChooseTaskPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Kontrola permission k GPS
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Toast.makeText(TaskDetailActivity.this,
-                                "Povolení přístupu k GPS je nutné pro zjištění aktuální polohy.",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                        // V pripade ziskani povoleni prejit na intent mapy
-                    }
-                } else {
-                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-
-                    try {
-                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
-                    } catch (GooglePlayServicesRepairableException e) {
-                        e.printStackTrace();
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        imgbtnTakePhoto = (ImageButton) findViewById(R.id.imgbtnTakePhoto);
-        imgbtnTakePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Kontrola permission k fotoaparatu
-                if (ContextCompat.checkSelfPermission(TaskDetailActivity.this,
-                        Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-                    // Should we show an explanation?
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(TaskDetailActivity.this,
-                            Manifest.permission.CAMERA)) {
-                        Toast.makeText(TaskDetailActivity.this,
-                                "Povolení přístupu ke kameře je nutné pro vyfocení úkolu.",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        ActivityCompat.requestPermissions(TaskDetailActivity.this,
-                                new String[]{Manifest.permission.CAMERA},
-                                PERMISSIONS_REQUEST_CAMERA);
-                        // V pripade ziskani povoleni spustit fotoaparat v onRequestPermissionsResult
-                    }
-                } else {
-                    takePhoto();
-                }
             }
         });
 
@@ -656,78 +530,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                 }
                 return;
             }
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Povoleni udeleno, prejit na PlacePicker
-//                    Intent taskDetailIntent = new Intent(TaskEditActivity.this, TaskPlacesMapActivity.class);
-//                    startActivityForResult(taskDetailIntent, 778);
-
-                    PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-
-                    try {
-                        startActivityForResult(builder.build(TaskDetailActivity.this), REQUEST_PLACE_PICKER);
-                    } catch (GooglePlayServicesRepairableException e) {
-                        e.printStackTrace();
-                    } catch (GooglePlayServicesNotAvailableException e) {
-                        e.printStackTrace();
-                    }
-
-
-                } else {
-                    Toast.makeText(TaskDetailActivity.this,
-                            "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
-                            Toast.LENGTH_SHORT).show();
-                }
-                return;
-            }
-            case PERMISSIONS_REQUEST_CURRENT_PLACE: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Povoleni udeleno, vyplnit soucasnou pozici
-                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    // Create a criteria object to retrieve provider
-                    Criteria criteria = new Criteria();
-                    // Get the name of the best provider
-                    String provider = locationManager.getBestProvider(criteria, true);
-                    // Get current location
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    Location currentLocation = locationManager.getLastKnownLocation(provider);
-
-                    // Ziskani adresy soucasne pozice z coordinates
-                    // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
-                    requestQueue = Volley.newRequestQueue(TaskDetailActivity.this);
-
-                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                            + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
-                                        .getString("formatted_address");
-                                etTaskPlace.setText(currentPlaceAddress);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskDetailActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                    requestQueue.add(request);
-                } else {
-                    Toast.makeText(TaskDetailActivity.this,
-                            "Povolení k GPS nebylo uděleno, nelze zjistit polohu.",
-                            Toast.LENGTH_SHORT).show();
-                }
-                return;
-            }
         }
     }
 
@@ -741,7 +543,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 taskId = data.getIntExtra("taskId", 1);
                 task = dm.getTask(taskId);
 
-                etTaskName.setText(task.getName());
+                tvTaskName.setText(task.getName());
                 if (task.getDueDate() != null) {
                     DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
                     etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
@@ -758,8 +560,8 @@ public class TaskDetailActivity extends AppCompatActivity {
 
                 // Pokud bylo vybrano misto ukolu, inicializuj ho
                 if (task.getTaskPlaceId() != -1) {
-                    chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
-                    etTaskPlace.setText(chosenTaskPlace.getAddress());
+//                    chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+//                    etTaskPlace.setText(chosenTaskPlace.getAddress());
                 }
             }
         }
@@ -783,20 +585,146 @@ public class TaskDetailActivity extends AppCompatActivity {
             setResult(Activity.RESULT_OK, returnIntent);
             finish();
         }
-        // Nacteni adresy vybraneho mista z TaskPlace Pickeru
-        if (requestCode == REQUEST_PLACE_PICKER) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(TaskDetailActivity.this, data);
+        // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
+    }
 
-                // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
-                // pred pripadnym updatem databaze po potvrzeni editace ukolu.
-                chosenTaskPlaceChanged = true;
-                chosenTaskPlace = new TaskPlace(place.getLatLng().latitude,
-                        place.getLatLng().longitude, place.getAddress().toString());
-                etTaskPlace.setText(chosenTaskPlace.getAddress());
+    public static class MyAdapter extends FragmentPagerAdapter {
+        public MyAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public int getCount() {
+            return NUM_ITEMS;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+
+            switch (position) {
+                case 0:
+                    return GeneralFragment.newInstance(position);
+                case 1:
+                    return ArrayListFragment.newInstance(position);
+                default:
+                    return null;
             }
         }
-        // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
+
+        // Returns the page title for the top indicator
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return "Page " + position;
+        }
+    }
+
+    public static class ArrayListFragment extends ListFragment {
+        int mNum;
+        String[] CHEESES = {
+                "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam", "Abondance" };
+
+        /**
+         * Create a new instance of CountingFragment, providing "num"
+         * as an argument.
+         */
+        static ArrayListFragment newInstance(int num) {
+            ArrayListFragment f = new ArrayListFragment();
+
+            // Supply num input as an argument.
+            Bundle args = new Bundle();
+            args.putInt("num", num);
+            f.setArguments(args);
+
+            return f;
+        }
+
+        /**
+         * When creating, retrieve this instance's number from its arguments.
+         */
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+        }
+
+        /**
+         * The Fragment's UI is just a simple text view showing its
+         * instance number.
+         */
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_pager_list, container, false);
+            View tv = v.findViewById(R.id.text);
+            ((TextView)tv).setText("Fragment #" + mNum);
+            return v;
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            setListAdapter(new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_list_item_1, CHEESES));
+        }
+
+        @Override
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            Log.i("FragmentList", "Item clicked: " + id);
+        }
+    }
+
+    public static class GeneralFragment extends Fragment {
+        int mNum;
+        Task task;
+        private TextView tvTaskPlace;
+
+        /**
+         * Create a new instance of CountingFragment, providing "num"
+         * as an argument.
+         */
+        static GeneralFragment newInstance(int num) {
+            GeneralFragment f = new GeneralFragment();
+
+            // Supply num input as an argument.
+            Bundle args = new Bundle();
+            args.putInt("num", num);
+            f.setArguments(args);
+
+            return f;
+        }
+
+        /**
+         * When creating, retrieve this instance's number from its arguments.
+         */
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+        }
+
+        /**
+         * The Fragment's UI is just a simple text view showing its
+         * instance number.
+         */
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_pager_general, container, false);
+            View tv = v.findViewById(R.id.text);
+            ((TextView)tv).setText("Fragment #" + mNum);
+
+
+            tvTaskPlace = (TextView) v.findViewById(R.id.tvTaskPlace);
+
+//            // Pokud bylo vybrano misto ukolu, inicializuj ho
+//            if (task.getTaskPlaceId() != -1) {
+//                chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+//                etTaskPlace.setText(chosenTaskPlace.getAddress());
+//            }
+
+            return v;
+        }
+
     }
 
 }
