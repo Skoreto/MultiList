@@ -50,7 +50,6 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
-    private EditText etTaskDescription;
     private ImageView ivTaskPhoto;
 
     private DataModel dm;
@@ -60,7 +59,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
 
-    static final int NUM_ITEMS = 2;
+    static final int NUM_ITEMS = 3;
     MyAdapter mAdapter;
     ViewPager mPager;
 
@@ -86,7 +85,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         tvTaskName = (TextView) findViewById(R.id.tvTaskName);
-        etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
@@ -98,7 +96,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         task = dm.getTask(taskId);
 
         tvTaskName.setText(task.getName());
-        etTaskDescription.setText(task.getDescription());
 
         if (!task.getPhotoName().equals("")) {
             // Prime prirazeni nahledu fotografie do ImageView.
@@ -277,7 +274,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 //                } else {
 //                    etTaskDueDate.setText("");
 //                }
-                etTaskDescription.setText(task.getDescription());
+//                etTaskDescription.setText(task.getDescription());
 
                 // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
 //                if (task.getCompleted() == 1)
@@ -320,6 +317,8 @@ public class TaskDetailActivity extends AppCompatActivity {
 //                    return (Fragment) generalFragment.newInstance(position, task, dm, context);
                     return GeneralFragment.newInstance(position, task, dm, context);
                 case 1:
+                    return DescriptionFragment.newInstance(task);
+                case 2:
                     return ArrayListFragment.newInstance(position);
                 default:
                     return null;
@@ -333,6 +332,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 0:
                     return "Obecné";
                 case 1:
+                    return "Popis";
+                case 2:
                     return "List";
                 default:
                     return "Page " + position;
@@ -365,7 +366,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                 taskDueDate = dateFormat.format(task.getDueDate());
             }
 
-            // Supply num input as an argument.
             Bundle args = new Bundle();
             args.putInt("num", num);
             args.putString("taskPlaceAddress", taskPlaceAddress);
@@ -412,7 +412,34 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Fragment blizsiho popisu ukolu.
+     */
+    public static class DescriptionFragment extends Fragment {
+        private TextView tvTaskDescription;
 
+        static DescriptionFragment newInstance(Task task) {
+            DescriptionFragment f = new DescriptionFragment();
+            Bundle args = new Bundle();
+            args.putString("taskDescription", task.getDescription());
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_pager_description, container, false);
+            tvTaskDescription = (TextView) view.findViewById(R.id.tvTaskDescription);
+            tvTaskDescription.setText(getArguments().getString("taskDescription"));
+            return view;
+        }
+    }
 
     public static class ArrayListFragment extends ListFragment {
         int mNum;

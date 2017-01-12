@@ -45,39 +45,10 @@
             android:paddingTop="4dp" />
     </android.support.v4.view.ViewPager>
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:useDefaultMargins="true"
-            android:alignmentMode="alignBounds"
-            android:columnOrderPreserved="false"
-            android:columnCount="2"
-            android:rowCount="8">
-
-            <TextView
-                android:id="@+id/tvTaskDescriptionLabel"
-                android:text="@string/tv_task_description_label"
-                android:layout_row="3"
-                android:layout_column="0"
-                android:layout_gravity="center_horizontal" />
-
-            <EditText
-                android:id="@+id/etTaskDescription"
-                android:inputType="textMultiLine"
-                android:layout_row="3"
-                android:layout_column="1"
-                android:ems="13" />
-
-            <ImageView
-                android:id="@+id/ivTaskPhoto"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_row="7"
-                android:layout_column="1"
-                android:layout_gravity="center_horizontal" />
-
-        </GridLayout>
-
-
+    <ImageView
+        android:id="@+id/ivTaskPhoto"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
 
