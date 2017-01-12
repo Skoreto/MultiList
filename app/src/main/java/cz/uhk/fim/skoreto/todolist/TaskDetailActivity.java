@@ -1,19 +1,16 @@
 package cz.uhk.fim.skoreto.todolist;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -49,22 +46,19 @@ import cz.uhk.fim.skoreto.todolist.utils.AudioController;
  * Created by Tomas Skorepa.
  */
 public class TaskDetailActivity extends AppCompatActivity {
-
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
     private EditText etTaskDescription;
+    private ImageView ivTaskPhoto;
+
     private DataModel dm;
     private int taskId;
     private int listId;
 
     private AudioManager audioManager;
-    private MediaRecorder mediaRecorder;
-    private MediaPlayer mediaPlayer;
-
-    private ImageView ivTaskPhoto;
-    private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
+    private static MediaPlayer mediaPlayer;
 
     static final int NUM_ITEMS = 2;
     MyAdapter mAdapter;
@@ -128,6 +122,16 @@ public class TaskDetailActivity extends AppCompatActivity {
         mAdapter = new MyAdapter(getSupportFragmentManager(), task, dm, getApplicationContext());
         mPager = (ViewPager)findViewById(R.id.pager);
         mPager.setAdapter(mAdapter);
+
+        // NAHRAVANI / PREHRAVANI ZVUKU
+        final ToggleButton btnPlayTask = (ToggleButton) findViewById(R.id.btnPlayTask);
+
+        btnPlayTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                onPlayPressed(isChecked);
+            }
+        });
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
@@ -238,15 +242,6 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        // Uvolni mediaRecorder, pokud zustala instance vytvorena.
-        if (mediaRecorder != null) {
-            // Clearne nastaveni recorderu.
-            mediaRecorder.reset();
-            // Uvolneni instance recorderu.
-            mediaRecorder.release();
-            mediaRecorder = null;
-        }
-
         // Uvolni mediaPlayer, pokud zustala instance vytvorena.
         if (mediaPlayer != null) {
             mediaPlayer.reset();
@@ -261,19 +256,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_RECORD_AUDIO: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Povoleni udeleno, spustit nahravani zvuku
-                    mediaRecorder = new MediaRecorder();
-                    AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskDetailActivity.this);
-                } else {
-                    Toast.makeText(TaskDetailActivity.this,
-                            "Povolení k mikrofonu nebylo uděleno, nelze nahrávat zvuk.",
-                            Toast.LENGTH_SHORT).show();
-                }
-                return;
-            }
+
         }
     }
 
@@ -312,7 +295,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
     }
 
-    public static class MyAdapter extends FragmentPagerAdapter {
+    public static class MyAdapter extends FragmentStatePagerAdapter {
         Task task;
         DataModel dm;
         Context context;
@@ -333,6 +316,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
+//                    GeneralFragment generalFragment = new GeneralFragment();
+//                    return (Fragment) generalFragment.newInstance(position, task, dm, context);
                     return GeneralFragment.newInstance(position, task, dm, context);
                 case 1:
                     return ArrayListFragment.newInstance(position);
@@ -423,19 +408,11 @@ public class TaskDetailActivity extends AppCompatActivity {
             if (getArguments().getInt("isTaskCompleted") == 0)
                 chbTaskCompleted.setChecked(false);
 
-            // NAHRAVANI / PREHRAVANI ZVUKU
-            final ToggleButton btnPlayTask = (ToggleButton) view.findViewById(R.id.btnPlayTask);
-
-//            btnPlayTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    onPlayPressed(isChecked);
-//                }
-//            });
-
             return view;
         }
     }
+
+
 
     public static class ArrayListFragment extends ListFragment {
         int mNum;
@@ -491,6 +468,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             Log.i("FragmentList", "Item clicked: " + id);
         }
     }
+
+
 
 }
 

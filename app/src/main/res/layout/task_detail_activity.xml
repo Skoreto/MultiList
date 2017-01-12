@@ -20,13 +20,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical|center_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/hello_world"/>
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ToggleButton
+        android:id="@+id/btnPlayTask"
+        android:layout_width="100dp"
+        android:layout_height="40dp"
+        android:textOn="@string/tb_stop"
+        android:textOff="@string/tb_start"
+        android:drawableStart="@drawable/ic_play_arrow_black_24dp"
+        android:drawablePadding="4dp" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1">
 
         <android.support.v4.view.PagerTabStrip

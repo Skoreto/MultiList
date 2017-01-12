@@ -14,6 +14,8 @@
     <string name="tv_task_list_label">Seznam</string>
     <string name="tv_task_completed_label">Splněno</string>
     <string name="tv_recording_label">Nahrávka</string>
+    <string name="tb_stop">STOP</string>
+    <string name="tb_start">START</string>
 
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
@@ -40,4 +42,7 @@
     <string name="sort_by_distance">Seřadit dle vzdálenosti</string>
 
     <string name="title_activity_maps">Map</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

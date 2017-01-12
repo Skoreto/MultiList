@@ -78,14 +78,14 @@
             android:layout_column="0"
             android:layout_gravity="center" />
 
-        <ToggleButton
-            android:id="@+id/btnPlayTask"
-            android:textOn="STOP"
-            android:textOff="START"
-            android:layout_row="4"
-            android:layout_column="1"
-            android:drawableStart="@drawable/ic_play_arrow_black_24dp"
-            android:drawablePadding="4dp" />
+        <!--<ToggleButton-->
+            <!--android:id="@+id/btnPlayTask"-->
+            <!--android:textOn="STOP"-->
+            <!--android:textOff="START"-->
+            <!--android:layout_row="4"-->
+            <!--android:layout_column="1"-->
+            <!--android:drawableStart="@drawable/ic_play_arrow_black_24dp"-->
+            <!--android:drawablePadding="4dp" />-->
     </GridLayout>
 
 </LinearLayout>
