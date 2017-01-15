@@ -3,7 +3,6 @@ package cz.uhk.fim.skoreto.todolist;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -26,12 +25,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -50,7 +55,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
-    private ImageView ivTaskPhoto;
+//    private ImageView ivTaskPhoto;
 
     private DataModel dm;
     private int taskId;
@@ -59,7 +64,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
 
-    static final int NUM_ITEMS = 3;
+    static final int NUM_ITEMS = 4;
     MyAdapter mAdapter;
     ViewPager mPager;
 
@@ -85,7 +90,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         tvTaskName = (TextView) findViewById(R.id.tvTaskName);
-        ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
+//        ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -97,28 +102,32 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         tvTaskName.setText(task.getName());
 
-        if (!task.getPhotoName().equals("")) {
-            // Prime prirazeni nahledu fotografie do ImageView.
-            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
-            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
-            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
-
-            ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                   @Override
-                   public void onClick(View view) {
-                       // Zobrazeni velke fotografie po kliknuti na nahled.
-                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
-                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-                       startActivity(sendPhotoDirectoryIntent);
-                   }
-               }
-            );
-        }
+//        if (!task.getPhotoName().equals("")) {
+//            // Prime prirazeni nahledu fotografie do ImageView.
+//            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+//            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+//            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
+//
+//            ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
+//                   @Override
+//                   public void onClick(View view) {
+//                       // Zobrazeni velke fotografie po kliknuti na nahled.
+//                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
+//                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+//                       startActivity(sendPhotoDirectoryIntent);
+//                   }
+//               }
+//            );
+//        }
 
         // Inicializace adapteru fragmentu
         mAdapter = new MyAdapter(getSupportFragmentManager(), task, dm, getApplicationContext());
         mPager = (ViewPager)findViewById(R.id.pager);
         mPager.setAdapter(mAdapter);
+
+//        ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+//        viewPager.setAdapter(new CustomPagerAdapter(this));
+
 
         // NAHRAVANI / PREHRAVANI ZVUKU
         final ToggleButton btnPlayTask = (ToggleButton) findViewById(R.id.btnPlayTask);
@@ -292,6 +301,48 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
     }
 
+
+//    public class CustomPagerAdapter extends PagerAdapter {
+//
+//        private Context mContext;
+//
+//        public CustomPagerAdapter(Context context) {
+//            mContext = context;
+//        }
+//
+//        @Override
+//        public Object instantiateItem(ViewGroup collection, int position) {
+//            ModelObject modelObject = ModelObject.values()[position];
+//            LayoutInflater inflater = LayoutInflater.from(mContext);
+//            ViewGroup layout = (ViewGroup) inflater.inflate(modelObject.getLayoutResId(), collection, false);
+//            collection.addView(layout);
+//            return layout;
+//        }
+//
+//        @Override
+//        public void destroyItem(ViewGroup collection, int position, Object view) {
+//            collection.removeView((View) view);
+//        }
+//
+//        @Override
+//        public int getCount() {
+//            return ModelObject.values().length;
+//        }
+//
+//        @Override
+//        public boolean isViewFromObject(View view, Object object) {
+//            return view == object;
+//        }
+//
+//        @Override
+//        public CharSequence getPageTitle(int position) {
+//            ModelObject customPagerEnum = ModelObject.values()[position];
+//
+//            return mContext.getString(customPagerEnum.getTitleResId());
+//        }
+//
+//    }
+
     public static class MyAdapter extends FragmentStatePagerAdapter {
         Task task;
         DataModel dm;
@@ -315,17 +366,25 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 0:
 //                    GeneralFragment generalFragment = new GeneralFragment();
 //                    return (Fragment) generalFragment.newInstance(position, task, dm, context);
-                    return GeneralFragment.newInstance(position, task, dm, context);
+
+
+//                    GeneralFragment f = GeneralFragment.newInstance(task, dm, context);
+//
+//                    ImageView ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
+
+                    return GeneralFragment.newInstance(task, dm, context);
                 case 1:
                     return DescriptionFragment.newInstance(task);
                 case 2:
+                    return TaskPlaceMapFragment.newInstance(task, dm);
+                case 3:
                     return ArrayListFragment.newInstance(position);
                 default:
                     return null;
             }
         }
 
-        // Returns the page title for the top indicator
+        // Returns the page title for the top indicator.
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -334,6 +393,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 1:
                     return "Popis";
                 case 2:
+                    return "Mapa";
+                case 3:
                     return "List";
                 default:
                     return "Page " + position;
@@ -345,13 +406,38 @@ public class TaskDetailActivity extends AppCompatActivity {
      * Fragment obecnych informaci o ukolu.
      */
     public static class GeneralFragment extends Fragment {
-        int mNum;
         private TextView tvTaskPlace;
         private TextView tvTaskDueDate;
         private TextView tvAssignedTaskList;
         private CheckBox chbTaskCompleted;
+//        private ImageView ivTaskPhoto;
 
-        static GeneralFragment newInstance(int num, Task task, DataModel dm, Context context) {
+//        @Override
+//        public void onActivityCreated(Bundle savedInstanceState) {
+//            super.onActivityCreated(savedInstanceState);
+//            Context context = getActivity();
+//        }
+
+//        @Override
+//        public void onAttach(Context context) {
+//            super.onAttach(context);
+//
+//            Activity activity;
+//            OnArticleSelectedListener mListener;
+//
+//            if (context instanceof Activity){
+//                activity=(Activity) context;
+//
+//                try {
+//                    mListener = (OnArticleSelectedListener) activity;
+//                } catch (ClassCastException e) {
+//                    throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+//                }
+//            }
+
+//        }
+
+        static GeneralFragment newInstance(Task task, DataModel dm, Context context) {
             GeneralFragment f = new GeneralFragment();
             String taskPlaceAddress = "";
             // Pokud bylo vybrano misto ukolu, inicializuj ho
@@ -367,7 +453,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
 
             Bundle args = new Bundle();
-            args.putInt("num", num);
             args.putString("taskPlaceAddress", taskPlaceAddress);
             args.putString("taskDueDate", taskDueDate);
             args.putString("tvAssignedTaskListName",
@@ -384,15 +469,12 @@ public class TaskDetailActivity extends AppCompatActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_pager_general, container, false);
-            View tv = view.findViewById(R.id.text);
-            ((TextView)tv).setText("Fragment #" + mNum);
 
             tvTaskPlace = (TextView) view.findViewById(R.id.tvTaskPlace);
             tvTaskPlace.setText(getArguments().getString("taskPlaceAddress"));
@@ -401,6 +483,7 @@ public class TaskDetailActivity extends AppCompatActivity {
             tvAssignedTaskList = (TextView) view.findViewById(R.id.tvAssignedTaskList);
             tvAssignedTaskList.setText(getArguments().getString("tvAssignedTaskListName"));
             chbTaskCompleted = (CheckBox) view.findViewById(R.id.chbTaskCompleted);
+//            ivTaskPhoto = (ImageView) view.findViewById(R.id.ivTaskPhoto);
 
             // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
             if (getArguments().getInt("isTaskCompleted") == 1)
@@ -439,6 +522,61 @@ public class TaskDetailActivity extends AppCompatActivity {
             tvTaskDescription.setText(getArguments().getString("taskDescription"));
             return view;
         }
+    }
+
+    /**
+     * Fragment umisteni a radiusu ukolu.
+     */
+    public static class TaskPlaceMapFragment extends Fragment {
+        private GoogleMap gMap;
+        MapView mapView;
+
+        static TaskPlaceMapFragment newInstance(Task task, DataModel dm) {
+            TaskPlaceMapFragment f = new TaskPlaceMapFragment();
+            Bundle args = new Bundle();
+            TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            args.putFloat("taskPlaceLat", (float) taskPlace.getLatitude());
+            args.putFloat("taskPlaceLong", (float) taskPlace.getLongitude());
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_pager_map, container, false);
+            mapView = (MapView) view.findViewById(R.id.mapView);
+            mapView.onCreate(savedInstanceState);
+
+            // Inicializace GoogleMap z MapView
+            gMap = mapView.getMap();
+            gMap.getUiSettings().setMyLocationButtonEnabled(false);
+//            gMap.setMyLocationEnabled(true);
+            float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
+            float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
+            gMap.addMarker(new MarkerOptions().position(
+                    new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
+
+            // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
+            MapsInitializer.initialize(this.getActivity());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(taskPlaceLatitude, taskPlaceLongitude), 10);
+            gMap.animateCamera(cameraUpdate);
+
+            return view;
+        }
+
+        @Override
+        public void onResume() {
+            mapView.onResume();
+            super.onResume();
+        }
+
     }
 
     public static class ArrayListFragment extends ListFragment {

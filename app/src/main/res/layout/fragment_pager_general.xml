@@ -4,13 +4,6 @@
     android:layout_height="match_parent"
     android:background="@android:drawable/gallery_thumb">
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|center_horizontal"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,4 +81,9 @@
             <!--android:drawablePadding="4dp" />-->
     </GridLayout>
 
+    <!--<ImageView-->
+        <!--android:id="@+id/ivTaskPhoto"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal" />-->
 </LinearLayout>
