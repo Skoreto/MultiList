@@ -3,10 +3,12 @@ package cz.uhk.fim.skoreto.todolist;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -35,6 +37,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -65,8 +68,8 @@ public class TaskDetailActivity extends AppCompatActivity {
     private static MediaPlayer mediaPlayer;
 
     static final int NUM_ITEMS = 4;
-    MyAdapter mAdapter;
-    ViewPager mPager;
+    private DetailFragmentPagerAdapter detailFragmentPagerAdapter;
+    private ViewPager detailViewPager;
 
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
@@ -120,25 +123,49 @@ public class TaskDetailActivity extends AppCompatActivity {
 //            );
 //        }
 
-        // Inicializace adapteru fragmentu
-        mAdapter = new MyAdapter(getSupportFragmentManager(), task, dm, getApplicationContext());
-        mPager = (ViewPager)findViewById(R.id.pager);
-        mPager.setAdapter(mAdapter);
+        // Komponenta nadpisu tabu
+        TabLayout detailTabLayout = (TabLayout) findViewById(R.id.detailTabLayout);
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Obecné"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
+        detailTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-//        ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-//        viewPager.setAdapter(new CustomPagerAdapter(this));
+        // Inicializace adapteru FragmentPageru
+        detailFragmentPagerAdapter = new DetailFragmentPagerAdapter(
+                getSupportFragmentManager(), task, dm, getApplicationContext());
+        detailViewPager = (ViewPager)findViewById(R.id.detailViewPagerpager);
+        detailViewPager.setAdapter(detailFragmentPagerAdapter);
+        // Listener pro prepinani tabu slidovanim stranek ViewPageru
+        detailViewPager.addOnPageChangeListener(
+                new TabLayout.TabLayoutOnPageChangeListener(detailTabLayout));
 
+        // Listener pro prepinani stranek klikanim na nadpis tabu
+        detailTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                detailViewPager.setCurrentItem(tab.getPosition());
+            }
 
-        // NAHRAVANI / PREHRAVANI ZVUKU
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        // PREHRAVANI ZVUKU
         final ToggleButton btnPlayTask = (ToggleButton) findViewById(R.id.btnPlayTask);
-
         btnPlayTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 onPlayPressed(isChecked);
             }
         });
-
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
@@ -301,54 +328,15 @@ public class TaskDetailActivity extends AppCompatActivity {
         // Pokud != RESULT_OK - nedelat nic - dulezite napr. pro tlacitko zpet v dolnim panelu.
     }
 
-
-//    public class CustomPagerAdapter extends PagerAdapter {
-//
-//        private Context mContext;
-//
-//        public CustomPagerAdapter(Context context) {
-//            mContext = context;
-//        }
-//
-//        @Override
-//        public Object instantiateItem(ViewGroup collection, int position) {
-//            ModelObject modelObject = ModelObject.values()[position];
-//            LayoutInflater inflater = LayoutInflater.from(mContext);
-//            ViewGroup layout = (ViewGroup) inflater.inflate(modelObject.getLayoutResId(), collection, false);
-//            collection.addView(layout);
-//            return layout;
-//        }
-//
-//        @Override
-//        public void destroyItem(ViewGroup collection, int position, Object view) {
-//            collection.removeView((View) view);
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return ModelObject.values().length;
-//        }
-//
-//        @Override
-//        public boolean isViewFromObject(View view, Object object) {
-//            return view == object;
-//        }
-//
-//        @Override
-//        public CharSequence getPageTitle(int position) {
-//            ModelObject customPagerEnum = ModelObject.values()[position];
-//
-//            return mContext.getString(customPagerEnum.getTitleResId());
-//        }
-//
-//    }
-
-    public static class MyAdapter extends FragmentStatePagerAdapter {
+    /**
+     * Vlastni adapter pro stranky fragmentu v detailu ukolu.
+     */
+    public class DetailFragmentPagerAdapter extends FragmentStatePagerAdapter {
         Task task;
         DataModel dm;
         Context context;
 
-        public MyAdapter(FragmentManager fm, Task task, DataModel dm, Context context) {
+        DetailFragmentPagerAdapter(FragmentManager fm, Task task, DataModel dm, Context context) {
             super(fm);
             this.task = task;
             this.dm = dm;
@@ -367,11 +355,8 @@ public class TaskDetailActivity extends AppCompatActivity {
 //                    GeneralFragment generalFragment = new GeneralFragment();
 //                    return (Fragment) generalFragment.newInstance(position, task, dm, context);
 
-
 //                    GeneralFragment f = GeneralFragment.newInstance(task, dm, context);
-//
 //                    ImageView ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
-
                     return GeneralFragment.newInstance(task, dm, context);
                 case 1:
                     return DescriptionFragment.newInstance(task);
@@ -561,11 +546,15 @@ public class TaskDetailActivity extends AppCompatActivity {
             float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
             gMap.addMarker(new MarkerOptions().position(
                     new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
+            gMap.addCircle(new CircleOptions()
+                    .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
+                    .radius(5000)
+                    .strokeColor(Color.RED));
 
             // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
             MapsInitializer.initialize(this.getActivity());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(taskPlaceLatitude, taskPlaceLongitude), 10);
+                    new LatLng(taskPlaceLatitude, taskPlaceLongitude), 11);
             gMap.animateCamera(cameraUpdate);
 
             return view;
@@ -575,6 +564,18 @@ public class TaskDetailActivity extends AppCompatActivity {
         public void onResume() {
             mapView.onResume();
             super.onResume();
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            mapView.onDestroy();
+        }
+
+        @Override
+        public void onLowMemory() {
+            super.onLowMemory();
+            mapView.onLowMemory();
         }
 
     }
@@ -633,7 +634,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             Log.i("FragmentList", "Item clicked: " + id);
         }
     }
-
 
 
 }
