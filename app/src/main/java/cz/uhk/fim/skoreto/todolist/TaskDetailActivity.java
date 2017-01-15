@@ -519,9 +519,15 @@ public class TaskDetailActivity extends AppCompatActivity {
         static TaskPlaceMapFragment newInstance(Task task, DataModel dm) {
             TaskPlaceMapFragment f = new TaskPlaceMapFragment();
             Bundle args = new Bundle();
-            TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
-            args.putFloat("taskPlaceLat", (float) taskPlace.getLatitude());
-            args.putFloat("taskPlaceLong", (float) taskPlace.getLongitude());
+            boolean isTaskPlaceFilled = false;
+            if (task.getTaskPlaceId() != -1) {
+                // Pokud je vyplneno misto ukolu predej Lat Long
+                isTaskPlaceFilled = true;
+                TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+                args.putFloat("taskPlaceLat", (float) taskPlace.getLatitude());
+                args.putFloat("taskPlaceLong", (float) taskPlace.getLongitude());
+            }
+            args.putBoolean("isTaskPlaceFilled", isTaskPlaceFilled);
             f.setArguments(args);
             return f;
         }
@@ -542,20 +548,24 @@ public class TaskDetailActivity extends AppCompatActivity {
             gMap = mapView.getMap();
             gMap.getUiSettings().setMyLocationButtonEnabled(false);
 //            gMap.setMyLocationEnabled(true);
-            float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
-            float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
-            gMap.addMarker(new MarkerOptions().position(
-                    new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
-            gMap.addCircle(new CircleOptions()
-                    .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
-                    .radius(5000)
-                    .strokeColor(Color.RED));
 
-            // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
-            MapsInitializer.initialize(this.getActivity());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(taskPlaceLatitude, taskPlaceLongitude), 11);
-            gMap.animateCamera(cameraUpdate);
+            if (getArguments().getBoolean("isTaskPlaceFilled")) {
+                // Pokud je vyplneno misto ukolu - vyznac jej na mape
+                float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
+                float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
+                gMap.addMarker(new MarkerOptions().position(
+                        new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
+                gMap.addCircle(new CircleOptions()
+                        .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
+                        .radius(5000)
+                        .strokeColor(Color.RED));
+
+                // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
+                MapsInitializer.initialize(this.getActivity());
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(taskPlaceLatitude, taskPlaceLongitude), 11);
+                gMap.animateCamera(cameraUpdate);
+            }
 
             return view;
         }
