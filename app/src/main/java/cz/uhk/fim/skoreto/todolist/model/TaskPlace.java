@@ -15,16 +15,19 @@ public class TaskPlace {
 
     private String address;
 
+    private int radius;
+
     public TaskPlace() {
     }
 
-    public TaskPlace(double latitude, double longitude, String address) {
+    public TaskPlace(double latitude, double longitude, String address, int radius) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
+        this.radius = radius;
     }
 
-    public TaskPlace(int id, double latitude, double longitude, String address) {
+    public TaskPlace(int id, double latitude, double longitude, String address, int radius) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -61,5 +64,13 @@ public class TaskPlace {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
     }
 }

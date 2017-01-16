@@ -19,7 +19,7 @@ import java.util.Date;
 public class DataModel extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "MULTILIST";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     public DataModel(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -53,11 +53,12 @@ public class DataModel extends SQLiteOpenHelper {
     /**
      * Metoda pro ulozeni noveho mista do databaze.
      */
-    public void addTaskPlace(double latitude, double longitude, String address){
+    public void addTaskPlace(double latitude, double longitude, String address, int radius){
         ContentValues contentValues = new ContentValues();
         contentValues.put("LATITUDE", latitude);
         contentValues.put("LONGITUDE", longitude);
         contentValues.put("ADDRESS", address);
+        contentValues.put("RADIUS", radius);
 
         getWritableDatabase().insert("TASK_PLACES", null, contentValues);
     }
@@ -66,11 +67,12 @@ public class DataModel extends SQLiteOpenHelper {
      * Metoda pro ulozeni noveho mista do databaze a vraceni id nove vlozeneho zaznamu.
      * Vraci -1 pri vyskytle chybe.
      */
-    public long addTaskPlaceReturnId(double latitude, double longitude, String address){
+    public long addTaskPlaceReturnId(double latitude, double longitude, String address, int radius){
         ContentValues contentValues = new ContentValues();
         contentValues.put("LATITUDE", latitude);
         contentValues.put("LONGITUDE", longitude);
         contentValues.put("ADDRESS", address);
+        contentValues.put("RADIUS", radius);
 
         long newTaskPlaceId = getWritableDatabase().insert("TASK_PLACES", null, contentValues);
         return newTaskPlaceId;
@@ -123,6 +125,7 @@ public class DataModel extends SQLiteOpenHelper {
         contentValues.put("LATITUDE", taskPlace.getLatitude());
         contentValues.put("LONGITUDE", taskPlace.getLongitude());
         contentValues.put("ADDRESS", taskPlace.getAddress());
+        contentValues.put("RADIUS", taskPlace.getRadius());
 
         return db.update("TASK_PLACES", contentValues, "ID = ?",  new String[] {String.valueOf(taskPlace.getId())});
     }
@@ -216,11 +219,13 @@ public class DataModel extends SQLiteOpenHelper {
                 double latitude = cursor.getDouble(1);
                 double longitude = cursor.getDouble(2);
                 String address = cursor.getString(3);
+                int radius = cursor.getInt(4);
 
                 taskPlace.setId(taskPlaceId);
                 taskPlace.setLatitude(latitude);
                 taskPlace.setLongitude(longitude);
                 taskPlace.setAddress(address);
+                taskPlace.setRadius(radius);
             } while (cursor.moveToNext());
         }
         return taskPlace;
@@ -395,7 +400,7 @@ public class DataModel extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE TASKS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT, DESCRIPTION TEXT, LIST_ID INTEGER, COMPLETED INTEGER, PHOTO_NAME TEXT, RECORDING_NAME TEXT, DUE_DATE TEXT, TASK_PLACE_ID INTEGER)");
         db.execSQL("CREATE TABLE TASK_LISTS (ID INTEGER PRIMARY KEY NOT NULL, NAME TEXT)");
-        db.execSQL("CREATE TABLE TASK_PLACES (ID INTEGER PRIMARY KEY NOT NULL, LATITUDE INTEGER, LONGITUDE INTEGER, ADDRESS TEXT)");
+        db.execSQL("CREATE TABLE TASK_PLACES (ID INTEGER PRIMARY KEY NOT NULL, LATITUDE INTEGER, LONGITUDE INTEGER, ADDRESS TEXT, RADIUS INTEGER)");
 
         // Pocatecni inicializace - vychozi vytvoreni seznamu Inbox - ziska ID 1.
         db.execSQL("INSERT INTO TASK_LISTS VALUES(null, ?)", new Object[] {"Inbox"});
