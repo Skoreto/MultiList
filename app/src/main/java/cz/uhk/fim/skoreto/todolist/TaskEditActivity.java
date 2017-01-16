@@ -35,7 +35,9 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -57,6 +59,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -80,6 +83,8 @@ public class TaskEditActivity extends AppCompatActivity {
     private EditText etTaskName;
     private EditText etTaskDueDate;
     private EditText etTaskPlace;
+    private TextView tvRadius;
+    private SeekBar sbRadius;
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
@@ -141,7 +146,6 @@ public class TaskEditActivity extends AppCompatActivity {
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
-
         ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
@@ -368,6 +372,36 @@ public class TaskEditActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+            }
+        });
+
+        // SEEKBAR radius
+        tvRadius = (TextView) findViewById(R.id.tvRadius);
+        sbRadius = (SeekBar) findViewById(R.id.sbRadius);
+        sbRadius.setProgress(15);
+        sbRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float radius = progress * 100;
+                DecimalFormat df = new DecimalFormat("#.#");
+
+                if (radius < 1000) {
+                    // Pod 1 km zobrazuj vzdalenost v metrech
+                    String sRadius = df.format(radius);
+                    tvRadius.setText(sRadius + " m");
+                } else {
+                    // Nad 1 km zobrazuj vzdalenost v kilometrech
+                    String sRadius = df.format(radius / 1000);
+                    tvRadius.setText(sRadius + " km");
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
 

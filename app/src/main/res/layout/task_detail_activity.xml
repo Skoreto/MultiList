@@ -35,6 +35,8 @@
         android:id="@+id/detailTabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:elevation="6dp"
+        android:minHeight="?attr/actionBarSize"
         app:tabMode="fixed"
         app:tabGravity="fill" />
 
