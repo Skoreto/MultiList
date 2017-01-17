@@ -324,7 +324,7 @@ public class TaskEditActivity extends AppCompatActivity {
                                 chosenTaskPlaceChanged = true;
                                 chosenTaskPlace = new TaskPlace(currentLocation.getLatitude(),
                                         currentLocation.getLongitude(), currentPlaceAddress,
-                                        sbRadius.getProgress());
+                                        sbRadius.getProgress() * 100);
                                 etTaskPlace.setText(chosenTaskPlace.getAddress());
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -383,6 +383,7 @@ public class TaskEditActivity extends AppCompatActivity {
         sbRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                chosenTaskPlaceChanged = true;
                 float radius = progress * 100;
                 DecimalFormat df = new DecimalFormat("#.#");
 
@@ -460,7 +461,7 @@ public class TaskEditActivity extends AppCompatActivity {
                 // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
                 // chosenTaskPlace s id.
                 long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
-                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(), sbRadius.getProgress());
+                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(), sbRadius.getProgress() * 100);
                 if (newTaskPlaceId == -1)
                     Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
                 else {
@@ -483,7 +484,7 @@ public class TaskEditActivity extends AppCompatActivity {
                     // chosenTaskPlace s id.
                     long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
                             chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(),
-                            sbRadius.getProgress());
+                            sbRadius.getProgress() * 100);
                     if (newTaskPlaceId == -1)
                         Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
                     else {
@@ -870,7 +871,7 @@ public class TaskEditActivity extends AppCompatActivity {
                 chosenTaskPlaceChanged = true;
                 chosenTaskPlace = new TaskPlace(place.getLatLng().latitude,
                         place.getLatLng().longitude, place.getAddress().toString(),
-                        sbRadius.getProgress());
+                        sbRadius.getProgress() * 100);
                 etTaskPlace.setText(chosenTaskPlace.getAddress());
             }
         }

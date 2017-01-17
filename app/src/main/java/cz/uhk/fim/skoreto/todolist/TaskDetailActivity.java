@@ -526,6 +526,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
                 args.putFloat("taskPlaceLat", (float) taskPlace.getLatitude());
                 args.putFloat("taskPlaceLong", (float) taskPlace.getLongitude());
+                args.putInt("taskPlaceRadius", taskPlace.getRadius());
             }
             args.putBoolean("isTaskPlaceFilled", isTaskPlaceFilled);
             f.setArguments(args);
@@ -553,12 +554,14 @@ public class TaskDetailActivity extends AppCompatActivity {
                 // Pokud je vyplneno misto ukolu - vyznac jej na mape
                 float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
                 float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
+                int taskPlaceRadius = getArguments().getInt("taskPlaceRadius");
                 gMap.addMarker(new MarkerOptions().position(
                         new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
+                // Radius specifikovan v metrech by mel byt 0 nebo vetsi
                 gMap.addCircle(new CircleOptions()
                         .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
-                        .radius(5000)
-                        .strokeColor(Color.RED));
+                        .radius(taskPlaceRadius)
+                        .strokeColor(Color.RED).strokeWidth(7));
 
                 // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
                 MapsInitializer.initialize(this.getActivity());
