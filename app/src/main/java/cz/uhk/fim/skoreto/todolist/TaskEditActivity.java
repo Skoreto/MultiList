@@ -158,7 +158,8 @@ public class TaskEditActivity extends AppCompatActivity {
 
         etTaskName.setText(task.getName());
         if (task.getDueDate() != null) {
-            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
+                    getApplicationContext());
             etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
         } else {
             etTaskDueDate.setText("");
@@ -183,7 +184,8 @@ public class TaskEditActivity extends AppCompatActivity {
         // Vytvoreni instance adapteru pro spinner a pripojeni jeho dat.
         // POZOR! Zobrazeni nazvu bylo docileno pouhym prepsanim metody toString() ve tride TaskList.
         // Pro aktualni ucely nebylo nutne tvorit vlastni adapter.
-        ArrayAdapter<TaskList> taskListsAdapter = new ArrayAdapter<TaskList>(this, R.layout.support_simple_spinner_dropdown_item, taskLists);
+        ArrayAdapter<TaskList> taskListsAdapter = new ArrayAdapter<TaskList>(
+                this, R.layout.support_simple_spinner_dropdown_item, taskLists);
         spinTaskLists.setAdapter(taskListsAdapter);
 
         // Vychozi nastaveni zvoleneho seznamu.
@@ -203,15 +205,18 @@ public class TaskEditActivity extends AppCompatActivity {
 
         if (!task.getPhotoName().equals("")) {
             // Prime prirazeni nahledu fotografie do ImageView.
-            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
-            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            String photoThumbnailPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            final String photoPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
                    @Override
                    public void onClick(View view) {
                        // Zobrazeni velke fotografie po kliknuti na nahled.
-                       Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this, SinglePhotoActivity.class);
+                       Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this,
+                               SinglePhotoActivity.class);
                        sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
                        startActivity(sendPhotoDirectoryIntent);
                    }
@@ -245,7 +250,8 @@ public class TaskEditActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
 
         // Listener pro potvrzeni vybraneho datumu v dialogu kalendare.
-        final DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
+        final DatePickerDialog.OnDateSetListener datePickerListener =
+                new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 // Sestaveni noveho datumu.
@@ -258,7 +264,8 @@ public class TaskEditActivity extends AppCompatActivity {
                 task.setDueDate(newDueDate);
 
                 // Zobrazeni noveho datumu v EditTextu.
-                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
+                        getApplicationContext());
                 etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
             }
         };
@@ -272,7 +279,8 @@ public class TaskEditActivity extends AppCompatActivity {
                 int day = calendar.get(Calendar.DAY_OF_MONTH);
 
                 // Pouzit aktualni datum jako vychozi datum v datepickeru.
-                datePickerDialog = new DatePickerDialog(TaskEditActivity.this, datePickerListener, year, month, day);
+                datePickerDialog = new DatePickerDialog(TaskEditActivity.this, datePickerListener,
+                        year, month, day);
                 datePickerDialog.show();
             }
         });
@@ -298,7 +306,8 @@ public class TaskEditActivity extends AppCompatActivity {
                         // V pripade ziskani povoleni prejit na intent mapy
                     }
                 } else {
-                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    LocationManager locationManager = (LocationManager) getSystemService(
+                            Context.LOCATION_SERVICE);
                     // Create a criteria object to retrieve provider
                     Criteria criteria = new Criteria();
                     // Get the name of the best provider
@@ -310,9 +319,11 @@ public class TaskEditActivity extends AppCompatActivity {
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
                     requestQueue = Volley.newRequestQueue(TaskEditActivity.this);
 
-                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                    JsonObjectRequest request = new JsonObjectRequest(
+                            "https://maps.googleapis.com/maps/api/geocode/json?latlng="
                             + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
+                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo",
+                            new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
@@ -366,7 +377,8 @@ public class TaskEditActivity extends AppCompatActivity {
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
                     try {
-                        startActivityForResult(builder.build(TaskEditActivity.this), REQUEST_PLACE_PICKER);
+                        startActivityForResult(builder.build(TaskEditActivity.this),
+                                REQUEST_PLACE_PICKER);
                     } catch (GooglePlayServicesRepairableException e) {
                         e.printStackTrace();
                     } catch (GooglePlayServicesNotAvailableException e) {
@@ -461,9 +473,12 @@ public class TaskEditActivity extends AppCompatActivity {
                 // Vytvor v databazi novy zaznam mista, vrat jeho id a inicializuj instanci
                 // chosenTaskPlace s id.
                 long newTaskPlaceId = dm.addTaskPlaceReturnId(chosenTaskPlace.getLatitude(),
-                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(), sbRadius.getProgress() * 100);
+                        chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(),
+                        sbRadius.getProgress() * 100);
                 if (newTaskPlaceId == -1)
-                    Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskEditActivity.this,
+                            "Chyba při přidávání nového místa do databáze",
+                            Toast.LENGTH_SHORT).show();
                 else {
                     chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
                     task.setTaskPlaceId((int) newTaskPlaceId);
@@ -486,7 +501,9 @@ public class TaskEditActivity extends AppCompatActivity {
                             chosenTaskPlace.getLongitude(), chosenTaskPlace.getAddress(),
                             sbRadius.getProgress() * 100);
                     if (newTaskPlaceId == -1)
-                        Toast.makeText(TaskEditActivity.this, "Chyba při přidávání nového místa do databáze", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(TaskEditActivity.this,
+                                "Chyba při přidávání nového místa do databáze",
+                                Toast.LENGTH_SHORT).show();
                     else {
                         chosenTaskPlace = dm.getTaskPlace((int) newTaskPlaceId);
                         task.setTaskPlaceId((int) newTaskPlaceId);
@@ -518,19 +535,22 @@ public class TaskEditActivity extends AppCompatActivity {
     public void deleteTask() {
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
-            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
 
             // Smazani prislusne miniatury stare fotografie.
-            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
             boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
 
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getRecordingName().equals("")) {
-            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+            String oldTaskRecordingPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
             File oldTaskRecording = new File(oldTaskRecordingPath);
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
@@ -563,7 +583,9 @@ public class TaskEditActivity extends AppCompatActivity {
             try {
                 photoFile = createPhotoFile();
             } catch (IOException ex) {
-                Toast.makeText(TaskEditActivity.this, "Vyskytla se chyba při vytváření souboru fotografie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskEditActivity.this,
+                        "Vyskytla se chyba při vytváření souboru fotografie",
+                        Toast.LENGTH_SHORT).show();
             }
 
             // Pokracuj pouze, pokud byl soubor uspesne vytvoren.
@@ -581,12 +603,14 @@ public class TaskEditActivity extends AppCompatActivity {
     private File createPhotoFile() throws IOException {
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
-            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
 
             // Smazani prislusne miniatury stare fotografie.
-            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory()
+                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
             boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
@@ -604,7 +628,8 @@ public class TaskEditActivity extends AppCompatActivity {
             photosDirectory.mkdirs();
         }
 
-        thumbnailFolderPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails";
+        thumbnailFolderPath = Environment.getExternalStorageDirectory()
+                + "/MultiList/PhotoThumbnails";
         File thumbnailFolder = new File(thumbnailFolderPath);
         if (!thumbnailFolder.exists()) {
             File photoThumbnailsDirectory = new File(thumbnailFolderPath);
@@ -697,7 +722,8 @@ public class TaskEditActivity extends AppCompatActivity {
         }
     }
 
-    AudioManager.OnAudioFocusChangeListener afcListener = new AudioManager.OnAudioFocusChangeListener() {
+    AudioManager.OnAudioFocusChangeListener afcListener =
+            new AudioManager.OnAudioFocusChangeListener() {
         @Override
         public void onAudioFocusChange(int focusChange) {
             if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
@@ -734,7 +760,8 @@ public class TaskEditActivity extends AppCompatActivity {
      * Metoda handlujici request pristupu k dangerous zdrojum.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(
+            int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CAMERA: {
                 // If request is cancelled, the result arrays are empty.
@@ -754,7 +781,8 @@ public class TaskEditActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Povoleni udeleno, spustit nahravani zvuku
                     mediaRecorder = new MediaRecorder();
-                    AudioController.startRecording(task, mediaRecorder, audioManager, dm, TaskEditActivity.this);
+                    AudioController.startRecording(task, mediaRecorder, audioManager, dm,
+                            TaskEditActivity.this);
                 } else {
                     Toast.makeText(TaskEditActivity.this,
                             "Povolení k mikrofonu nebylo uděleno, nelze nahrávat zvuk.",
@@ -772,7 +800,8 @@ public class TaskEditActivity extends AppCompatActivity {
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
 
                     try {
-                        startActivityForResult(builder.build(TaskEditActivity.this), REQUEST_PLACE_PICKER);
+                        startActivityForResult(builder.build(TaskEditActivity.this),
+                                REQUEST_PLACE_PICKER);
                     } catch (GooglePlayServicesRepairableException e) {
                         e.printStackTrace();
                     } catch (GooglePlayServicesNotAvailableException e) {
@@ -791,13 +820,19 @@ public class TaskEditActivity extends AppCompatActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Povoleni udeleno, vyplnit soucasnou pozici
-                    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    LocationManager locationManager = (LocationManager) getSystemService(
+                            Context.LOCATION_SERVICE);
                     // Create a criteria object to retrieve provider
                     Criteria criteria = new Criteria();
                     // Get the name of the best provider
                     String provider = locationManager.getBestProvider(criteria, true);
                     // Get current location
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(this,
+                            Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
                     Location currentLocation = locationManager.getLastKnownLocation(provider);
@@ -806,13 +841,16 @@ public class TaskEditActivity extends AppCompatActivity {
                     // Oproti tride Geocoder vraci pristup s GeocodingAPI vzdy vysledek
                     requestQueue = Volley.newRequestQueue(TaskEditActivity.this);
 
-                    JsonObjectRequest request = new JsonObjectRequest("https://maps.googleapis.com/maps/api/geocode/json?latlng="
+                    JsonObjectRequest request = new JsonObjectRequest(
+                            "https://maps.googleapis.com/maps/api/geocode/json?latlng="
                             + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo", new Response.Listener<JSONObject>() {
+                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo",
+                            new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                String currentPlaceAddress = response.getJSONArray("results").getJSONObject(0)
+                                String currentPlaceAddress =
+                                        response.getJSONArray("results").getJSONObject(0)
                                         .getString("formatted_address");
                                 etTaskPlace.setText(currentPlaceAddress);
                             } catch (JSONException e) {
@@ -822,7 +860,8 @@ public class TaskEditActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(TaskEditActivity.this, "Volley networking chyba", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(TaskEditActivity.this, "Volley networking chyba",
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -844,15 +883,18 @@ public class TaskEditActivity extends AppCompatActivity {
         // Po potvrzeni vyfocene fotografie prejdi na stejnou upravu ukolu.
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             // Vytvoreni zmenseneho nahledu z porizene fotografie.
-            Bitmap photoBitmap = BitmapFactory.decodeFile(folderPath + File.separator + photoFileName + ".jpg");
+            Bitmap photoBitmap = BitmapFactory.decodeFile(
+                    folderPath + File.separator + photoFileName + ".jpg");
             Bitmap photoThumbnail = Bitmap.createScaledBitmap(photoBitmap, 200, 356, true);
 
             // Ulozeni nahledu do externiho uloziste.
             try {
-                OutputStream stream = new FileOutputStream(thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
+                OutputStream stream = new FileOutputStream(
+                        thumbnailFolderPath + File.separator + photoThumbnailFileName + ".jpg");
                 photoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             } catch (IOException e) {
-                Toast.makeText(TaskEditActivity.this, "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TaskEditActivity.this,
+                        "Chyba při vytváření náhledu fotografie", Toast.LENGTH_SHORT).show();
             }
 
             // Presmerovani na seznam ukolu, odkud ukol pochazi.

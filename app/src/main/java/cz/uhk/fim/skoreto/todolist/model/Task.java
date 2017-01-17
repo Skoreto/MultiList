@@ -24,12 +24,16 @@ public class Task {
 
     private Date dueDate;
 
+    private Date notificationDate;
+
     private int taskPlaceId;
 
     public Task(){
     }
 
-    public Task(int id, String name, String description, int listId, int completed, String photoName, String recordingName, Date dueDate, int taskPlaceId) {
+    public Task(int id, String name, String description, int listId, int completed,
+                String photoName, String recordingName, Date dueDate, Date notificationDate,
+                int taskPlaceId) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -38,6 +42,7 @@ public class Task {
         this.photoName = photoName;
         this.recordingName = recordingName;
         this.dueDate = dueDate;
+        this.notificationDate = notificationDate;
         this.taskPlaceId = taskPlaceId;
     }
 
@@ -103,6 +108,14 @@ public class Task {
 
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public Date getNotificationDate() {
+        return notificationDate;
+    }
+
+    public void setNotificationDate(Date notificationDate) {
+        this.notificationDate = notificationDate;
     }
 
     public int getTaskPlaceId() {

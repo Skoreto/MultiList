@@ -92,9 +92,11 @@ public class TaskListActivity extends AppCompatActivity {
         // Zobrazit vsechny / pouze splnene ukoly.
         hideCompleted = false;
         if (!hideCompleted) {
-            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(
+                    dataModel.getTasksByListId(listId, orderAscendingDueDate));
         } else {
-            taskRecyclerAdapter = new TaskRecyclerAdapter(dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
+            taskRecyclerAdapter = new TaskRecyclerAdapter(
+                    dataModel.getIncompletedTasksByListId(listId, orderAscendingDueDate));
         }
         rvTaskList.setAdapter(taskRecyclerAdapter);
 
@@ -111,8 +113,10 @@ public class TaskListActivity extends AppCompatActivity {
                     Calendar calendar = Calendar.getInstance();
                     Date dueDate = calendar.getTime();
 
-                    // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako nesplneny a s datumem splneni do dnes.
-                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", null, -1);
+                    // Ve vychozim pripade pridej novy ukol s prazdnym popisem do Inboxu jako
+                    // nesplneny a s datumem splneni do dnes.
+                    dataModel.addTask(etTaskName.getText().toString(), "", listId, 0, "", "", null,
+                            null, -1);
 
                     // Vyprazdneni pole po pridani ukolu.
                     etTaskName.setText("");
@@ -126,7 +130,8 @@ public class TaskListActivity extends AppCompatActivity {
                     Toast.makeText(TaskListActivity.this, "Úkol přidán", Toast.LENGTH_SHORT).show();
                 } else {
                     // Informovani uzivatele o nutnosti vyplnit název úkolu.
-                    Toast.makeText(TaskListActivity.this, "Prázdný název úkolu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(TaskListActivity.this, "Prázdný název úkolu!",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
         });
