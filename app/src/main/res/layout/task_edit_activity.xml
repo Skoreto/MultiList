@@ -65,14 +65,30 @@
                 android:focusable="false" />
 
             <TextView
-                android:id="@+id/tvPlaceLabel"
-                android:text="@string/tv_place_label"
+                android:id="@+id/tvNotificationDateLabel"
+                android:text="@string/tv_notification_date_label"
                 android:layout_row="2"
                 android:layout_column="0"
                 android:layout_gravity="center_horizontal|center_vertical" />
 
-            <GridLayout
+            <EditText
+                android:id="@+id/etNotificationDate"
+                android:inputType="date"
                 android:layout_row="2"
+                android:layout_column="1"
+                android:ems="13"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:focusable="false" />
+
+            <TextView
+                android:id="@+id/tvPlaceLabel"
+                android:text="@string/tv_place_label"
+                android:layout_row="3"
+                android:layout_column="0"
+                android:layout_gravity="center_horizontal|center_vertical" />
+
+            <GridLayout
+                android:layout_row="3"
                 android:layout_column="1"
                 android:layout_gravity="center_horizontal|center_vertical"
 
@@ -107,12 +123,12 @@
             <TextView
                 android:id="@+id/tvRadiusLabel"
                 android:text="@string/tv_radius_label"
-                android:layout_row="3"
+                android:layout_row="4"
                 android:layout_column="0"
                 android:layout_gravity="center_horizontal|center_vertical" />
 
             <GridLayout
-                android:layout_row="3"
+                android:layout_row="4"
                 android:layout_column="1"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_width="wrap_content"

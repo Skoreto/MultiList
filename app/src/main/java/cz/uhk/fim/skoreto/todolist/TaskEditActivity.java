@@ -82,6 +82,7 @@ public class TaskEditActivity extends AppCompatActivity {
     private Task task;
     private EditText etTaskName;
     private EditText etTaskDueDate;
+    private EditText etNotificationDate;
     private EditText etTaskPlace;
     private TextView tvRadius;
     private SeekBar sbRadius;
@@ -142,7 +143,10 @@ public class TaskEditActivity extends AppCompatActivity {
 
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
+        etNotificationDate = (EditText) findViewById(R.id.etNotificationDate);
         etTaskPlace = (EditText) findViewById(R.id.etTaskPlace);
+        tvRadius = (TextView) findViewById(R.id.tvRadius);
+        sbRadius = (SeekBar) findViewById(R.id.sbRadius);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -176,6 +180,22 @@ public class TaskEditActivity extends AppCompatActivity {
         if (task.getTaskPlaceId() != -1) {
             chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             etTaskPlace.setText(chosenTaskPlace.getAddress());
+            // SEEKBAR RADIUS
+            float radius = chosenTaskPlace.getRadius();
+            sbRadius.setProgress((int) radius / 100);
+
+            DecimalFormat df = new DecimalFormat("#.#");
+            if (radius < 1000) {
+                // Pod 1 km zobrazuj vzdalenost v metrech
+                String sRadius = df.format(radius);
+                tvRadius.setText(sRadius + " m");
+            } else {
+                // Nad 1 km zobrazuj vzdalenost v kilometrech
+                String sRadius = df.format(radius / 1000);
+                tvRadius.setText(sRadius + " km");
+            }
+        } else {
+            sbRadius.setProgress(15);
         }
 
         // SPINNER seznamu ukolu
@@ -388,10 +408,7 @@ public class TaskEditActivity extends AppCompatActivity {
             }
         });
 
-        // SEEKBAR radius
-        tvRadius = (TextView) findViewById(R.id.tvRadius);
-        sbRadius = (SeekBar) findViewById(R.id.sbRadius);
-        sbRadius.setProgress(15);
+        // SEEKBAR RADIUS
         sbRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
