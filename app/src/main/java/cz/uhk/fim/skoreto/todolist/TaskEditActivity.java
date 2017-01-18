@@ -3,6 +3,8 @@ package cz.uhk.fim.skoreto.todolist;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.DialogFragment;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -38,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -65,6 +68,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import cz.uhk.fim.skoreto.todolist.fragments.DateTimeDialogFragment;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
@@ -83,6 +87,7 @@ public class TaskEditActivity extends AppCompatActivity {
     private EditText etTaskName;
     private EditText etTaskDueDate;
     private EditText etNotificationDate;
+    private EditText etNotificationTime;
     private EditText etTaskPlace;
     private TextView tvRadius;
     private SeekBar sbRadius;
@@ -109,6 +114,8 @@ public class TaskEditActivity extends AppCompatActivity {
 
     private Calendar calendar;
     private DatePickerDialog datePickerDialog;
+//    private DialogFragment dateTimePickerDialog;
+    private TimePickerDialog timePickerDialog;
 
     private final int PERMISSIONS_REQUEST_CAMERA = 102;
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
@@ -144,6 +151,7 @@ public class TaskEditActivity extends AppCompatActivity {
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDueDate = (EditText) findViewById(R.id.etTaskDueDate);
         etNotificationDate = (EditText) findViewById(R.id.etNotificationDate);
+        etNotificationTime = (EditText) findViewById(R.id.etNotificationTime);
         etTaskPlace = (EditText) findViewById(R.id.etTaskPlace);
         tvRadius = (TextView) findViewById(R.id.tvRadius);
         sbRadius = (SeekBar) findViewById(R.id.sbRadius);
@@ -165,6 +173,13 @@ public class TaskEditActivity extends AppCompatActivity {
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
                     getApplicationContext());
             etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+        } else {
+            etTaskDueDate.setText("");
+        }
+        if (task.getNotificationDate() != null) {
+            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
+                    getApplicationContext());
+            etNotificationDate.setText(dateFormat.format(task.getNotificationDate()));
         } else {
             etTaskDueDate.setText("");
         }
@@ -269,7 +284,7 @@ public class TaskEditActivity extends AppCompatActivity {
         // DATE PICKER - DUE DATE
         calendar = Calendar.getInstance();
 
-        // Listener pro potvrzeni vybraneho datumu v dialogu kalendare.
+        // Listener pro potvrzeni vybraneho datumu splneni v dialogu kalendare.
         final DatePickerDialog.OnDateSetListener datePickerListener =
                 new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -284,9 +299,11 @@ public class TaskEditActivity extends AppCompatActivity {
                 task.setDueDate(newDueDate);
 
                 // Zobrazeni noveho datumu v EditTextu.
-                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
-                        getApplicationContext());
-                etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+//                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
+//                        getApplicationContext());
+//                etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+                etTaskDueDate.setText(
+                        dayOfMonth + "." + (monthOfYear + 1) + "." + year);
             }
         };
 
@@ -302,6 +319,78 @@ public class TaskEditActivity extends AppCompatActivity {
                 datePickerDialog = new DatePickerDialog(TaskEditActivity.this, datePickerListener,
                         year, month, day);
                 datePickerDialog.show();
+            }
+        });
+
+        // Listener pro potvrzeni vybraneho datumu notifikace v dialogu kalendare.
+        final DatePickerDialog.OnDateSetListener notificationDatePickerListener =
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        // Sestaveni noveho datumu.
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, monthOfYear);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        Date newDueDate = calendar.getTime();
+
+                        // Nastaveni datumu aktualni instanci ukolu.
+                        task.setNotificationDate(newDueDate);
+                        // TODO
+
+                        // Zobrazeni noveho datumu v EditTextu.
+                        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
+                                getApplicationContext());
+//                        etNotificationDate.setText(dateFormat.format(task.getDueDate()));
+
+                        etNotificationDate.setText(
+                                dayOfMonth + "." + (monthOfYear + 1) + "." + year);
+                    }
+                };
+
+        etNotificationDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                dateTimePickerDialog = new DateTimeDialogFragment();
+//                dateTimePickerDialog.show(getFragmentManager(), "dateTimePicker");
+
+                // Zjisteni aktualniho roku, mesice, dne.
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                // Pouzit aktualni datum jako vychozi datum v datepickeru.
+                datePickerDialog = new DatePickerDialog(TaskEditActivity.this,
+                        notificationDatePickerListener, year, month, day);
+                datePickerDialog.show();
+            }
+        });
+
+        // Listener pro potvrzeni vybraneho casu notifikace v dialogu TimePickeru.
+        final TimePickerDialog.OnTimeSetListener notificationTimePickerListener =
+                new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        String correctMinute;
+                        if (minute < 10)
+                            correctMinute = "0" + minute;
+                        else
+                            correctMinute = String.valueOf(minute);
+
+                        etNotificationTime.setText(hourOfDay + ":" + correctMinute);
+                    }
+                };
+
+        etNotificationTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Zjisteni aktualniho casu.
+                int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+
+                // Pouzit aktualni cas jako vychozi cas v TimePickeru.
+                timePickerDialog = new TimePickerDialog(TaskEditActivity.this,
+                        notificationTimePickerListener, hourOfDay, minute, true);
+                timePickerDialog.show();
             }
         });
 
