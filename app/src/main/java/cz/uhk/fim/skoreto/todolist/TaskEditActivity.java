@@ -3,7 +3,6 @@ package cz.uhk.fim.skoreto.todolist;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -61,14 +60,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import cz.uhk.fim.skoreto.todolist.fragments.DateTimeDialogFragment;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
@@ -114,8 +112,10 @@ public class TaskEditActivity extends AppCompatActivity {
 
     private Calendar calendar;
     private DatePickerDialog datePickerDialog;
-//    private DialogFragment dateTimePickerDialog;
     private TimePickerDialog timePickerDialog;
+    private String chosenNotificationDate = "";
+    private String chosenNotificationTime = "";
+    private boolean notificationDateTimeChanged = false;
 
     private final int PERMISSIONS_REQUEST_CAMERA = 102;
     private final int PERMISSIONS_REQUEST_RECORD_AUDIO = 103;
@@ -170,19 +170,37 @@ public class TaskEditActivity extends AppCompatActivity {
 
         etTaskName.setText(task.getName());
         if (task.getDueDate() != null) {
-            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
-                    getApplicationContext());
-            etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
+            SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy");
+            String sDueDate = sdf.format(task.getDueDate());
+            etTaskDueDate.setText(sDueDate);
         } else {
             etTaskDueDate.setText("");
         }
-        if (task.getNotificationDate() != null) {
-            DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
-                    getApplicationContext());
-            etNotificationDate.setText(dateFormat.format(task.getNotificationDate()));
+
+        // Predvyplneni datumu a casu notifikace
+        Date notificationDate = task.getNotificationDate();
+        if (notificationDate != null) {
+            // Nastaveni formatu datumu pro EditText
+            SimpleDateFormat sdfDateET = new SimpleDateFormat("d.M.yyyy");
+            String sNotificationDateET = sdfDateET.format(notificationDate);
+            etNotificationDate.setText(sNotificationDateET);
+            // Nastaveni fromatu datumu pro ulozeni do databaze
+            SimpleDateFormat sdfDateDB = new SimpleDateFormat("yyyy-MM-dd");
+            String sNotificationDateDB = sdfDateDB.format(notificationDate);
+            chosenNotificationDate = sNotificationDateDB;
+            // Nastaveni formatu datumu pro EditText
+            SimpleDateFormat sdfTimeET = new SimpleDateFormat("H:mm");
+            String sNotificationTimeET = sdfTimeET.format(notificationDate);
+            etNotificationTime.setText(sNotificationTimeET);
+            // Nastaveni fromatu casu pro ulozeni do databaze
+            SimpleDateFormat sdfTimeDB = new SimpleDateFormat("HH-mm");
+            String sNotificationTimeDB = sdfTimeDB.format(notificationDate);
+            chosenNotificationTime = sNotificationTimeDB;
         } else {
-            etTaskDueDate.setText("");
+            etNotificationDate.setText("");
+            etNotificationTime.setText("");
         }
+
         etTaskDescription.setText(task.getDescription());
 
         // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
@@ -299,9 +317,6 @@ public class TaskEditActivity extends AppCompatActivity {
                 task.setDueDate(newDueDate);
 
                 // Zobrazeni noveho datumu v EditTextu.
-//                DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
-//                        getApplicationContext());
-//                etTaskDueDate.setText(dateFormat.format(task.getDueDate()));
                 etTaskDueDate.setText(
                         dayOfMonth + "." + (monthOfYear + 1) + "." + year);
             }
@@ -326,33 +341,36 @@ public class TaskEditActivity extends AppCompatActivity {
         final DatePickerDialog.OnDateSetListener notificationDatePickerListener =
                 new DatePickerDialog.OnDateSetListener() {
                     @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        // Sestaveni noveho datumu.
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, monthOfYear);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        Date newDueDate = calendar.getTime();
-
-                        // Nastaveni datumu aktualni instanci ukolu.
-                        task.setNotificationDate(newDueDate);
-                        // TODO
-
-                        // Zobrazeni noveho datumu v EditTextu.
-                        DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(
-                                getApplicationContext());
-//                        etNotificationDate.setText(dateFormat.format(task.getDueDate()));
-
+                    public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                          int dayOfMonth) {
+                        // Sestaveni datumu notifikace pro prezentaci do EditTextu
+                        // Mesice pocitane od 0, tudiz nutne pricist 1
+                        monthOfYear = monthOfYear + 1;
                         etNotificationDate.setText(
-                                dayOfMonth + "." + (monthOfYear + 1) + "." + year);
+                                dayOfMonth + "." + monthOfYear + "." + year);
+
+                        // Sestaveni datumu notifikace pro ulozeni do databaze
+                        String databaseDayOfMonth;
+                        if (dayOfMonth < 10)
+                            databaseDayOfMonth = "0" + dayOfMonth;
+                        else
+                            databaseDayOfMonth = String.valueOf(dayOfMonth);
+
+                        String databaseMonthOfYear;
+                        if (monthOfYear < 10)
+                            databaseMonthOfYear = "0" + monthOfYear;
+                        else
+                            databaseMonthOfYear = String.valueOf(monthOfYear);
+
+                        chosenNotificationDate = year + "-" + databaseMonthOfYear
+                                + "-" + databaseDayOfMonth;
+                        notificationDateTimeChanged = true;
                     }
                 };
 
         etNotificationDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                dateTimePickerDialog = new DateTimeDialogFragment();
-//                dateTimePickerDialog.show(getFragmentManager(), "dateTimePicker");
-
                 // Zjisteni aktualniho roku, mesice, dne.
                 int year = calendar.get(Calendar.YEAR);
                 int month = calendar.get(Calendar.MONTH);
@@ -370,6 +388,7 @@ public class TaskEditActivity extends AppCompatActivity {
                 new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        // Sestaveni casu notifikace pro prezentaci do EditTextu
                         String correctMinute;
                         if (minute < 10)
                             correctMinute = "0" + minute;
@@ -377,6 +396,16 @@ public class TaskEditActivity extends AppCompatActivity {
                             correctMinute = String.valueOf(minute);
 
                         etNotificationTime.setText(hourOfDay + ":" + correctMinute);
+
+                        // Sestaveni casu notifikace pro ulozeni do databaze
+                        String databaseHourOfDay;
+                        if (hourOfDay < 10)
+                            databaseHourOfDay = "0" + hourOfDay;
+                        else
+                            databaseHourOfDay = String.valueOf(hourOfDay);
+
+                        chosenNotificationTime = databaseHourOfDay + "-" + correctMinute;
+                        notificationDateTimeChanged = true;
                     }
                 };
 
@@ -566,6 +595,20 @@ public class TaskEditActivity extends AppCompatActivity {
         task.setId(taskId);
         task.setName(etTaskName.getText().toString());
         task.setDescription(etTaskDescription.getText().toString());
+
+        // Sestaveni kompletniho notificationDateTime z formatu yyyy-MM-dd-HH-mm
+        if (notificationDateTimeChanged) {
+            String chosenNotificationDateTime = chosenNotificationDate + "-"
+                    + chosenNotificationTime;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+            try {
+                Date newNotificationDateTime = sdf.parse(chosenNotificationDateTime);
+                task.setNotificationDate(newNotificationDateTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (chbTaskCompleted.isChecked())
             task.setCompleted(1);
@@ -1026,5 +1069,3 @@ public class TaskEditActivity extends AppCompatActivity {
     }
 
 }
-
-
