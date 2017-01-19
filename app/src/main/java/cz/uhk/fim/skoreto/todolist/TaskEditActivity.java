@@ -3,6 +3,9 @@ package cz.uhk.fim.skoreto.todolist;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +23,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -127,6 +132,11 @@ public class TaskEditActivity extends AppCompatActivity {
     private boolean chosenTaskPlaceChanged = false;
     private RequestQueue requestQueue;
 
+    Button showNotificationBut, stopNotificationBut, alertButton;
+    private NotificationManager notificationManager;
+    boolean isNotificActive = false;
+    int notifID = 33;
+
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
      */
@@ -159,6 +169,10 @@ public class TaskEditActivity extends AppCompatActivity {
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
         ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
+
+        showNotificationBut = (Button) findViewById(R.id.showNotificationBut);
+        stopNotificationBut = (Button) findViewById(R.id.stopNotificationBut);
+        alertButton = (Button) findViewById(R.id.alertButton);
 
         Intent anyTaskListIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -1068,4 +1082,46 @@ public class TaskEditActivity extends AppCompatActivity {
         }
     }
 
+    public void showNotification(View view) {
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setContentTitle("Titulek zpravy")
+                .setContentText("Text zpravy")
+                .setTicker("Varovani nova zprava")
+                .setSmallIcon(R.drawable.ic_event_black_18dp);
+
+        Intent moreInfoIntent = new Intent(this, TaskListsActivity.class);
+
+        // Pouzivano pro stackovani tasku napric aktivitami, aby uzivatel presel na spravne misto
+        // po kliknuti na tlacitko zpet.
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
+        // Pridat vsechny rodice teto aktivity do stacku
+        taskStackBuilder.addParentStack(TaskListsActivity.class);
+        // Pridat novy Intent do stacku
+        taskStackBuilder.addNextIntent(moreInfoIntent);
+
+        // Definuje Intent a akci, kterou s nim provest jinou aplikaci
+        // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
+        int requestCode = 0;
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(requestCode,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Definuje Intent, ktery se ma objevit, pokud bylo kliknuto na notifikaci
+        notificationBuilder.setContentIntent(pendingIntent);
+        // Ziskani NotificationManageru, ktery je pouzit k upozorneni uzivatele o udalosti na pozadi
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // Odesli notifikaci
+        notificationManager.notify(notifID, notificationBuilder.build());
+        // Pro zabraneni stopnuti jiz stopnute notifikace
+        isNotificActive = true;
+    }
+
+    public void stopNotification(View view) {
+        if (isNotificActive) {
+            // Zruseni notifikace s danym ID
+            notificationManager.cancel(notifID);
+        }
+    }
+
+    public void setAlarm(View view) {
+    }
 }
