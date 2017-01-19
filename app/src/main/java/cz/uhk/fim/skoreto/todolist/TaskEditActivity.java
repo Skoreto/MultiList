@@ -2,6 +2,7 @@ package cz.uhk.fim.skoreto.todolist;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -70,12 +71,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
+import cz.uhk.fim.skoreto.todolist.utils.AlertReceiver;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 
 /**
@@ -1123,5 +1126,23 @@ public class TaskEditActivity extends AppCompatActivity {
     }
 
     public void setAlarm(View view) {
+        // Jak dlouho bude cekat nez upozorni
+        Long alertTime = new GregorianCalendar().getTimeInMillis() + 5 * 1000;
+
+//        Calendar calendar2 = Calendar.getInstance();
+//        calendar2.setTimeInMillis(System.currentTimeMillis());
+//        calendar2.add(Calendar.SECOND, 10);
+//        Long alertTime = calendar2.getTimeInMillis();
+
+        Intent alertIntent = new Intent(this, AlertReceiver.class);
+
+        // Umoznuje naplanovat, aby aplikace neco pozdeji provedla, i kdyz neni aktivni
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        // Definuje Intent a akci, kterou s nim provest jinou aplikaci
+        // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
+        alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
+                PendingIntent.getBroadcast(this, 34,
+                alertIntent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }

@@ -63,7 +63,10 @@
             android:value="@string/google_maps_key" />
         <activity
             android:name=".TaskPlacesMapActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps">
+        </activity>
+        <!-- Receiver pro naplanovane notifikace -->
+        <receiver android:name=".utils.AlertReceiver"/>
     </application>
 
 </manifest>
