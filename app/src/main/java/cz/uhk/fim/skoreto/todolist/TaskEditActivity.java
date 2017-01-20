@@ -340,6 +340,7 @@ public class TaskEditActivity extends AppCompatActivity {
             }
         });
 
+        // DATE PICKER - NOTIFICATION DATE
         // Listener pro potvrzeni vybraneho datumu notifikace v dialogu kalendare.
         final DatePickerDialog.OnDateSetListener notificationDatePickerListener =
                 new DatePickerDialog.OnDateSetListener() {
@@ -392,6 +393,7 @@ public class TaskEditActivity extends AppCompatActivity {
             }
         });
 
+        // TIME PICKER - NOTIFICATION TIME
         // Listener pro potvrzeni vybraneho casu notifikace v dialogu TimePickeru.
         final TimePickerDialog.OnTimeSetListener notificationTimePickerListener =
                 new TimePickerDialog.OnTimeSetListener() {

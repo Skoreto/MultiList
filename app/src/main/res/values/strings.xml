@@ -20,10 +20,6 @@
     <string name="tv_radius_label">Radius</string>
     <string name="tv_radius">1,5 km</string>
 
-    <!-- DateTime Dialog pripominky -->
-    <string name="btn_date_time_dialog_ok">OK</string>
-    <string name="btn_date_time_dialog_cancel">ZRUŠIT</string>
-
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>
 
