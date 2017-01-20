@@ -19,11 +19,13 @@ public class AlertReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        createNotification(context, "Čas vypršel", "5 sekund uplynulo", "Upozornění");
+        createNotification(context, intent.getStringExtra("notifTitle"),
+                intent.getStringExtra("notifText"), intent.getStringExtra("notifTicker"),
+                intent.getIntExtra("notifId", 1));
     }
 
     public void createNotification(Context context, String title, String text,
-                                   String ticker) {
+                                   String ticker, int id) {
 
         // Definuje Intent a akci, kterou s nim provest jinou aplikaci
         // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
@@ -50,8 +52,7 @@ public class AlertReceiver extends BroadcastReceiver {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         // Odesli notifikaci
-        int notificationId = 34;
-        notificationManager.notify(notificationId, notificationBuilder.build());
+        notificationManager.notify(id, notificationBuilder.build());
     }
 
 }

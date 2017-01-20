@@ -381,6 +381,12 @@ public class TaskEditActivity extends AppCompatActivity {
 
                         chosenNotificationDate = year + "-" + databaseMonthOfYear
                                 + "-" + databaseDayOfMonth;
+
+                        // Prednastaveni casu notifikace, pokud neni jeste vyplnen
+                        if (chosenNotificationTime.equals("")) {
+                            chosenNotificationTime = "09-00";
+                            etNotificationTime.setText("9:00");
+                        }
                         notificationDateTimeChanged = true;
                     }
                 };
@@ -613,15 +619,37 @@ public class TaskEditActivity extends AppCompatActivity {
         task.setName(etTaskName.getText().toString());
         task.setDescription(etTaskDescription.getText().toString());
 
-        // Sestaveni kompletniho notificationDateTime z formatu yyyy-MM-dd-HH-mm
+        // NOTIFIKACE
         if (notificationDateTimeChanged) {
+            // Sestaveni kompletniho notificationDateTime z formatu yyyy-MM-dd-HH-mm
             String chosenNotificationDateTime = chosenNotificationDate + "-"
                     + chosenNotificationTime;
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+            SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
             try {
-                Date newNotificationDateTime = sdf.parse(chosenNotificationDateTime);
+                // ZAZNAM DO DATABAZE
+                Date newNotificationDateTime = sdfDateTime.parse(chosenNotificationDateTime);
                 task.setNotificationDate(newNotificationDateTime);
+
+                // NASTAVENI NOTIFIKACE
+                Calendar alarmCalendar = Calendar.getInstance();
+                alarmCalendar.setTime(newNotificationDateTime);
+                Long alertTime = alarmCalendar.getTimeInMillis();
+
+                Intent alertIntent = new Intent(this, AlertReceiver.class);
+                alertIntent.putExtra("notifTitle", "Připomenutí");
+                alertIntent.putExtra("notifText", task.getName());
+                alertIntent.putExtra("notifTicker", "Připomenutí úkolu");
+                alertIntent.putExtra("notifId", task.getId());
+
+                // Umoznuje naplanovat, aby aplikace neco pozdeji provedla, i kdyz neni aktivni
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+                // Definuje Intent a akci, kterou s nim provest jinou aplikaci
+                // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho
+                alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
+                        PendingIntent.getBroadcast(this, task.getId(),
+                                alertIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -1127,14 +1155,24 @@ public class TaskEditActivity extends AppCompatActivity {
 
     public void setAlarm(View view) {
         // Jak dlouho bude cekat nez upozorni
-        Long alertTime = new GregorianCalendar().getTimeInMillis() + 5 * 1000;
+//        Long alertTime = new GregorianCalendar().getTimeInMillis() + 5 * 1000;
 
 //        Calendar calendar2 = Calendar.getInstance();
 //        calendar2.setTimeInMillis(System.currentTimeMillis());
 //        calendar2.add(Calendar.SECOND, 10);
 //        Long alertTime = calendar2.getTimeInMillis();
 
+        Calendar alarmCalendar = Calendar.getInstance();
+        alarmCalendar.setTimeInMillis(System.currentTimeMillis());
+        alarmCalendar.set(2017, 0, 20, 9, 45, 0);
+        Long alertTime = alarmCalendar.getTimeInMillis();
+
+
         Intent alertIntent = new Intent(this, AlertReceiver.class);
+        alertIntent.putExtra("notifTitle", "Připomenutí");
+        alertIntent.putExtra("notifText", task.getName());
+        alertIntent.putExtra("notifTicker", "Připomenutí úkolu");
+        alertIntent.putExtra("notifId", task.getId());
 
         // Umoznuje naplanovat, aby aplikace neco pozdeji provedla, i kdyz neni aktivni
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -1142,7 +1180,7 @@ public class TaskEditActivity extends AppCompatActivity {
         // Definuje Intent a akci, kterou s nim provest jinou aplikaci
         // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
         alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
-                PendingIntent.getBroadcast(this, 34,
+                PendingIntent.getBroadcast(this, task.getId(),
                 alertIntent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }
