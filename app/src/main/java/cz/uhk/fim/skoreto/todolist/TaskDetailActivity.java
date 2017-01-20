@@ -48,6 +48,7 @@ import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
+import cz.uhk.fim.skoreto.todolist.utils.WeatherDownload;
 
 /**
  * Aktivita pro zobrazeni detailu ukolu.
@@ -58,6 +59,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
+    public static TextView tvTemperature;
 //    private ImageView ivTaskPhoto;
 
     private DataModel dm;
@@ -93,6 +95,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         tvTaskName = (TextView) findViewById(R.id.tvTaskName);
+        tvTemperature = (TextView) findViewById(R.id.tvTemperature);
 //        ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
@@ -104,6 +107,16 @@ public class TaskDetailActivity extends AppCompatActivity {
         task = dm.getTask(taskId);
 
         tvTaskName.setText(task.getName());
+
+        // POCASI
+        if (task.getTaskPlaceId() != -1) {
+            TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            WeatherDownload weatherDownload = new WeatherDownload();
+            String sLat = String.valueOf(taskPlace.getLatitude());
+            String sLong = String.valueOf(taskPlace.getLongitude());
+            weatherDownload.execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
+                    sLat + "&lon="+ sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
+        }
 
 //        if (!task.getPhotoName().equals("")) {
 //            // Prime prirazeni nahledu fotografie do ImageView.

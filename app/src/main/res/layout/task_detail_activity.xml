@@ -22,6 +22,13 @@
         android:gravity="center_vertical|center_horizontal"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+    <TextView
+        android:id="@+id/tvTemperature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <ToggleButton
         android:id="@+id/btnPlayTask"
         android:layout_width="100dp"
