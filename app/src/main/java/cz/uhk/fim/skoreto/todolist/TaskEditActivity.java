@@ -4,9 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +22,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +32,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -71,7 +67,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
@@ -135,11 +130,6 @@ public class TaskEditActivity extends AppCompatActivity {
     private boolean chosenTaskPlaceChanged = false;
     private RequestQueue requestQueue;
 
-    Button showNotificationBut, stopNotificationBut, alertButton;
-    private NotificationManager notificationManager;
-    boolean isNotificActive = false;
-    int notifID = 33;
-
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
      */
@@ -172,10 +162,6 @@ public class TaskEditActivity extends AppCompatActivity {
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
         ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
-
-        showNotificationBut = (Button) findViewById(R.id.showNotificationBut);
-        stopNotificationBut = (Button) findViewById(R.id.stopNotificationBut);
-        alertButton = (Button) findViewById(R.id.alertButton);
 
         Intent anyTaskListIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -1113,74 +1099,4 @@ public class TaskEditActivity extends AppCompatActivity {
         }
     }
 
-    public void showNotification(View view) {
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setContentTitle("Titulek zpravy")
-                .setContentText("Text zpravy")
-                .setTicker("Varovani nova zprava")
-                .setSmallIcon(R.drawable.ic_event_black_18dp);
-
-        Intent moreInfoIntent = new Intent(this, TaskListsActivity.class);
-
-        // Pouzivano pro stackovani tasku napric aktivitami, aby uzivatel presel na spravne misto
-        // po kliknuti na tlacitko zpet.
-        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-        // Pridat vsechny rodice teto aktivity do stacku
-        taskStackBuilder.addParentStack(TaskListsActivity.class);
-        // Pridat novy Intent do stacku
-        taskStackBuilder.addNextIntent(moreInfoIntent);
-
-        // Definuje Intent a akci, kterou s nim provest jinou aplikaci
-        // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
-        int requestCode = 0;
-        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(requestCode,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Definuje Intent, ktery se ma objevit, pokud bylo kliknuto na notifikaci
-        notificationBuilder.setContentIntent(pendingIntent);
-        // Ziskani NotificationManageru, ktery je pouzit k upozorneni uzivatele o udalosti na pozadi
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        // Odesli notifikaci
-        notificationManager.notify(notifID, notificationBuilder.build());
-        // Pro zabraneni stopnuti jiz stopnute notifikace
-        isNotificActive = true;
-    }
-
-    public void stopNotification(View view) {
-        if (isNotificActive) {
-            // Zruseni notifikace s danym ID
-            notificationManager.cancel(notifID);
-        }
-    }
-
-    public void setAlarm(View view) {
-        // Jak dlouho bude cekat nez upozorni
-//        Long alertTime = new GregorianCalendar().getTimeInMillis() + 5 * 1000;
-
-//        Calendar calendar2 = Calendar.getInstance();
-//        calendar2.setTimeInMillis(System.currentTimeMillis());
-//        calendar2.add(Calendar.SECOND, 10);
-//        Long alertTime = calendar2.getTimeInMillis();
-
-        Calendar alarmCalendar = Calendar.getInstance();
-        alarmCalendar.setTimeInMillis(System.currentTimeMillis());
-        alarmCalendar.set(2017, 0, 20, 9, 45, 0);
-        Long alertTime = alarmCalendar.getTimeInMillis();
-
-
-        Intent alertIntent = new Intent(this, AlertReceiver.class);
-        alertIntent.putExtra("notifTitle", "Připomenutí");
-        alertIntent.putExtra("notifText", task.getName());
-        alertIntent.putExtra("notifTicker", "Připomenutí úkolu");
-        alertIntent.putExtra("notifId", task.getId());
-
-        // Umoznuje naplanovat, aby aplikace neco pozdeji provedla, i kdyz neni aktivni
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        // Definuje Intent a akci, kterou s nim provest jinou aplikaci
-        // FLAG_UPDATE_CURRENT: Pokud Intent existuje ponechej ho, ale updatuj ho, pokud je potreba
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime,
-                PendingIntent.getBroadcast(this, task.getId(),
-                alertIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-    }
 }
