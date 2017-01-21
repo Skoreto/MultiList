@@ -46,6 +46,8 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
@@ -53,6 +55,7 @@ import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.model.Weather;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherCurrentForecast;
+import cz.uhk.fim.skoreto.todolist.utils.WeatherDailyForecast;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherHourForecast;
 
 /**
@@ -69,7 +72,10 @@ public class TaskDetailActivity extends AppCompatActivity {
     private DataModel dm;
     private int taskId;
     private int listId;
-    public static Weather weatherCurrent, weatherHour;
+
+    public static Weather weatherCurrent, weatherHour, weatherDaily;
+    public static int weatherDailyCount;
+    public static List<Weather> listWeatherDaily;
 
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
@@ -114,6 +120,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         // POCASI
         if (task.getTaskPlaceId() != -1) {
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            // Stahni aktualni data o pocasi
             weatherCurrent = new Weather();
             WeatherCurrentForecast weatherCurrentForecast = new WeatherCurrentForecast();
             String sLat = String.valueOf(taskPlace.getLatitude());
@@ -121,10 +128,25 @@ public class TaskDetailActivity extends AppCompatActivity {
             weatherCurrentForecast.execute("http://api.openweathermap.org/data/2.5/weather?lat="
                     + sLat + "&lon="+ sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
 
+            // Stahni predpoved pro hodinnove urcene pocasi
             weatherHour = new Weather();
             WeatherHourForecast weatherHourForecast = new WeatherHourForecast();
             weatherHourForecast.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
                     + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
+
+            // Stahni predpoved pocasi pro X dni
+            weatherDailyCount = 7;
+            listWeatherDaily = new ArrayList<Weather>();
+            // Inicializuj si prazdne pocasi pro kazdy den
+            for (int i = 0; i < weatherDailyCount; i++) {
+                listWeatherDaily.add(new Weather());
+            }
+            WeatherDailyForecast weatherDailyForecast = new WeatherDailyForecast();
+            weatherDailyForecast.execute(
+                    "http://api.openweathermap.org/data/2.5/forecast/daily?lat="
+                    + sLat + "&lon=" + sLong + "&cnt=" + String.valueOf(weatherDailyCount)
+                            + "&mode=json&appid=792b095348cf903a77b8ee3f2bc8251e");
+            weatherDaily = listWeatherDaily.get(0);
         }
 
 //        if (!task.getPhotoName().equals("")) {
@@ -150,8 +172,9 @@ public class TaskDetailActivity extends AppCompatActivity {
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Obecné"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Počasí"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Předpověď"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Aktuálně"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Hour"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Daily"));
 //        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
         detailTabLayout.setTabGravity(TabLayout.MODE_SCROLLABLE);
 
@@ -369,7 +392,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 5;
+            return 6;
         }
 
         @Override
@@ -390,6 +413,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                     return WeatherCurrentFragment.newInstance(weatherCurrent);
                 case 4:
                     return WeatherHourFragment.newInstance(weatherHour);
+                case 5:
+                    return WeatherDailyFragment.newInstance(weatherDaily);
 //                case 4:
 //                    return ArrayListFragment.newInstance(position);
                 default:
@@ -408,9 +433,11 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 2:
                     return "Mapa";
                 case 3:
-                    return "Počasí";
+                    return "Aktuálě";
                 case 4:
-                    return "Předpověď";
+                    return "Hour";
+                case 5:
+                    return "Daily";
 //                case 4:
 //                    return "List";
                 default:
@@ -626,7 +653,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Fragment predpovedi pocasi.
+     * Fragment aktualniho pocasi.
      */
     public static class WeatherCurrentFragment extends Fragment {
         private TextView tvCurrentDate;
@@ -689,7 +716,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Fragment predpovedi pocasi.
+     * Fragment 5-ti denni / 3-hodinove predpovedi pocasi.
      */
     public static class WeatherHourFragment extends Fragment {
         private TextView tvForecastDate;
@@ -725,6 +752,67 @@ public class TaskDetailActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_pager_weather_hour, container, false);
+            Bundle args = getArguments();
+
+            tvForecastDate = (TextView) view.findViewById(R.id.tvForecastDate);
+            tvForecastDate.setText(args.getString("forecastDate"));
+
+            ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
+            String icon = args.getString("icon");
+            String iconImage = String.format("http://openweathermap.org/img/w/%s.png", icon);
+            Picasso.with(getContext()).load(iconImage).into(ivMainIcon);
+
+            tvTemp = (TextView) view.findViewById(R.id.tvTemp);
+            tvTemp.setText(
+                    String.format("%.1f", args.getDouble("temp")) + " °C");
+            tvMain = (TextView) view.findViewById(R.id.tvMain);
+            tvMain.setText(args.getString("main"));
+            tvPressure = (TextView) view.findViewById(R.id.tvPressure);
+            tvPressure.setText(
+                    String.format("%.0f", args.getDouble("pressure")) + " hPa");
+            tvWind = (TextView) view.findViewById(R.id.tvWind);
+
+            return view;
+        }
+    }
+
+    /**
+     * Fragment az 16-ti denni prumerne predpovedi pocasi.
+     */
+    public static class WeatherDailyFragment extends Fragment {
+        private TextView tvForecastDate;
+        private ImageView ivMainIcon;
+        private TextView tvTemp;
+        private TextView tvMain;
+        private TextView tvPressure;
+        private TextView tvWind;
+
+        static WeatherDailyFragment newInstance(Weather weatherDaily) {
+            WeatherDailyFragment f = new WeatherDailyFragment();
+            Bundle args = new Bundle();
+            args.putString("icon", weatherDaily.getIcon());
+            args.putDouble("temp", weatherDaily.getTemp());
+            args.putString("main", weatherDaily.getMain());
+            args.putDouble("pressure", weatherDaily.getPressure());
+
+            // Parsovani datumu predpovedi
+            SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy H:mm");
+            String sForecastDate = sdf.format(weatherDaily.getDate());
+            args.putString("forecastDate", sForecastDate);
+
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_pager_weather_daily, container, false);
             Bundle args = getArguments();
 
             tvForecastDate = (TextView) view.findViewById(R.id.tvForecastDate);

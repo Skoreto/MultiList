@@ -18,7 +18,7 @@ import java.util.Date;
 import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
 
 /**
- * Trida pro vraceni az 5-ti denni predpovedi pocasi.
+ * Trida pro vraceni az 5-ti denni predpovedi pocasi pro kazde 3 hodiny.
  * Priklad zdroje dat pro Podebrady:
  * http://api.openweathermap.org/data/2.5/forecast?lat=
  * 50.145197499999966&lon=15.137113281249997&appid=792b095348cf903a77b8ee3f2bc8251e
@@ -60,7 +60,7 @@ public class WeatherHourForecast extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         try {
-            // Cely objekt dat o pocasi
+            // Cely objekt dat o pocasi (5 dni po 3 hodinach)
             JSONObject overalWeatherObject = new JSONObject(result);
 
             // "city":{"id","name","coord":{"lon","lat"},"country",...}
@@ -76,11 +76,11 @@ public class WeatherHourForecast extends AsyncTask<String, Void, String> {
             JSONObject singleObject = listArray.getJSONObject(0);
 
             // Parsovane datum casu predpovedi z JSON formatu "yyyy-MM-dd HH:mm:ss"
-            String sDtTxt = singleObject.getString("dt_txt");
-            Date dtTxt = null;
+            String sDate = singleObject.getString("dt_txt");
+            Date date = null;
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
-                dtTxt = sdf.parse(sDtTxt);
+                date = sdf.parse(sDate);
             } catch (ParseException e) {
                 Log.e("Parsovani datumu",
                         "Nepodarilo se naparsovat datum u predpovedi pocasi.");
@@ -115,11 +115,11 @@ public class WeatherHourForecast extends AsyncTask<String, Void, String> {
             TaskDetailActivity.weatherHour.setHumidity(humidity);
             TaskDetailActivity.weatherHour.setWindSpeed(windSpeed);
             TaskDetailActivity.weatherHour.setName(name);
-            TaskDetailActivity.weatherHour.setDate(dtTxt);
+            TaskDetailActivity.weatherHour.setDate(date);
         } catch (JSONException e) {
             e.printStackTrace();
-            Log.e("Tvorba JSON pocasi",
-                    "Nepodarilo se naparsovat udaje o pocasi z JSON OpenWeatherMapAPI.");
+            Log.e("Tvorba hour pocasi",
+                    "Nepodarilo se naparsovat udaje o hour pocasi z JSON OpenWeatherMapAPI.");
         }
     }
 

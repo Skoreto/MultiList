@@ -22,6 +22,7 @@ public class Weather {
 
     private double windSpeed;
 
+    // Nazev mista, ze ktereho pochazi udaje o pocasi
     private String name;
 
     // Parsovane datum casu predpovedi z JSON formatu "yyyy-MM-dd HH:mm:ss"
