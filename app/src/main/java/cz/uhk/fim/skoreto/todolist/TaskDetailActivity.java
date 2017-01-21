@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -47,6 +49,7 @@ import java.text.DateFormat;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
+import cz.uhk.fim.skoreto.todolist.model.Weather;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherDownload;
 
@@ -59,17 +62,16 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
-    public static TextView tvTemperature;
 //    private ImageView ivTaskPhoto;
 
     private DataModel dm;
     private int taskId;
     private int listId;
+    public static Weather weather;
 
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
 
-    static final int NUM_ITEMS = 4;
     private DetailFragmentPagerAdapter detailFragmentPagerAdapter;
     private ViewPager detailViewPager;
 
@@ -95,7 +97,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         tvTaskName = (TextView) findViewById(R.id.tvTaskName);
-        tvTemperature = (TextView) findViewById(R.id.tvTemperature);
 //        ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
@@ -110,6 +111,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // POCASI
         if (task.getTaskPlaceId() != -1) {
+            weather = new Weather();
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             WeatherDownload weatherDownload = new WeatherDownload();
             String sLat = String.valueOf(taskPlace.getLatitude());
@@ -141,7 +143,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Obecné"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Počasí"));
+//        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
         detailTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         // Inicializace adapteru FragmentPageru
@@ -358,7 +361,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return NUM_ITEMS;
+            return 4;
         }
 
         @Override
@@ -376,7 +379,9 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 2:
                     return TaskPlaceMapFragment.newInstance(task, dm);
                 case 3:
-                    return ArrayListFragment.newInstance(position);
+                    return WeatherFragment.newInstance(weather);
+//                case 4:
+//                    return ArrayListFragment.newInstance(position);
                 default:
                     return null;
             }
@@ -393,7 +398,9 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 2:
                     return "Mapa";
                 case 3:
-                    return "List";
+                    return "Počasí";
+//                case 4:
+//                    return "List";
                 default:
                     return "Page " + position;
             }
@@ -604,6 +611,61 @@ public class TaskDetailActivity extends AppCompatActivity {
             mapView.onLowMemory();
         }
 
+    }
+
+    /**
+     * Fragment predpovedi pocasi.
+     */
+    public static class WeatherFragment extends Fragment {
+        private ImageView ivMainIcon;
+        private TextView tvTemp;
+        private TextView tvMain;
+        private TextView tvPressure;
+        private TextView tvWind;
+
+
+        static WeatherFragment newInstance(Weather weather) {
+            WeatherFragment f = new WeatherFragment();
+            Bundle args = new Bundle();
+            args.putString("icon", weather.getIcon());
+            args.putDouble("temp", weather.getTemp());
+            args.putString("main", weather.getMain());
+            args.putDouble("pressure", weather.getPressure());
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_pager_weather, container, false);
+            Bundle args = getArguments();
+
+            ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
+            String icon = args.getString("icon");
+            String iconImage = String.format("http://openweathermap.org/img/w/%s.png", icon);
+            Picasso.with(getContext()).load(iconImage).into(ivMainIcon);
+
+            tvTemp = (TextView) view.findViewById(R.id.tvTemp);
+            tvTemp.setText(
+                    String.format("%.1f", args.getDouble("temp")) + " °C");
+            tvMain = (TextView) view.findViewById(R.id.tvMain);
+            tvMain.setText(args.getString("main"));
+            tvPressure = (TextView) view.findViewById(R.id.tvPressure);
+            tvPressure.setText(
+                    String.format("%.0f", args.getDouble("pressure")) + " hPa");
+            tvWind = (TextView) view.findViewById(R.id.tvWind);
+
+
+//            ivPressure.setImageResource(R.drawable.ic_event_black_18dp);
+
+            return view;
+        }
     }
 
     public static class ArrayListFragment extends ListFragment {

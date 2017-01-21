@@ -1,7 +1,9 @@
 package cz.uhk.fim.skoreto.todolist.utils;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,7 +43,8 @@ public class WeatherDownload extends AsyncTask<String, Void, String> {
             return result;
         } catch (Exception e) {
             e.printStackTrace();
-            // TODO Nepodarilo se nacist pocasi
+            Log.e("Connection k pocasi",
+                    "Nepodarilo se ziskat connection k pocasi na OpenWeatherMapAPI.");
         }
 
         return null;
@@ -50,24 +53,45 @@ public class WeatherDownload extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-
         try {
-            JSONObject jsonObject = new JSONObject(result);
-            // "main":{"temp":280.75,"pressure":1007.87,"humidity":100,"temp_min":280.75,"temp_max":280.75,"sea_level":1017.32,"grnd_level":1007.87
-            JSONObject mainWeatherData = new JSONObject(jsonObject.getString("main"));
+            // Cely objekt dat o pocasi
+            JSONObject overalWeatherObject = new JSONObject(result);
+            String name = overalWeatherObject.getString("name");
 
-            Double tempKelvinDbl = Double.parseDouble(mainWeatherData.getString("temp"));
+            // "weather":[{"id":701,"main":"Mist","description":"mist","icon":"50d"}]
+            JSONArray weatherArray = new JSONArray(overalWeatherObject.getString("weather"));
+            JSONObject weatherObject = weatherArray.getJSONObject(0);
+            String main = weatherObject.getString("main");
+            String description = weatherObject.getString("description");
+            String icon = weatherObject.getString("icon");
 
-            double tempCelsius = tempKelvinDbl - 273.15;
+            // "main":{"temp","pressure","humidity","temp_min","temp_max","sea_level","grnd_level"
+            JSONObject mainObject = new JSONObject(overalWeatherObject.getString("main"));
+            Double pressure = Double.parseDouble(mainObject.getString("pressure"));
+            Double humidity = Double.parseDouble(mainObject.getString("humidity"));
 
-            String weatherPlaceName = jsonObject.getString("name");
+            // Prepocet teplony z Kelvinu na Celsius
+            Double tempKelvin = Double.parseDouble(mainObject.getString("temp"));
+            double tempCelsius = tempKelvin - 273.15;
 
-            TaskDetailActivity.tvTemperature.setText(String.format("%.1f", tempCelsius) + " °C");
+            // "wind":{"speed":1}
+            JSONObject windObject = new JSONObject(overalWeatherObject.getString("wind"));
+            Double windSpeed = Double.parseDouble(windObject.getString("speed"));
 
+            // Predani udaju do inicializovaneho statickeho objektu pocasi v TaskDetailActivity
+            TaskDetailActivity.weather.setMain(main);
+            TaskDetailActivity.weather.setDescription(description);
+            TaskDetailActivity.weather.setIcon(icon);
+            TaskDetailActivity.weather.setTemp(tempCelsius);
+            TaskDetailActivity.weather.setPressure(pressure);
+            TaskDetailActivity.weather.setHumidity(humidity);
+            TaskDetailActivity.weather.setWindSpeed(windSpeed);
+            TaskDetailActivity.weather.setName(name);
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.e("Tvorba JSON pocasi",
+                    "Nepodarilo se naparsovat udaje o pocasi z JSON OpenWeatherMapAPI.");
         }
-
-
     }
+
 }
