@@ -24,7 +24,7 @@ import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
  * 50.145197499999966&lon=15.137113281249997&appid=792b095348cf903a77b8ee3f2bc8251e
  * Created by Tomas.
  */
-public class WeatherForecastDownload extends AsyncTask<String, Void, String> {
+public class WeatherHourForecast extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... urls) {
@@ -107,15 +107,15 @@ public class WeatherForecastDownload extends AsyncTask<String, Void, String> {
             Double windSpeed = Double.parseDouble(windObject.getString("speed"));
 
             // Predani udaju do inicializovaneho statickeho objektu pocasi v TaskDetailActivity
-            TaskDetailActivity.weatherForecast.setMain(main);
-            TaskDetailActivity.weatherForecast.setDescription(description);
-            TaskDetailActivity.weatherForecast.setIcon(icon);
-            TaskDetailActivity.weatherForecast.setTemp(tempCelsius);
-            TaskDetailActivity.weatherForecast.setPressure(pressure);
-            TaskDetailActivity.weatherForecast.setHumidity(humidity);
-            TaskDetailActivity.weatherForecast.setWindSpeed(windSpeed);
-            TaskDetailActivity.weatherForecast.setName(name);
-            TaskDetailActivity.weatherForecast.setDtTxt(dtTxt);
+            TaskDetailActivity.weatherHour.setMain(main);
+            TaskDetailActivity.weatherHour.setDescription(description);
+            TaskDetailActivity.weatherHour.setIcon(icon);
+            TaskDetailActivity.weatherHour.setTemp(tempCelsius);
+            TaskDetailActivity.weatherHour.setPressure(pressure);
+            TaskDetailActivity.weatherHour.setHumidity(humidity);
+            TaskDetailActivity.weatherHour.setWindSpeed(windSpeed);
+            TaskDetailActivity.weatherHour.setName(name);
+            TaskDetailActivity.weatherHour.setDate(dtTxt);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("Tvorba JSON pocasi",

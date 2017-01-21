@@ -52,8 +52,8 @@ import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.model.Weather;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
-import cz.uhk.fim.skoreto.todolist.utils.WeatherDownload;
-import cz.uhk.fim.skoreto.todolist.utils.WeatherForecastDownload;
+import cz.uhk.fim.skoreto.todolist.utils.WeatherCurrentForecast;
+import cz.uhk.fim.skoreto.todolist.utils.WeatherHourForecast;
 
 /**
  * Aktivita pro zobrazeni detailu ukolu.
@@ -69,7 +69,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private DataModel dm;
     private int taskId;
     private int listId;
-    public static Weather weather, weatherForecast;
+    public static Weather weatherCurrent, weatherHour;
 
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
@@ -114,16 +114,16 @@ public class TaskDetailActivity extends AppCompatActivity {
         // POCASI
         if (task.getTaskPlaceId() != -1) {
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
-            weather = new Weather();
-            WeatherDownload weatherDownload = new WeatherDownload();
+            weatherCurrent = new Weather();
+            WeatherCurrentForecast weatherCurrentForecast = new WeatherCurrentForecast();
             String sLat = String.valueOf(taskPlace.getLatitude());
             String sLong = String.valueOf(taskPlace.getLongitude());
-            weatherDownload.execute("http://api.openweathermap.org/data/2.5/weather?lat="
+            weatherCurrentForecast.execute("http://api.openweathermap.org/data/2.5/weather?lat="
                     + sLat + "&lon="+ sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
 
-            weatherForecast = new Weather();
-            WeatherForecastDownload weatherForecastDownload = new WeatherForecastDownload();
-            weatherForecastDownload.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
+            weatherHour = new Weather();
+            WeatherHourForecast weatherHourForecast = new WeatherHourForecast();
+            weatherHourForecast.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
                     + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
         }
 
@@ -153,7 +153,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Počasí"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Předpověď"));
 //        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
-        detailTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        detailTabLayout.setTabGravity(TabLayout.MODE_SCROLLABLE);
 
         // Inicializace adapteru FragmentPageru
         detailFragmentPagerAdapter = new DetailFragmentPagerAdapter(
@@ -387,9 +387,9 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 2:
                     return TaskPlaceMapFragment.newInstance(task, dm);
                 case 3:
-                    return WeatherFragment.newInstance(weather);
+                    return WeatherCurrentFragment.newInstance(weatherCurrent);
                 case 4:
-                    return WeatherForecastFragment.newInstance(weatherForecast);
+                    return WeatherHourFragment.newInstance(weatherHour);
 //                case 4:
 //                    return ArrayListFragment.newInstance(position);
                 default:
@@ -628,20 +628,27 @@ public class TaskDetailActivity extends AppCompatActivity {
     /**
      * Fragment predpovedi pocasi.
      */
-    public static class WeatherFragment extends Fragment {
+    public static class WeatherCurrentFragment extends Fragment {
+        private TextView tvCurrentDate;
         private ImageView ivMainIcon;
         private TextView tvTemp;
         private TextView tvMain;
         private TextView tvPressure;
         private TextView tvWind;
 
-        static WeatherFragment newInstance(Weather weather) {
-            WeatherFragment f = new WeatherFragment();
+        static WeatherCurrentFragment newInstance(Weather weatherCurrent) {
+            WeatherCurrentFragment f = new WeatherCurrentFragment();
             Bundle args = new Bundle();
-            args.putString("icon", weather.getIcon());
-            args.putDouble("temp", weather.getTemp());
-            args.putString("main", weather.getMain());
-            args.putDouble("pressure", weather.getPressure());
+            args.putString("icon", weatherCurrent.getIcon());
+            args.putDouble("temp", weatherCurrent.getTemp());
+            args.putString("main", weatherCurrent.getMain());
+            args.putDouble("pressure", weatherCurrent.getPressure());
+
+            // Parsovani datumu predpovedi
+            SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy H:mm");
+            String sCurrentDate = sdf.format(weatherCurrent.getDate());
+            args.putString("currentDate", sCurrentDate);
+
             f.setArguments(args);
             return f;
         }
@@ -654,8 +661,11 @@ public class TaskDetailActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_pager_weather, container, false);
+            View view = inflater.inflate(R.layout.fragment_pager_weather_current, container, false);
             Bundle args = getArguments();
+
+            tvCurrentDate = (TextView) view.findViewById(R.id.tvCurrentDate);
+            tvCurrentDate.setText(args.getString("currentDate"));
 
             ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
             String icon = args.getString("icon");
@@ -672,7 +682,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                     String.format("%.0f", args.getDouble("pressure")) + " hPa");
             tvWind = (TextView) view.findViewById(R.id.tvWind);
 
-
 //            ivPressure.setImageResource(R.drawable.ic_event_black_18dp);
 
             return view;
@@ -682,26 +691,26 @@ public class TaskDetailActivity extends AppCompatActivity {
     /**
      * Fragment predpovedi pocasi.
      */
-    public static class WeatherForecastFragment extends Fragment {
-        private TextView tvDtTxt;
+    public static class WeatherHourFragment extends Fragment {
+        private TextView tvForecastDate;
         private ImageView ivMainIcon;
         private TextView tvTemp;
         private TextView tvMain;
         private TextView tvPressure;
         private TextView tvWind;
 
-        static WeatherForecastFragment newInstance(Weather weatherForecast) {
-            WeatherForecastFragment f = new WeatherForecastFragment();
+        static WeatherHourFragment newInstance(Weather weatherHour) {
+            WeatherHourFragment f = new WeatherHourFragment();
             Bundle args = new Bundle();
-            args.putString("icon", weatherForecast.getIcon());
-            args.putDouble("temp", weatherForecast.getTemp());
-            args.putString("main", weatherForecast.getMain());
-            args.putDouble("pressure", weatherForecast.getPressure());
+            args.putString("icon", weatherHour.getIcon());
+            args.putDouble("temp", weatherHour.getTemp());
+            args.putString("main", weatherHour.getMain());
+            args.putDouble("pressure", weatherHour.getPressure());
 
             // Parsovani datumu predpovedi
             SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy H:mm");
-            String sDtTxt = sdf.format(weatherForecast.getDtTxt());
-            args.putString("dtTxt", sDtTxt);
+            String sForecastDate = sdf.format(weatherHour.getDate());
+            args.putString("forecastDate", sForecastDate);
 
             f.setArguments(args);
             return f;
@@ -715,11 +724,11 @@ public class TaskDetailActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_pager_weather_forecast, container, false);
+            View view = inflater.inflate(R.layout.fragment_pager_weather_hour, container, false);
             Bundle args = getArguments();
 
-            tvDtTxt = (TextView) view.findViewById(R.id.tvDtTxt);
-            tvDtTxt.setText(args.getString("dtTxt"));
+            tvForecastDate = (TextView) view.findViewById(R.id.tvForecastDate);
+            tvForecastDate.setText(args.getString("forecastDate"));
 
             ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
             String icon = args.getString("icon");

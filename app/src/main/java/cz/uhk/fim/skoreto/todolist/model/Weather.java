@@ -25,7 +25,7 @@ public class Weather {
     private String name;
 
     // Parsovane datum casu predpovedi z JSON formatu "yyyy-MM-dd HH:mm:ss"
-    private Date dtTxt;
+    private Date date;
 
     public Weather() {
     }
@@ -106,11 +106,11 @@ public class Weather {
         this.name = name;
     }
 
-    public Date getDtTxt() {
-        return dtTxt;
+    public Date getDate() {
+        return date;
     }
 
-    public void setDtTxt(Date dtTxt) {
-        this.dtTxt = dtTxt;
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

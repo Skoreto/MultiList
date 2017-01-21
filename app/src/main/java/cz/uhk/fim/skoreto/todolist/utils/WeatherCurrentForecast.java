@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 
 import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
 
@@ -21,7 +23,7 @@ import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
  * 50.145197499999966&lon=15.137113281249997&appid=792b095348cf903a77b8ee3f2bc8251e
  * Created by Tomas.
  */
-public class WeatherDownload extends AsyncTask<String, Void, String> {
+public class WeatherCurrentForecast extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... urls) {
@@ -81,15 +83,19 @@ public class WeatherDownload extends AsyncTask<String, Void, String> {
             JSONObject windObject = new JSONObject(overalWeatherObject.getString("wind"));
             Double windSpeed = Double.parseDouble(windObject.getString("speed"));
 
+            // Ziskani aktualniho datumu
+            Date currentDate = Calendar.getInstance().getTime();
+
             // Predani udaju do inicializovaneho statickeho objektu pocasi v TaskDetailActivity
-            TaskDetailActivity.weather.setMain(main);
-            TaskDetailActivity.weather.setDescription(description);
-            TaskDetailActivity.weather.setIcon(icon);
-            TaskDetailActivity.weather.setTemp(tempCelsius);
-            TaskDetailActivity.weather.setPressure(pressure);
-            TaskDetailActivity.weather.setHumidity(humidity);
-            TaskDetailActivity.weather.setWindSpeed(windSpeed);
-            TaskDetailActivity.weather.setName(name);
+            TaskDetailActivity.weatherCurrent.setMain(main);
+            TaskDetailActivity.weatherCurrent.setDescription(description);
+            TaskDetailActivity.weatherCurrent.setIcon(icon);
+            TaskDetailActivity.weatherCurrent.setTemp(tempCelsius);
+            TaskDetailActivity.weatherCurrent.setPressure(pressure);
+            TaskDetailActivity.weatherCurrent.setHumidity(humidity);
+            TaskDetailActivity.weatherCurrent.setWindSpeed(windSpeed);
+            TaskDetailActivity.weatherCurrent.setName(name);
+            TaskDetailActivity.weatherCurrent.setDate(currentDate);
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("Tvorba JSON pocasi",

@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     android:background="@android:drawable/gallery_thumb">
 
+    <TextView
+        android:id="@+id/tvForecastDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <ImageView
         android:id="@+id/ivMainIcon"
         android:layout_width="match_parent"
