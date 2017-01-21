@@ -1,5 +1,7 @@
 package cz.uhk.fim.skoreto.todolist.model;
 
+import java.util.Date;
+
 /**
  * Trida uchovavajici zakladni udaje o pocasi.
  * Created by Tomas.
@@ -21,6 +23,9 @@ public class Weather {
     private double windSpeed;
 
     private String name;
+
+    // Parsovane datum casu predpovedi z JSON formatu "yyyy-MM-dd HH:mm:ss"
+    private Date dtTxt;
 
     public Weather() {
     }
@@ -99,5 +104,13 @@ public class Weather {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Date getDtTxt() {
+        return dtTxt;
+    }
+
+    public void setDtTxt(Date dtTxt) {
+        this.dtTxt = dtTxt;
     }
 }

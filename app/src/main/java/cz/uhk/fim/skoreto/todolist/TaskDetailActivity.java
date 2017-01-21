@@ -45,6 +45,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
@@ -52,6 +53,7 @@ import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.model.Weather;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherDownload;
+import cz.uhk.fim.skoreto.todolist.utils.WeatherForecastDownload;
 
 /**
  * Aktivita pro zobrazeni detailu ukolu.
@@ -67,7 +69,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private DataModel dm;
     private int taskId;
     private int listId;
-    public static Weather weather;
+    public static Weather weather, weatherForecast;
 
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
@@ -111,13 +113,18 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // POCASI
         if (task.getTaskPlaceId() != -1) {
-            weather = new Weather();
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
+            weather = new Weather();
             WeatherDownload weatherDownload = new WeatherDownload();
             String sLat = String.valueOf(taskPlace.getLatitude());
             String sLong = String.valueOf(taskPlace.getLongitude());
-            weatherDownload.execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
-                    sLat + "&lon="+ sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
+            weatherDownload.execute("http://api.openweathermap.org/data/2.5/weather?lat="
+                    + sLat + "&lon="+ sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
+
+            weatherForecast = new Weather();
+            WeatherForecastDownload weatherForecastDownload = new WeatherForecastDownload();
+            weatherForecastDownload.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
+                    + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
         }
 
 //        if (!task.getPhotoName().equals("")) {
@@ -144,6 +151,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Počasí"));
+        detailTabLayout.addTab(detailTabLayout.newTab().setText("Předpověď"));
 //        detailTabLayout.addTab(detailTabLayout.newTab().setText("List"));
         detailTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
@@ -361,7 +369,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 4;
+            return 5;
         }
 
         @Override
@@ -380,6 +388,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                     return TaskPlaceMapFragment.newInstance(task, dm);
                 case 3:
                     return WeatherFragment.newInstance(weather);
+                case 4:
+                    return WeatherForecastFragment.newInstance(weatherForecast);
 //                case 4:
 //                    return ArrayListFragment.newInstance(position);
                 default:
@@ -399,6 +409,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                     return "Mapa";
                 case 3:
                     return "Počasí";
+                case 4:
+                    return "Předpověď";
 //                case 4:
 //                    return "List";
                 default:
@@ -623,7 +635,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         private TextView tvPressure;
         private TextView tvWind;
 
-
         static WeatherFragment newInstance(Weather weather) {
             WeatherFragment f = new WeatherFragment();
             Bundle args = new Bundle();
@@ -663,6 +674,67 @@ public class TaskDetailActivity extends AppCompatActivity {
 
 
 //            ivPressure.setImageResource(R.drawable.ic_event_black_18dp);
+
+            return view;
+        }
+    }
+
+    /**
+     * Fragment predpovedi pocasi.
+     */
+    public static class WeatherForecastFragment extends Fragment {
+        private TextView tvDtTxt;
+        private ImageView ivMainIcon;
+        private TextView tvTemp;
+        private TextView tvMain;
+        private TextView tvPressure;
+        private TextView tvWind;
+
+        static WeatherForecastFragment newInstance(Weather weatherForecast) {
+            WeatherForecastFragment f = new WeatherForecastFragment();
+            Bundle args = new Bundle();
+            args.putString("icon", weatherForecast.getIcon());
+            args.putDouble("temp", weatherForecast.getTemp());
+            args.putString("main", weatherForecast.getMain());
+            args.putDouble("pressure", weatherForecast.getPressure());
+
+            // Parsovani datumu predpovedi
+            SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy H:mm");
+            String sDtTxt = sdf.format(weatherForecast.getDtTxt());
+            args.putString("dtTxt", sDtTxt);
+
+            f.setArguments(args);
+            return f;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_pager_weather_forecast, container, false);
+            Bundle args = getArguments();
+
+            tvDtTxt = (TextView) view.findViewById(R.id.tvDtTxt);
+            tvDtTxt.setText(args.getString("dtTxt"));
+
+            ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
+            String icon = args.getString("icon");
+            String iconImage = String.format("http://openweathermap.org/img/w/%s.png", icon);
+            Picasso.with(getContext()).load(iconImage).into(ivMainIcon);
+
+            tvTemp = (TextView) view.findViewById(R.id.tvTemp);
+            tvTemp.setText(
+                    String.format("%.1f", args.getDouble("temp")) + " °C");
+            tvMain = (TextView) view.findViewById(R.id.tvMain);
+            tvMain.setText(args.getString("main"));
+            tvPressure = (TextView) view.findViewById(R.id.tvPressure);
+            tvPressure.setText(
+                    String.format("%.0f", args.getDouble("pressure")) + " hPa");
+            tvWind = (TextView) view.findViewById(R.id.tvWind);
 
             return view;
         }

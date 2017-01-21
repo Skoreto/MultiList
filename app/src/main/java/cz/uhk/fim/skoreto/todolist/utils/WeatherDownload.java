@@ -15,7 +15,10 @@ import java.net.URL;
 import cz.uhk.fim.skoreto.todolist.TaskDetailActivity;
 
 /**
- * Trida pro vraceni soucasne predpovedi pocasi.
+ * Trida pro vraceni aktualniho pocasi.
+ * Priklad zdroje dat pro Podebrady:
+ * http://api.openweathermap.org/data/2.5/weather?lat=
+ * 50.145197499999966&lon=15.137113281249997&appid=792b095348cf903a77b8ee3f2bc8251e
  * Created by Tomas.
  */
 public class WeatherDownload extends AsyncTask<String, Void, String> {
