@@ -26,6 +26,11 @@ import cz.uhk.fim.skoreto.todolist.model.Weather;
 public class WeatherDailyForecast extends AsyncTask<String, Void, String> {
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
+
+    @Override
     protected String doInBackground(String... urls) {
 
         String result = "";
