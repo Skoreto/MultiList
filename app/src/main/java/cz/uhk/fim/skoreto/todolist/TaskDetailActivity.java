@@ -80,7 +80,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     public static Weather weatherCurrent, weatherHour, weatherDaily;
     public static int weatherDailyCount;
     public static List<Weather> listWeatherDaily;
-    private boolean showDailyWeather;
+    private boolean showCurrentWeather, showDailyWeather = false;
     public static Typeface weatherFont;
 
     private AudioManager audioManager;
@@ -129,6 +129,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (task.getTaskPlaceId() != -1) {
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             // AKTUALNI POCASI
+            showCurrentWeather = true;
             weatherCurrent = new Weather();
             WeatherCurrentForecast weatherCurrentForecast = new WeatherCurrentForecast();
             String sLat = String.valueOf(taskPlace.getLatitude());
@@ -143,7 +144,6 @@ public class TaskDetailActivity extends AppCompatActivity {
                     + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
 
             // 7 DENNI PREDPOVED
-            showDailyWeather = false;
             if (task.getDueDate() != null) {
                 // Pokud je vyplneno datum splneni
                 // Ziskej dnesni datum v 0:00
@@ -206,7 +206,9 @@ public class TaskDetailActivity extends AppCompatActivity {
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Obecné"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
         detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Aktuálně"));
+        if (showCurrentWeather) {
+            detailTabLayout.addTab(detailTabLayout.newTab().setText("Aktuálně"));
+        }
 //        detailTabLayout.addTab(detailTabLayout.newTab().setText("Hour"));
         if (showDailyWeather) {
             detailTabLayout.addTab(detailTabLayout.newTab().setText("Daily"));
@@ -430,8 +432,12 @@ public class TaskDetailActivity extends AppCompatActivity {
         public int getCount() {
             if (showDailyWeather)
                 return 5;
-            else
-                return 4;
+            else {
+                if (showCurrentWeather)
+                    return 4;
+                else
+                    return 3;
+            }
         }
 
         @Override
@@ -461,7 +467,7 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
         }
 
-        // Returns the page title for the top indicator.
+        // Vraci titulek stranky pro horni indikator (nahrazeno TabLayoutem)
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
