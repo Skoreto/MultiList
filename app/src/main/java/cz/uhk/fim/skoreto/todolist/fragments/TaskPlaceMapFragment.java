@@ -1,7 +1,10 @@
 package cz.uhk.fim.skoreto.todolist.fragments;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -24,7 +28,7 @@ import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 /**
  * Fragment umisteni a radiusu ukolu. Umisten v DetailFragmentPageru detailu ukolu.
  */
-public class TaskPlaceMapFragment extends Fragment {
+public class TaskPlaceMapFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap gMap;
     MapView mapView;
 
@@ -56,32 +60,9 @@ public class TaskPlaceMapFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_pager_map, container, false);
         mapView = (MapView) view.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
-        // Inicializace GoogleMap z MapView
-        gMap = mapView.getMap();
-        gMap.getUiSettings().setMyLocationButtonEnabled(false);
-//            gMap.setMyLocationEnabled(true);
-
-        if (getArguments().getBoolean("isTaskPlaceFilled")) {
-            // Pokud je vyplneno misto ukolu - vyznac jej na mape
-            float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
-            float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
-            int taskPlaceRadius = getArguments().getInt("taskPlaceRadius");
-            gMap.addMarker(new MarkerOptions().position(
-                    new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
-            // Radius specifikovan v metrech by mel byt 0 nebo vetsi
-            gMap.addCircle(new CircleOptions()
-                    .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
-                    .radius(taskPlaceRadius)
-                    .strokeColor(Color.RED).strokeWidth(7));
-
-            // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
-            MapsInitializer.initialize(this.getActivity());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(taskPlaceLatitude, taskPlaceLongitude), 11);
-            gMap.animateCamera(cameraUpdate);
-        }
-
+        mapView.onResume();
+        // Inicializace mapView mapou
+        mapView.getMapAsync(this);
         return view;
     }
 
@@ -89,6 +70,43 @@ public class TaskPlaceMapFragment extends Fragment {
     public void onResume() {
         mapView.onResume();
         super.onResume();
+    }
+
+    // Callback zavolany, kdyz je mapa pripravena
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        gMap = googleMap;
+        if (gMap != null) {
+            gMap.getUiSettings().setMyLocationButtonEnabled(false);
+            // Kontrola permission pro pristup k aktualni lokaci
+            if (ActivityCompat.checkSelfPermission(getContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            gMap.setMyLocationEnabled(true);
+
+            if (getArguments().getBoolean("isTaskPlaceFilled")) {
+                // Pokud je vyplneno misto ukolu - vyznac jej na mape
+                float taskPlaceLatitude = getArguments().getFloat("taskPlaceLat");
+                float taskPlaceLongitude = getArguments().getFloat("taskPlaceLong");
+                int taskPlaceRadius = getArguments().getInt("taskPlaceRadius");
+                gMap.addMarker(new MarkerOptions().position(
+                        new LatLng(taskPlaceLatitude, taskPlaceLongitude)));
+                // Radius specifikovan v metrech by mel byt 0 nebo vetsi
+                gMap.addCircle(new CircleOptions()
+                        .center(new LatLng(taskPlaceLatitude, taskPlaceLongitude))
+                        .radius(taskPlaceRadius)
+                        .strokeColor(Color.RED).strokeWidth(7));
+
+                // Nutne zavolat MapsInitializer pred volanim CameraUpdateFactory
+                MapsInitializer.initialize(this.getActivity());
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(taskPlaceLatitude, taskPlaceLongitude), 11);
+                gMap.animateCamera(cameraUpdate);
+            }
+        }
     }
 
     @Override
