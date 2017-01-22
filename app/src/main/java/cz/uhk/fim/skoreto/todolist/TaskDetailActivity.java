@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -56,6 +57,7 @@ import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.model.Weather;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
+import cz.uhk.fim.skoreto.todolist.utils.OtherUtils;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherCurrentForecast;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherDailyForecast;
 import cz.uhk.fim.skoreto.todolist.utils.WeatherHourForecast;
@@ -79,6 +81,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     public static int weatherDailyCount;
     public static List<Weather> listWeatherDaily;
     private boolean showDailyWeather;
+    public static Typeface weatherFont;
 
     private AudioManager audioManager;
     private static MediaPlayer mediaPlayer;
@@ -121,6 +124,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         tvTaskName.setText(task.getName());
 
         // POCASI
+        // Inicializace fontu pro ikony
+        weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weathericons.ttf");
         if (task.getTaskPlaceId() != -1) {
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             // AKTUALNI POCASI
@@ -692,6 +697,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     public static class WeatherCurrentFragment extends Fragment {
         private TextView tvCurrentDate;
         private TextView tvName;
+        private TextView tvFontIcon;
         private ImageView ivMainIcon;
         private TextView tvTemp;
         private TextView tvMain;
@@ -737,6 +743,10 @@ public class TaskDetailActivity extends AppCompatActivity {
             String icon = args.getString("icon");
             String iconImage = String.format("http://openweathermap.org/img/w/%s.png", icon);
             Picasso.with(getContext()).load(iconImage).into(ivMainIcon);
+
+            tvFontIcon = (TextView) view.findViewById(R.id.tvFontIcon);
+            tvFontIcon.setTypeface(weatherFont);
+            tvFontIcon.setText(OtherUtils.getAppropriateWeatherIcon(icon));
 
             tvTemp = (TextView) view.findViewById(R.id.tvTemp);
             tvTemp.setText(
@@ -962,6 +972,8 @@ public class TaskDetailActivity extends AppCompatActivity {
             Log.i("FragmentList", "Item clicked: " + id);
         }
     }
+
+
 
 
 }
