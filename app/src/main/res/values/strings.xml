@@ -63,4 +63,7 @@
     <string name="weather_night_thunderstorm">&#xf01e;</string>
     <string name="weather_night_snow">&#xf038;</string>
     <string name="weather_night_fog">&#xf04a;</string>
+    <string name="weather_barometer">&#xf079;</string>
+    <string name="weather_humidity">&#xf07a;</string>
+    <string name="weather_windy">&#xf021;</string>
 </resources>
