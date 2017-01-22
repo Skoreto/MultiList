@@ -13,23 +13,19 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -71,7 +67,6 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private Task task;
     private TextView tvTaskName;
-//    private ImageView ivTaskPhoto;
 
     private DataModel dm;
     private int taskId;
@@ -111,7 +106,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
 
         tvTaskName = (TextView) findViewById(R.id.tvTaskName);
-//        ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
         Intent anyTaskListIntent = getIntent();
         // Nastaveni listId pro filtraci ukolu v seznamu.
@@ -182,24 +176,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
 
         }
-
-//        if (!task.getPhotoName().equals("")) {
-//            // Prime prirazeni nahledu fotografie do ImageView.
-//            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
-//            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
-//            ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
-//
-//            ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-//                   @Override
-//                   public void onClick(View view) {
-//                       // Zobrazeni velke fotografie po kliknuti na nahled.
-//                       Intent sendPhotoDirectoryIntent = new Intent(TaskDetailActivity.this, SinglePhotoActivity.class);
-//                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-//                       startActivity(sendPhotoDirectoryIntent);
-//                   }
-//               }
-//            );
-//        }
 
         // Komponenta nadpisu tabu
         TabLayout detailTabLayout = (TabLayout) findViewById(R.id.detailTabLayout);
@@ -443,11 +419,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-//                    GeneralFragment generalFragment = new GeneralFragment();
-//                    return (Fragment) generalFragment.newInstance(position, task, dm, context);
-
-//                    GeneralFragment f = GeneralFragment.newInstance(task, dm, context);
-//                    ImageView ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
                     return GeneralFragment.newInstance(task, dm, context);
                 case 1:
                     return DescriptionFragment.newInstance(task);
@@ -494,32 +465,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         private TextView tvTaskDueDate;
         private TextView tvAssignedTaskList;
         private CheckBox chbTaskCompleted;
-//        private ImageView ivTaskPhoto;
-
-//        @Override
-//        public void onActivityCreated(Bundle savedInstanceState) {
-//            super.onActivityCreated(savedInstanceState);
-//            Context context = getActivity();
-//        }
-
-//        @Override
-//        public void onAttach(Context context) {
-//            super.onAttach(context);
-//
-//            Activity activity;
-//            OnArticleSelectedListener mListener;
-//
-//            if (context instanceof Activity){
-//                activity=(Activity) context;
-//
-//                try {
-//                    mListener = (OnArticleSelectedListener) activity;
-//                } catch (ClassCastException e) {
-//                    throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
-//                }
-//            }
-
-//        }
 
         static GeneralFragment newInstance(Task task, DataModel dm, Context context) {
             GeneralFragment f = new GeneralFragment();
@@ -567,7 +512,6 @@ public class TaskDetailActivity extends AppCompatActivity {
             tvAssignedTaskList = (TextView) view.findViewById(R.id.tvAssignedTaskList);
             tvAssignedTaskList.setText(getArguments().getString("tvAssignedTaskListName"));
             chbTaskCompleted = (CheckBox) view.findViewById(R.id.chbTaskCompleted);
-//            ivTaskPhoto = (ImageView) view.findViewById(R.id.ivTaskPhoto);
 
             // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
             if (getArguments().getInt("isTaskCompleted") == 1)
