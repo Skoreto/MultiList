@@ -12,7 +12,7 @@ public class OtherUtils {
      * Pomocna metoda pro vraceni odpovidajiciho ID Weather font ikony.
      */
     public static int getAppropriateWeatherIcon(String icon) {
-        int iconR = R.string.weather_day_sunny_overcast;
+        int iconR;
 
         switch (icon) {
             // day - clear sky
