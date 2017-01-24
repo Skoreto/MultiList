@@ -21,6 +21,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -50,8 +52,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
@@ -75,12 +84,15 @@ import cz.uhk.fim.skoreto.todolist.model.TaskList;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
 import cz.uhk.fim.skoreto.todolist.utils.AlertReceiver;
 import cz.uhk.fim.skoreto.todolist.utils.AudioController;
+import cz.uhk.fim.skoreto.todolist.utils.GeofenceTransitionService;
 
 /**
  * Aktivita pro upravu a smazani ukolu.
  * Created by Tomas Skorepa.
  */
-public class TaskEditActivity extends AppCompatActivity {
+public class TaskEditActivity extends AppCompatActivity
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<Status> {
 
     private Toolbar tlbEditTaskActivity;
     private ActionBar actionBar;
@@ -92,6 +104,7 @@ public class TaskEditActivity extends AppCompatActivity {
     private EditText etTaskPlace;
     private TextView tvRadius;
     private SeekBar sbRadius;
+    private CheckBox chbSetGeofence;
     private EditText etTaskDescription;
     private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
@@ -130,6 +143,10 @@ public class TaskEditActivity extends AppCompatActivity {
     private boolean chosenTaskPlaceChanged = false;
     private RequestQueue requestQueue;
 
+    private GoogleApiClient googleApiClient;
+    private PendingIntent geoFencePendingIntent;
+    private boolean mGeofencesAdded;
+
     /**
      * Metoda pro zobrazeni predvyplneneho formulare upravy ukolu.
      */
@@ -158,6 +175,7 @@ public class TaskEditActivity extends AppCompatActivity {
         etTaskPlace = (EditText) findViewById(R.id.etTaskPlace);
         tvRadius = (TextView) findViewById(R.id.tvRadius);
         sbRadius = (SeekBar) findViewById(R.id.sbRadius);
+        chbSetGeofence = (CheckBox) findViewById(R.id.chbSetGeofence);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
         chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
@@ -268,15 +286,15 @@ public class TaskEditActivity extends AppCompatActivity {
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                   @Override
-                   public void onClick(View view) {
-                       // Zobrazeni velke fotografie po kliknuti na nahled.
-                       Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this,
-                               SinglePhotoActivity.class);
-                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-                       startActivity(sendPhotoDirectoryIntent);
-                   }
-               }
+                                               @Override
+                                               public void onClick(View view) {
+                                                   // Zobrazeni velke fotografie po kliknuti na nahled.
+                                                   Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this,
+                                                           SinglePhotoActivity.class);
+                                                   sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+                                                   startActivity(sendPhotoDirectoryIntent);
+                                               }
+                                           }
             );
         }
 
@@ -308,22 +326,22 @@ public class TaskEditActivity extends AppCompatActivity {
         // Listener pro potvrzeni vybraneho datumu splneni v dialogu kalendare.
         final DatePickerDialog.OnDateSetListener datePickerListener =
                 new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                // Sestaveni noveho datumu.
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, monthOfYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                Date newDueDate = calendar.getTime();
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        // Sestaveni noveho datumu.
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, monthOfYear);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        Date newDueDate = calendar.getTime();
 
-                // Nastaveni datumu aktualni instanci ukolu.
-                task.setDueDate(newDueDate);
+                        // Nastaveni datumu aktualni instanci ukolu.
+                        task.setDueDate(newDueDate);
 
-                // Zobrazeni noveho datumu v EditTextu.
-                etTaskDueDate.setText(
-                        dayOfMonth + "." + (monthOfYear + 1) + "." + year);
-            }
-        };
+                        // Zobrazeni noveho datumu v EditTextu.
+                        etTaskDueDate.setText(
+                                dayOfMonth + "." + (monthOfYear + 1) + "." + year);
+                    }
+                };
 
         etTaskDueDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -470,27 +488,27 @@ public class TaskEditActivity extends AppCompatActivity {
 
                     JsonObjectRequest request = new JsonObjectRequest(
                             "https://maps.googleapis.com/maps/api/geocode/json?latlng="
-                            + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                            + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo",
+                                    + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
+                                    + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo",
                             new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                String currentPlaceAddress = response.getJSONArray("results")
-                                        .getJSONObject(0).getString("formatted_address");
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    try {
+                                        String currentPlaceAddress = response.getJSONArray("results")
+                                                .getJSONObject(0).getString("formatted_address");
 
-                                // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
-                                // pred pripadnym updatem databaze po potvrzeni editace ukolu.
-                                chosenTaskPlaceChanged = true;
-                                chosenTaskPlace = new TaskPlace(currentLocation.getLatitude(),
-                                        currentLocation.getLongitude(), currentPlaceAddress,
-                                        sbRadius.getProgress() * 100);
-                                etTaskPlace.setText(chosenTaskPlace.getAddress());
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
+                                        // Poznamenej si, ze misto bylo zmeneno. Udrz si novou instanci
+                                        // pred pripadnym updatem databaze po potvrzeni editace ukolu.
+                                        chosenTaskPlaceChanged = true;
+                                        chosenTaskPlace = new TaskPlace(currentLocation.getLatitude(),
+                                                currentLocation.getLongitude(), currentPlaceAddress,
+                                                sbRadius.getProgress() * 100);
+                                        etTaskPlace.setText(chosenTaskPlace.getAddress());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(TaskEditActivity.this, "Volley networking chyba",
@@ -592,6 +610,15 @@ public class TaskEditActivity extends AppCompatActivity {
             }
         });
 
+        // GEOFENCING
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
     }
 
     /**
@@ -692,6 +719,48 @@ public class TaskEditActivity extends AppCompatActivity {
                     }
                 }
             }
+        }
+
+        // GEOFENCING
+        if (task.getTaskPlaceId() != -1) {
+            int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER
+                    | Geofence.GEOFENCE_TRANSITION_EXIT;
+            Geofence newGeofence = createGeofence(taskId, chosenTaskPlace.getLatitude(),
+                    chosenTaskPlace.getLongitude(), chosenTaskPlace.getRadius(),
+                    60 * 60 * 1000, transitionTypes);
+
+            GeofencingRequest newGeofencingRequest = new GeofencingRequest.Builder()
+                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                    .addGeofence(newGeofence)
+                    .build();
+
+            PendingIntent newGeoPendingIntent;
+            if (geoFencePendingIntent != null)
+                newGeoPendingIntent =  geoFencePendingIntent;
+            else {
+                // Pouziti PendingIntentu k zavolani IntentService, ktera handluje GeofenceEvent
+                Intent intent = new Intent(this, GeofenceTransitionService.class);
+                intent.putExtra("notifTitle", task.getName());
+                intent.putExtra("notifText", chosenTaskPlace.getAddress());
+                intent.putExtra("notifTicker", "Připomenutí v okolí místa úkolu");
+//                intent.putExtra("notifId", task.getId());
+
+                int geofenceReqCode = 0;
+                newGeoPendingIntent = PendingIntent.getService(
+                        this, geofenceReqCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+
+            // Nutne overeni permission
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            // Pridej vytvoreny GeofenceRequest do monitorovaciho listu zarizeni
+            LocationServices.GeofencingApi.addGeofences(
+                    googleApiClient,
+                    newGeofencingRequest,
+                    newGeoPendingIntent
+            ).setResultCallback(this);
         }
 
         // Ziskani vybraneho seznamu ukolu a dle nej prirazeni ukolu do prislusneho seznamu.
@@ -915,6 +984,13 @@ public class TaskEditActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Zavolej GoogleApiClient pripojeni pri startovani aktivity (Geofencing)
+        googleApiClient.connect();
+    }
+
     /**
      * Ochrana pro uvolneni zdroju prehravace a mikrofonu po preruseni aktivity.
      */
@@ -936,6 +1012,13 @@ public class TaskEditActivity extends AppCompatActivity {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Odpoj GoogleApiClienta pri zastaveni aktivity (Geofencing)
+        googleApiClient.disconnect();
     }
 
     /**
@@ -1101,4 +1184,52 @@ public class TaskEditActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * GoogleApiClient.ConnectionCallbacks pripojeno
+     */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    /**
+     * GoogleApiClient.ConnectionCallbacks pozastaveno
+     */
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    /**
+     * GoogleApiClient.OnConnectionFailedListener selhalo
+     */
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    /**
+     * Metoda pro vytvoreni Geofence s predanymi parametry.
+     */
+    private Geofence createGeofence(int taskId, double latitude, double longitude,
+                                    float radius, long duration, int transitionTypes) {
+        String geofenceReqId = String.valueOf(2000 + taskId);
+        Geofence newGeofence = new Geofence.Builder()
+                // Request ID identifikuje geofence v aplikaci. Pokud jsou monitorovany dva geofence
+                // se stejnym requestId, novy nahradi ten stary. Muze mit az 100 pismen.
+                .setRequestId(geofenceReqId)
+                .setCircularRegion(latitude, longitude, radius)
+                .setExpirationDuration(duration)
+                // Jestli bude reagovat na vstupu, vystupu z obasti nebo oboji
+                .setTransitionTypes(transitionTypes)
+                .build();
+        return newGeofence;
+    }
+
+    @Override
+    public void onResult(@NonNull Status status) {
+        if (status.isSuccess()) {
+            Toast.makeText(this, "Geofence přidán", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

@@ -11,14 +11,15 @@
     <string name="tv_due_date_label">Splnit do</string>
     <string name="tv_notification_date_label">Připomenout</string>
     <string name="tv_place_label">Místo</string>
+    <string name="tv_radius_label">Radius</string>
+    <string name="tv_radius">1,5 km</string>
+    <string name="tv_set_geofence_label">Upozornit</string>
     <string name="btn_edit_task">Upravit</string>
     <string name="tv_task_list_label">Seznam</string>
     <string name="tv_task_completed_label">Splněno</string>
     <string name="tv_recording_label">Nahrávka</string>
     <string name="tb_stop">STOP</string>
     <string name="tb_start">START</string>
-    <string name="tv_radius_label">Radius</string>
-    <string name="tv_radius">1,5 km</string>
 
     <!-- Item listu -->
     <string name="photo_thumbnail">Popis fotky</string>

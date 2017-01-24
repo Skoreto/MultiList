@@ -65,8 +65,10 @@
             android:name=".TaskPlacesMapActivity"
             android:label="@string/title_activity_maps">
         </activity>
-        <!-- Receiver pro naplanovane notifikace -->
-        <receiver android:name=".utils.AlertReceiver"/>
+        <!-- Receiver pro naplanovane casove notifikace -->
+        <receiver android:name=".utils.AlertReceiver" />
+        <!-- Service pro obsluhu notifikaci Geofencingu -->
+        <service android:name=".utils.GeofenceTransitionService" />
     </application>
 
 </manifest>
