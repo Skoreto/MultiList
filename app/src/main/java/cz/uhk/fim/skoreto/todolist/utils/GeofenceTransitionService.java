@@ -60,26 +60,19 @@ public class GeofenceTransitionService extends IntentService {
                 geoFenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             // Ziskej seznam geofence, ktere vyvolaly notifikaci v danem miste
             List<Geofence> listTriggeringGeofences = geofencingEvent.getTriggeringGeofences();
-            // Vytvor detailni zpravu o vstupu/vystupu z o okoli mist kterych Geofencu
-            String geofenceTransitionDetails = getGeofenceTrasitionDetails(geoFenceTransition,
-                    listTriggeringGeofences);
+            // Vrat preklad Geofence transition - jestli uzivatel vstoupil/vystoupil z okoli ukolu
+            String geofenceTransitionInterpretation = getGeofenceTrasitionInterpretation(
+                    geoFenceTransition);
             // Odesli detaily o notifikaci jako String a pripoj predana extras z intentu
-            sendNotification(geofenceTransitionDetails, notifTitle, notifText, notifTicker);
+            sendNotification(geofenceTransitionInterpretation, notifTitle, notifText, notifTicker);
         }
     }
 
     /**
-     * Metoda vytvori detailni zpravu o obdrzenem Geofence.
+     * Metoda vrati slovni interpretaci Geofence transition obdrzeneho geofence.
      * Ve zprave rozlisi, jestli uzivatel vstupuje/opousti radius mista ukolu.
      */
-    private String getGeofenceTrasitionDetails(int geoFenceTransition,
-                                               List<Geofence> triggeringGeofences) {
-        // Ziskej ID kazdeho geofence, ktery vyvolal notifikaci v danem miste
-        ArrayList<String> listTriggeringGeofencesIds = new ArrayList<>();
-        for (Geofence geofence : triggeringGeofences) {
-            listTriggeringGeofencesIds.add(geofence.getRequestId());
-        }
-
+    private String getGeofenceTrasitionInterpretation(int geoFenceTransition) {
         String transitionMessage = null;
         if (geoFenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
             transitionMessage = "Vstupujete do okolí místa";
@@ -87,20 +80,31 @@ public class GeofenceTransitionService extends IntentService {
             transitionMessage = "Opouštíte okolí místa";
 
         // Pripoj ID (nazvy) geofence, ktere vyvolaly notifikaci v danem miste
-        return transitionMessage + TextUtils.join(", ", listTriggeringGeofencesIds);
+        return transitionMessage;
+    }
+
+    /**
+     * Metoda pro vraceni seznamu Stringu ReqId Geofence, ktere vyvolaly notifikaci v danem miste.
+     */
+    private String getGeofencesReqIds(List<Geofence> triggeringGeofences) {
+        // Ziskej ID kazdeho geofence, ktery vyvolal notifikaci v danem miste
+        ArrayList<String> listTriggeringGeofencesIds = new ArrayList<>();
+        for (Geofence geofence : triggeringGeofences) {
+            listTriggeringGeofencesIds.add(geofence.getRequestId());
+        }
+
+        // Vrat String ReqId geofencu, ktere vyvolaly notifikaci v danem miste
+        String sListGeofencesReqIds = TextUtils.join(", ", listTriggeringGeofencesIds);
+        return sListGeofencesReqIds;
     }
 
     /**
      * Metoda pro sestaveni a zaslani vysledne notifikace
-     * @param geofenceTransitionDetails Zprava, zda uzivatel vstupuje/vystupuje z okoli mista ukolu.
+     * @param geofenceTransitionInterpretation Zprava, zda uzivatel vstupuje/vystupuje z okoli
+     *                                         mista ukolu.
      */
-    private void sendNotification(String geofenceTransitionDetails, String notifTitle,
+    private void sendNotification(String geofenceTransitionInterpretation, String notifTitle,
                                   String notifText, String notifTicker) {
-//        // Intent pro start hlavni TaskListsActivity
-//        Intent notificationIntent = TaskListsActivity.makeNotificationIntent(
-//                getApplicationContext(), geofenceTransitionDetails
-//        );
-
         // Intent vytvoreny odle alertIntent
         Intent notificationIntent = new Intent(this, AlertReceiver.class);
 
@@ -116,14 +120,13 @@ public class GeofenceTransitionService extends IntentService {
                 .setSmallIcon(R.drawable.ic_event_black_18dp)
                 .setColor(Color.RED)
                 .setContentTitle("Okolí úkolu: " + notifTitle)
-                .setContentText(geofenceTransitionDetails + " " + notifText)
+                .setContentText(geofenceTransitionInterpretation + " " + notifText)
                 .setTicker(notifTicker)
                 .setContentIntent(notificationPendingIntent)
                 .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_VIBRATE
                         | Notification.DEFAULT_SOUND)
                 // Automaticky zrus notifikaci, pokud je na ni kliknuto v task baru
                 .setAutoCancel(true);
-
 
         // Ziskani NotificationManageru, ktery je pouzit k upozorneni uzivatele o udalosti na pozadi
         NotificationManager notificatioMng =

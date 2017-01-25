@@ -723,12 +723,15 @@ public class TaskEditActivity extends AppCompatActivity
 
         // GEOFENCING
         if (task.getTaskPlaceId() != -1) {
-            int transitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER
+            // Vytvoreni noveho Geofence k mistu ukolu v danem radiusu s nekonecnou expiraci
+            long geofExpirationDuration = Geofence.NEVER_EXPIRE;
+            int geofTransitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER
                     | Geofence.GEOFENCE_TRANSITION_EXIT;
             Geofence newGeofence = createGeofence(taskId, chosenTaskPlace.getLatitude(),
                     chosenTaskPlace.getLongitude(), chosenTaskPlace.getRadius(),
-                    60 * 60 * 1000, transitionTypes);
+                    geofExpirationDuration, geofTransitionTypes);
 
+            // Vytvoreni noveho GeofencingRequestu
             GeofencingRequest newGeofencingRequest = new GeofencingRequest.Builder()
                     .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                     .addGeofence(newGeofence)
@@ -1210,10 +1213,12 @@ public class TaskEditActivity extends AppCompatActivity
 
     /**
      * Metoda pro vytvoreni Geofence s predanymi parametry.
+     * Na jednouzivatelskem zarizeni je limit 100 geofenci na aplikaci!
      */
     private Geofence createGeofence(int taskId, double latitude, double longitude,
                                     float radius, long duration, int transitionTypes) {
-        String geofenceReqId = String.valueOf(2000 + taskId);
+        // Nastaveni nazvu ReqId jako ID ukolu
+        String geofenceReqId = String.valueOf(taskId);
         Geofence newGeofence = new Geofence.Builder()
                 // Request ID identifikuje geofence v aplikaci. Pokud jsou monitorovany dva geofence
                 // se stejnym requestId, novy nahradi ten stary. Muze mit az 100 pismen.
