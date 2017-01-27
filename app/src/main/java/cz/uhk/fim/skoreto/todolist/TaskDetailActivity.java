@@ -220,19 +220,19 @@ public class TaskDetailActivity extends AppCompatActivity {
     public void deleteTask() {
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
-            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
 
             // Smazani prislusne miniatury stare fotografie.
-            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory() + "/SmartList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
             boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
 
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getRecordingName().equals("")) {
-            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings/" + task.getRecordingName() + ".3gp";
             File oldTaskRecording = new File(oldTaskRecordingPath);
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }

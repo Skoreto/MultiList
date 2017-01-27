@@ -231,7 +231,7 @@ public class TaskListActivity extends AppCompatActivity {
                 List<Task> tasksSortedAscDueDate = dataModel.getTasksByListId(listId, orderAscendingDueDate);
                 List<Task> tasksWithoutDueDate = new ArrayList<Task>();
 
-                // Vytrid vsechny ukoly bez zadaneho datumu splneni
+                // Vytrid vsechny ukoly bez zadaneho data splneni
                 for (int i = 0; i < tasksSortedAscDueDate.size(); i++) {
                     Task currentTask = tasksSortedAscDueDate.get(i);
                     if (currentTask.getDueDate() == null) {

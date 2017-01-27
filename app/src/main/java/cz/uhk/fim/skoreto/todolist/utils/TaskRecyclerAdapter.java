@@ -83,8 +83,8 @@ public class TaskRecyclerAdapter extends RecyclerView.Adapter<TaskRecyclerAdapte
 
         // Prirazeni nahledu fotografie k ukolu.
         if (!task.getPhotoName().equals("")) {
-            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
-            final String photoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+            String photoThumbnailPath = Environment.getExternalStorageDirectory() + "/SmartList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+            final String photoPath = Environment.getExternalStorageDirectory() + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
 
             // Optimalizace dekodovani a nacteni miniatury z nahledu v externim ulozisti do pameti.
             Bitmap photoThumbnail = ThumbnailUtils.extractThumbnail(BitmapHelper.decodeSampledBitmapFromPath(photoThumbnailPath, 100, 100), 100, 100);

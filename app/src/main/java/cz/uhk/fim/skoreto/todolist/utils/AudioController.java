@@ -30,7 +30,7 @@ public class AudioController {
     public static void startRecording(Task task, MediaRecorder mediaRecorder, AudioManager audioManager, DataModel dm, Context context) {
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getRecordingName().equals("")) {
-            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+            String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings/" + task.getRecordingName() + ".3gp";
             File oldTaskRecording = new File(oldTaskRecordingPath);
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
@@ -39,7 +39,7 @@ public class AudioController {
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
         // Vytvor potrebne slozky "Internal storage: /MultiList/MultiListRecordings" pokud neexistuji.
-        String folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings";
+        String folderPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings";
         File folder = new File(folderPath);
         if (!folder.exists()) {
             File recordingsDirectory = new File(folderPath);
@@ -49,7 +49,7 @@ public class AudioController {
         // Vytvor unikatni jmeno nahravky z casu iniciace nahravani ukolu.
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String taskRecordingName = "nahravka_" + timeStamp;
-        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + taskRecordingName + ".3gp";
+        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings/" + taskRecordingName + ".3gp";
 
         mediaRecorder.setOutputFile(taskRecordingPath);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -85,7 +85,7 @@ public class AudioController {
         Task task = dm.getTask(taskId);
 
         String taskRecordingName = task.getRecordingName();
-        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + taskRecordingName + ".3gp";
+        String taskRecordingPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings/" + taskRecordingName + ".3gp";
 
         try {
             if (!taskRecordingName.equals("")) {

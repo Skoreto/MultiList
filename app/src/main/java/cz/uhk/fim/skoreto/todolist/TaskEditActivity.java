@@ -280,9 +280,9 @@ public class TaskEditActivity extends AppCompatActivity
         if (!task.getPhotoName().equals("")) {
             // Prime prirazeni nahledu fotografie do ImageView.
             String photoThumbnailPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             final String photoPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
@@ -790,13 +790,13 @@ public class TaskEditActivity extends AppCompatActivity
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
             String oldTaskPhotoPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
 
             // Smazani prislusne miniatury stare fotografie.
             String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
             boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
@@ -804,7 +804,7 @@ public class TaskEditActivity extends AppCompatActivity
         // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getRecordingName().equals("")) {
             String oldTaskRecordingPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+                    + "/SmartList/Recordings/" + task.getRecordingName() + ".3gp";
             File oldTaskRecording = new File(oldTaskRecordingPath);
             boolean isTaskRecordingDeleted = oldTaskRecording.delete();
         }
@@ -858,13 +858,13 @@ public class TaskEditActivity extends AppCompatActivity
         // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
         if (!task.getPhotoName().equals("")) {
             String oldTaskPhotoPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
             File oldTaskPhoto = new File(oldTaskPhotoPath);
             boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
 
             // Smazani prislusne miniatury stare fotografie.
             String oldTaskPhotoThumbnailPath = Environment.getExternalStorageDirectory()
-                    + "/MultiList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
+                    + "/SmartList/PhotoThumbnails/" + "THUMBNAIL_" + task.getPhotoName() + ".jpg";
             File oldTaskPhotoThumbnail = new File(oldTaskPhotoThumbnailPath);
             boolean isTaskPhotoThumbnailDeleted = oldTaskPhotoThumbnail.delete();
         }
@@ -875,7 +875,7 @@ public class TaskEditActivity extends AppCompatActivity
         photoThumbnailFileName = "THUMBNAIL_" + timeStamp;
 
         // Vytvor potrebne slozky "Internal storage: /MultiList/Photos" pokud neexistuji.
-        folderPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos";
+        folderPath = Environment.getExternalStorageDirectory() + "/SmartList/Photos";
         File folder = new File(folderPath);
         if (!folder.exists()) {
             File photosDirectory = new File(folderPath);
@@ -883,7 +883,7 @@ public class TaskEditActivity extends AppCompatActivity
         }
 
         thumbnailFolderPath = Environment.getExternalStorageDirectory()
-                + "/MultiList/PhotoThumbnails";
+                + "/SmartList/PhotoThumbnails";
         File thumbnailFolder = new File(thumbnailFolderPath);
         if (!thumbnailFolder.exists()) {
             File photoThumbnailsDirectory = new File(thumbnailFolderPath);

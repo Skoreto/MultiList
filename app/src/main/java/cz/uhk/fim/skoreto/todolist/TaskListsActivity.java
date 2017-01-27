@@ -251,14 +251,14 @@ public class TaskListsActivity extends AppCompatActivity {
                 for (Task task: tasksInList) {
                     // Smazani stare fotografie, pokud je o ni zaznam a pokud jeji soubor existuje.
                     if (!task.getPhotoName().equals("")) {
-                        String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/MultiList/Photos/" + task.getPhotoName() + ".jpg";
+                        String oldTaskPhotoPath = Environment.getExternalStorageDirectory() + "/SmartList/Photos/" + task.getPhotoName() + ".jpg";
                         File oldTaskPhoto = new File(oldTaskPhotoPath);
                         boolean isTaskPhotoDeleted = oldTaskPhoto.delete();
                     }
 
                     // Smazani stare nahravky, pokud je o ni zaznam a pokud jeji soubor existuje.
                     if (!task.getRecordingName().equals("")) {
-                        String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/MultiList/Recordings/" + task.getRecordingName() + ".3gp";
+                        String oldTaskRecordingPath = Environment.getExternalStorageDirectory() + "/SmartList/Recordings/" + task.getRecordingName() + ".3gp";
                         File oldTaskRecording = new File(oldTaskRecordingPath);
                         boolean isTaskRecordingDeleted = oldTaskRecording.delete();
                     }
