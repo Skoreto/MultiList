@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.TabLayout;
@@ -109,55 +111,60 @@ public class TaskDetailActivity extends AppCompatActivity {
         weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weathericons.ttf");
         if (task.getTaskPlaceId() != -1) {
             TaskPlace taskPlace = dm.getTaskPlace(task.getTaskPlaceId());
-            // AKTUALNI POCASI
-            showCurrentWeather = true;
-            weatherCurrent = new Weather();
-            WeatherCurrentForecast weatherCurrentForecast = new WeatherCurrentForecast();
-            String sLat = String.valueOf(taskPlace.getLatitude());
-            String sLong = String.valueOf(taskPlace.getLongitude());
-            weatherCurrentForecast.execute("http://api.openweathermap.org/data/2.5/weather?lat="
-                    + sLat + "&lon=" + sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
+            // Pokud je dostupny nejaky zdroj internetoveho pripojeni
+            if (isNetworkAvailable()) {
+                // AKTUALNI POCASI
+                showCurrentWeather = true;
+                weatherCurrent = new Weather();
+                WeatherCurrentForecast weatherCurrentForecast = new WeatherCurrentForecast();
+                String sLat = String.valueOf(taskPlace.getLatitude());
+                String sLong = String.valueOf(taskPlace.getLongitude());
+                weatherCurrentForecast.execute("http://api.openweathermap.org/data/2.5/weather?lat="
+                        + sLat + "&lon=" + sLong +"&appid=792b095348cf903a77b8ee3f2bc8251e");
 
-            // HODINOVE URCENA PREDPOVED POCASI
-            weatherHour = new Weather();
-            WeatherHourForecast weatherHourForecast = new WeatherHourForecast();
-            weatherHourForecast.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
-                    + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
+                // HODINOVE URCENA PREDPOVED POCASI
+                weatherHour = new Weather();
+                WeatherHourForecast weatherHourForecast = new WeatherHourForecast();
+                weatherHourForecast.execute("http://api.openweathermap.org/data/2.5/forecast?lat="
+                        + sLat + "&lon=" + sLong + "&appid=792b095348cf903a77b8ee3f2bc8251e");
 
-            // 7 DENNI PREDPOVED
-            if (task.getDueDate() != null) {
-                // Pokud je vyplneno datum splneni
-                // Ziskej dnesni datum v 0:00
-                Calendar calToday = Calendar.getInstance();
-                calToday.set(Calendar.HOUR_OF_DAY, 0);
-                calToday.set(Calendar.MINUTE, 0);
-                calToday.set(Calendar.SECOND, 0);
-                calToday.set(Calendar.MILLISECOND, 0);
-                Date dateToday = calToday.getTime();
+                // 7 DENNI PREDPOVED
+                if (task.getDueDate() != null) {
+                    // Pokud je vyplneno datum splneni
+                    // Ziskej dnesni datum v 0:00
+                    Calendar calToday = Calendar.getInstance();
+                    calToday.set(Calendar.HOUR_OF_DAY, 0);
+                    calToday.set(Calendar.MINUTE, 0);
+                    calToday.set(Calendar.SECOND, 0);
+                    calToday.set(Calendar.MILLISECOND, 0);
+                    Date dateToday = calToday.getTime();
 
-                // Ziskej datum za 7 dni
-                calToday.add(Calendar.DAY_OF_MONTH, 8);
-                Date date7daysAhead = calToday.getTime();
+                    // Ziskej datum za 7 dni
+                    calToday.add(Calendar.DAY_OF_MONTH, 8);
+                    Date date7daysAhead = calToday.getTime();
 
-                if (task.getDueDate().compareTo(dateToday) >= 0
-                        && task.getDueDate().compareTo(date7daysAhead) < 0) {
-                    // Pokud datum splneni je v rozmezi od dneska az do 7 dni
-                    showDailyWeather = true;
+                    if (task.getDueDate().compareTo(dateToday) >= 0
+                            && task.getDueDate().compareTo(date7daysAhead) < 0) {
+                        // Pokud datum splneni je v rozmezi od dneska az do 7 dni
+                        showDailyWeather = true;
 
-                    // Stahni predpoved pocasi pro X dni
-                    weatherDailyCount = 9;
-                    listWeatherDaily = new ArrayList<Weather>();
-                    // Inicializuj si prazdne pocasi pro kazdy den
-                    for (int i = 0; i < weatherDailyCount; i++) {
-                        listWeatherDaily.add(new Weather());
+                        // Stahni predpoved pocasi pro X dni
+                        weatherDailyCount = 9;
+                        listWeatherDaily = new ArrayList<Weather>();
+                        // Inicializuj si prazdne pocasi pro kazdy den
+                        for (int i = 0; i < weatherDailyCount; i++) {
+                            listWeatherDaily.add(new Weather());
+                        }
+                        WeatherDailyForecast weatherDailyForecast = new WeatherDailyForecast();
+                        weatherDailyForecast.execute(
+                                "http://api.openweathermap.org/data/2.5/forecast/daily?lat="
+                                        + sLat + "&lon=" + sLong + "&cnt="
+                                        + String.valueOf(weatherDailyCount)
+                                        + "&mode=json&appid=792b095348cf903a77b8ee3f2bc8251e");
+                        // Zalozni instance pro pripad, kdy by se nenacetla spravna predpoved
+                        // k dueDate
+                        weatherDaily = listWeatherDaily.get(0);
                     }
-                    WeatherDailyForecast weatherDailyForecast = new WeatherDailyForecast();
-                    weatherDailyForecast.execute(
-                            "http://api.openweathermap.org/data/2.5/forecast/daily?lat="
-                                    + sLat + "&lon=" + sLong + "&cnt=" + String.valueOf(weatherDailyCount)
-                                    + "&mode=json&appid=792b095348cf903a77b8ee3f2bc8251e");
-                    // Zalozni instance pro pripad, kdy by se nenacetla spravna predpoved k dueDate
-                    weatherDaily = listWeatherDaily.get(0);
                 }
             }
         }
@@ -451,6 +458,17 @@ public class TaskDetailActivity extends AppCompatActivity {
                     return "Page " + position;
             }
         }
+    }
+
+    /**
+     * Metoda pro overeni dostupnosti nejakeho pripojeni k Internetu.
+     * Negarantuje, ze pripojeni ze strany serveru atd. je opravdu funkcni.
+     */
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }
