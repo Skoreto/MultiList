@@ -35,7 +35,6 @@ import cz.uhk.fim.skoreto.todolist.fragments.GeneralFragment;
 import cz.uhk.fim.skoreto.todolist.fragments.TaskPlaceMapFragment;
 import cz.uhk.fim.skoreto.todolist.fragments.WeatherCurrentFragment;
 import cz.uhk.fim.skoreto.todolist.fragments.WeatherDailyFragment;
-import cz.uhk.fim.skoreto.todolist.fragments.WeatherErrorFragment;
 import cz.uhk.fim.skoreto.todolist.model.DataModel;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.TaskPlace;
@@ -375,7 +374,6 @@ public class TaskDetailActivity extends AppCompatActivity {
 
     /**
      * Vlastni adapter pro stranky fragmentu v detailu ukolu.
-     * Upozorneni: Zda se, ze po zvoleni Tabu je okamzite prednacitan fragment nasledujiciho Tabu.
      */
     public class DetailFragmentPagerAdapter extends FragmentStatePagerAdapter {
         Task task;
@@ -411,21 +409,11 @@ public class TaskDetailActivity extends AppCompatActivity {
                 case 2:
                     return TaskPlaceMapFragment.newInstance(task, dm);
                 case 3:
-                    // Zobrazit chybovy fragment, pokud server nestihl vratit potrebne informace
-                    if (weatherCurrent.getDate() != null)
-                        return WeatherCurrentFragment.newInstance(weatherCurrent);
-                    else
-                        return WeatherErrorFragment.newInstance();
+                    return WeatherCurrentFragment.newInstance(weatherCurrent);
 //                case 4:
 //                    return WeatherHourFragment.newInstance(weatherHour);
                 case 4:
-                    // Zobrazit chybovy fragment, pokud server nestihl inicializovat posledni
-                    // den pocasi, ktery by jeste mohl byt zvolen k zobrazeni
-                    if (listWeatherDaily.get(weatherDailyCount - 1).getDate() != null)
-                        return WeatherDailyFragment.newInstance(
-                                listWeatherDaily, task, weatherDaily);
-                    else
-                        return WeatherErrorFragment.newInstance();
+                    return WeatherDailyFragment.newInstance(listWeatherDaily, task, weatherDaily);
                 default:
                     return null;
             }
