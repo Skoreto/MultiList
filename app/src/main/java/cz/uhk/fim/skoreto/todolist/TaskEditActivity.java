@@ -106,7 +106,6 @@ public class TaskEditActivity extends AppCompatActivity
     private SeekBar sbRadius;
     private CheckBox chbSetGeofence;
     private EditText etTaskDescription;
-    private CheckBox chbTaskCompleted;
     private Spinner spinTaskLists;
     private ImageButton imgbtnCurrentPlace;
     private ImageButton imgbtnChooseTaskPlace;
@@ -177,7 +176,6 @@ public class TaskEditActivity extends AppCompatActivity
         sbRadius = (SeekBar) findViewById(R.id.sbRadius);
         chbSetGeofence = (CheckBox) findViewById(R.id.chbSetGeofence);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
-        chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
         spinTaskLists = (Spinner) findViewById(R.id.spinTaskLists);
         ivTaskPhoto = (ImageView) findViewById(R.id.ivTaskPhoto);
 
@@ -223,12 +221,6 @@ public class TaskEditActivity extends AppCompatActivity
         }
 
         etTaskDescription.setText(task.getDescription());
-
-        // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
-        if (task.getCompleted() == 1)
-            chbTaskCompleted.setChecked(true);
-        if (task.getCompleted() == 0)
-            chbTaskCompleted.setChecked(false);
 
         // Pokud bylo vybrano misto ukolu, inicializuj ho
         if (task.getTaskPlaceId() != -1) {
@@ -286,15 +278,15 @@ public class TaskEditActivity extends AppCompatActivity
             ivTaskPhoto.setImageBitmap(BitmapFactory.decodeFile(photoThumbnailPath));
 
             ivTaskPhoto.setOnClickListener(new View.OnClickListener() {
-                                               @Override
-                                               public void onClick(View view) {
-                                                   // Zobrazeni velke fotografie po kliknuti na nahled.
-                                                   Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this,
-                                                           SinglePhotoActivity.class);
-                                                   sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
-                                                   startActivity(sendPhotoDirectoryIntent);
-                                               }
-                                           }
+                   @Override
+                   public void onClick(View view) {
+                       // Zobrazeni velke fotografie po kliknuti na nahled.
+                       Intent sendPhotoDirectoryIntent = new Intent(TaskEditActivity.this,
+                               SinglePhotoActivity.class);
+                       sendPhotoDirectoryIntent.putExtra("photoPath", photoPath);
+                       startActivity(sendPhotoDirectoryIntent);
+                   }
+               }
             );
         }
 
@@ -627,7 +619,6 @@ public class TaskEditActivity extends AppCompatActivity
     public void editTask() {
         etTaskName = (EditText) findViewById(R.id.etTaskName);
         etTaskDescription = (EditText) findViewById(R.id.etTaskDescription);
-        chbTaskCompleted = (CheckBox) findViewById(R.id.chbTaskCompleted);
 
         // Uprava atributu ukolu dle editacnich poli.
         task.setId(taskId);
@@ -669,11 +660,6 @@ public class TaskEditActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
-
-        if (chbTaskCompleted.isChecked())
-            task.setCompleted(1);
-        else
-            task.setCompleted(0);
 
         if (task.getTaskPlaceId() == -1) {
             // Pokud nebylo drive zvoleno misto ukolu
@@ -722,7 +708,7 @@ public class TaskEditActivity extends AppCompatActivity
         }
 
         // GEOFENCING
-        if (task.getTaskPlaceId() != -1) {
+        if (task.getTaskPlaceId() != -1 && chbSetGeofence.isChecked()) {
             // Vytvoreni noveho Geofence k mistu ukolu v danem radiusu s nekonecnou expiraci
             long geofExpirationDuration = Geofence.NEVER_EXPIRE;
             int geofTransitionTypes = Geofence.GEOFENCE_TRANSITION_ENTER
