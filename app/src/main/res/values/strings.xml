@@ -9,7 +9,7 @@
     <string name="tv_task_name_label">Název</string>
     <string name="tv_task_description_label">Popis</string>
     <string name="tv_due_date_label">Splnit do</string>
-    <string name="tv_notification_date_label">Připomenout</string>
+    <string name="tv_notification_date_label">Připomeň</string>
     <string name="tv_place_label">Místo</string>
     <string name="tv_radius_label">Okolí</string>
     <string name="tv_radius">1,5 km</string>

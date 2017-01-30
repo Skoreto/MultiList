@@ -96,7 +96,7 @@
                     android:layout_column="1"
                     android:ems="1"
                     android:text="v"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal|center_vertical" />
 
                 <EditText
                     android:id="@+id/etNotificationTime"
