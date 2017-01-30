@@ -481,7 +481,7 @@ public class TaskEditActivity extends AppCompatActivity
                     JsonObjectRequest request = new JsonObjectRequest(
                             "https://maps.googleapis.com/maps/api/geocode/json?latlng="
                                     + currentLocation.getLatitude() + "," + currentLocation.getLongitude()
-                                    + "&key=AIzaSyC1Vaq8FOHelH58mXhZ3Zn8ksvPbsb9loo",
+                                    + "&key=AIzaSyBR-q2ZzNE-D1JnOtIfig4gtusw0Kaz9FI",
                             new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
