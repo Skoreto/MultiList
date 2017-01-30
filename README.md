@@ -19,6 +19,10 @@ SmartList umožňuje uživateli spravovat více seznamů úkolů, nabízí možn
 <img src="http://imgur.com/biIdVod.png" width="400" height="711" alt="preview" />
 </p>
 <p align="center" width="850">
+<img src="http://imgur.com/ju88snq.png" width="400" height="711" alt="preview" />
+<img src="http://imgur.com/DIgSUvX.png" width="400" height="711" alt="preview" />
+</p>
+<p align="center" width="850">
 <img src="http://imgur.com/n9cZ1go.png" width="400" height="711" alt="preview" />
 <img src="http://imgur.com/Z89BWvq.png" width="400" height="711" alt="preview" />
 </p>
