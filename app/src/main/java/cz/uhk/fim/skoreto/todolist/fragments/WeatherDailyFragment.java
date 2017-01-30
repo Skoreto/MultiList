@@ -18,6 +18,9 @@ import java.util.List;
 import cz.uhk.fim.skoreto.todolist.R;
 import cz.uhk.fim.skoreto.todolist.model.Task;
 import cz.uhk.fim.skoreto.todolist.model.Weather;
+import cz.uhk.fim.skoreto.todolist.utils.OtherUtils;
+
+import static cz.uhk.fim.skoreto.todolist.TaskDetailActivity.weatherFont;
 
 /**
  * Fragment az 16-ti denni prumerne predpovedi pocasi. Umisten v DetailFragmentPageru detailu ukolu.
@@ -25,10 +28,13 @@ import cz.uhk.fim.skoreto.todolist.model.Weather;
 public class WeatherDailyFragment extends Fragment {
     private TextView tvForecastDate;
     private TextView tvName;
-    private ImageView ivMainIcon;
+    private TextView tvMainIcon;
     private TextView tvTemp;
-    private TextView tvMain;
+    private TextView tvPressureIcon;
     private TextView tvPressure;
+    private TextView tvHumidityIcon;
+    private TextView tvHumidity;
+    private TextView tvWindIcon;
     private TextView tvWind;
 
     public static WeatherDailyFragment newInstance(List<Weather> listWeatherDailyFrag, Task task,
@@ -67,6 +73,8 @@ public class WeatherDailyFragment extends Fragment {
         args.putDouble("temp", weatherDailyFrag.getTemp());
         args.putString("main", weatherDailyFrag.getMain());
         args.putDouble("pressure", weatherDailyFrag.getPressure());
+        args.putDouble("humidity", weatherDailyFrag.getHumidity());
+        args.putDouble("windSpeed", weatherDailyFrag.getWindSpeed());
 
         // Parsovani datumu predpovedi
         SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy H:mm");
@@ -94,20 +102,38 @@ public class WeatherDailyFragment extends Fragment {
         tvName = (TextView) view.findViewById(R.id.tvName);
         tvName.setText(args.getString("name"));
 
-        ivMainIcon = (ImageView) view.findViewById(R.id.ivMainIcon);
         String icon = args.getString("icon");
-        String iconImage = String.format("http://openweathermap.org/img/w/%s.png", icon);
-        Picasso.with(getContext()).load(iconImage).into(ivMainIcon);
+        tvMainIcon = (TextView) view.findViewById(R.id.tvMainIcon);
+        tvMainIcon.setTypeface(weatherFont);
+        tvMainIcon.setText(OtherUtils.getAppropriateWeatherIcon(icon));
 
         tvTemp = (TextView) view.findViewById(R.id.tvTemp);
         tvTemp.setText(
                 String.format("%.1f", args.getDouble("temp")) + " °C");
-        tvMain = (TextView) view.findViewById(R.id.tvMain);
-        tvMain.setText(args.getString("main"));
+
+        tvPressureIcon = (TextView) view.findViewById(R.id.tvPressureIcon);
+        tvPressureIcon.setTypeface(weatherFont);
+        tvPressureIcon.setText(R.string.weather_barometer);
+
         tvPressure = (TextView) view.findViewById(R.id.tvPressure);
         tvPressure.setText(
                 String.format("%.0f", args.getDouble("pressure")) + " hPa");
+
+        tvHumidityIcon = (TextView) view.findViewById(R.id.tvHumidityIcon);
+        tvHumidityIcon.setTypeface(weatherFont);
+        tvHumidityIcon.setText(R.string.weather_humidity);
+
+        tvHumidity = (TextView) view.findViewById(R.id.tvHumidity);
+        tvHumidity.setText(
+                String.format("%.0f", args.getDouble("humidity")) + " %");
+
+        tvWindIcon = (TextView) view.findViewById(R.id.tvWindIcon);
+        tvWindIcon.setTypeface(weatherFont);
+        tvWindIcon.setText(R.string.weather_windy);
+
         tvWind = (TextView) view.findViewById(R.id.tvWind);
+        tvWind.setText(
+                String.format("%.1f", args.getDouble("windSpeed")) + " m/s");
 
         return view;
     }
