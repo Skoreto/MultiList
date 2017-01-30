@@ -27,14 +27,14 @@ public class GeneralFragment extends Fragment {
 
     public static GeneralFragment newInstance(Task task, DataModel dm, Context context) {
         GeneralFragment f = new GeneralFragment();
-        String taskPlaceAddress = "";
+        String taskPlaceAddress = "nezadáno";
         // Pokud bylo vybrano misto ukolu, inicializuj ho
         if (task.getTaskPlaceId() != -1) {
             TaskPlace chosenTaskPlace = dm.getTaskPlace(task.getTaskPlaceId());
             taskPlaceAddress = chosenTaskPlace.getAddress();
         }
 
-        String taskDueDate = "";
+        String taskDueDate = "nezadáno";
         if (task.getDueDate() != null) {
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(context);
             taskDueDate = dateFormat.format(task.getDueDate());
@@ -71,6 +71,7 @@ public class GeneralFragment extends Fragment {
         tvAssignedTaskList = (TextView) view.findViewById(R.id.tvAssignedTaskList);
         tvAssignedTaskList.setText(getArguments().getString("tvAssignedTaskListName"));
         chbTaskCompleted = (CheckBox) view.findViewById(R.id.chbTaskCompleted);
+        chbTaskCompleted.setEnabled(false);
 
         // Zaskrtnuti checkboxu podle toho zda ukol je/neni splnen.
         if (getArguments().getInt("isTaskCompleted") == 1)

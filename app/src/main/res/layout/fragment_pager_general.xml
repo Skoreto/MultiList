@@ -5,7 +5,7 @@
     android:background="@android:drawable/gallery_thumb">
 
     <GridLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:useDefaultMargins="true"
         android:alignmentMode="alignBounds"
@@ -18,24 +18,31 @@
             android:text="@string/tv_due_date_label"
             android:layout_row="0"
             android:layout_column="0"
-            android:layout_gravity="center_horizontal" />
+            android:layout_marginStart="20dp"
+            android:minWidth="120dp"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
             android:id="@+id/tvTaskDueDate"
             android:layout_row="0"
-            android:layout_column="1" />
+            android:layout_column="1"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
             android:id="@+id/tvPlaceLabel"
             android:text="@string/tv_place_label"
             android:layout_row="1"
             android:layout_column="0"
-            android:layout_gravity="center_horizontal" />
+            android:minWidth="120dp"
+            android:layout_gravity="center_horizontal"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
             android:id="@+id/tvTaskPlace"
             android:layout_row="1"
             android:layout_column="1"
+            android:layout_width="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <TextView
@@ -43,19 +50,25 @@
             android:text="@string/tv_task_list_label"
             android:layout_row="2"
             android:layout_column="0"
-            android:layout_gravity="center_horizontal" />
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:minWidth="120dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/tvAssignedTaskList"
             android:layout_row="2"
-            android:layout_column="1"/>
+            android:layout_column="1"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/tvTaskCompletedLabel"
             android:text="@string/tv_task_completed_label"
             android:layout_row="3"
             android:layout_column="0"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:minWidth="120dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <CheckBox
             android:id="@+id/chbTaskCompleted"
@@ -64,26 +77,6 @@
             android:layout_row="3"
             android:layout_column="1" />
 
-        <TextView
-            android:id="@+id/tvRecordingLabel"
-            android:text="@string/tv_recording_label"
-            android:layout_row="4"
-            android:layout_column="0"
-            android:layout_gravity="center" />
-
-        <!--<ToggleButton-->
-            <!--android:id="@+id/btnPlayTask"-->
-            <!--android:textOn="STOP"-->
-            <!--android:textOff="START"-->
-            <!--android:layout_row="4"-->
-            <!--android:layout_column="1"-->
-            <!--android:drawableStart="@drawable/ic_play_arrow_black_24dp"-->
-            <!--android:drawablePadding="4dp" />-->
     </GridLayout>
 
-    <!--<ImageView-->
-        <!--android:id="@+id/ivTaskPhoto"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_gravity="center_horizontal" />-->
 </LinearLayout>
