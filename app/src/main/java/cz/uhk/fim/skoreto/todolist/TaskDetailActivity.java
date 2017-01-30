@@ -3,6 +3,8 @@ package cz.uhk.fim.skoreto.todolist;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -171,15 +173,35 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         // Komponenta nadpisu tabu
         TabLayout detailTabLayout = (TabLayout) findViewById(R.id.detailTabLayout);
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Obecné"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Popis"));
-        detailTabLayout.addTab(detailTabLayout.newTab().setText("Mapa"));
+        TabLayout.Tab tabDetail = detailTabLayout.newTab();
+        tabDetail.setIcon(R.drawable.ic_chrome_reader_mode_black_24dp);
+        tabDetail.getIcon().setColorFilter(Color.rgb(117, 117, 117), PorterDuff.Mode.SRC_IN);
+        detailTabLayout.addTab(tabDetail);
+
+        TabLayout.Tab tabDescription = detailTabLayout.newTab();
+        tabDescription.setIcon(R.drawable.ic_rate_review_black_24dp);
+        tabDescription.getIcon().setColorFilter(Color.rgb(117, 117, 117), PorterDuff.Mode.SRC_IN);
+        detailTabLayout.addTab(tabDescription);
+
+        TabLayout.Tab tabMap = detailTabLayout.newTab();
+        tabMap.setIcon(R.drawable.ic_location_on_black_24dp);
+        tabMap.getIcon().setColorFilter(Color.rgb(117, 117, 117), PorterDuff.Mode.SRC_IN);
+        detailTabLayout.addTab(tabMap);
+
         if (showCurrentWeather) {
-            detailTabLayout.addTab(detailTabLayout.newTab().setText("Aktuálně"));
+            TabLayout.Tab tabWeatherCurrent = detailTabLayout.newTab();
+            tabWeatherCurrent.setIcon(R.drawable.ic_cloud_black_24dp);
+            tabWeatherCurrent.getIcon().setColorFilter(Color.rgb(117, 117, 117),
+                    PorterDuff.Mode.SRC_IN);
+            detailTabLayout.addTab(tabWeatherCurrent);
         }
 //        detailTabLayout.addTab(detailTabLayout.newTab().setText("Hour"));
         if (showDailyWeather) {
-            detailTabLayout.addTab(detailTabLayout.newTab().setText("Daily"));
+            TabLayout.Tab tabWeatherDaily = detailTabLayout.newTab();
+            tabWeatherDaily.setIcon(R.drawable.ic_cloud_upload_black_24dp);
+            tabWeatherDaily.getIcon().setColorFilter(Color.rgb(117, 117, 117),
+                    PorterDuff.Mode.SRC_IN);
+            detailTabLayout.addTab(tabWeatherDaily);
         }
         detailTabLayout.setTabGravity(TabLayout.MODE_SCROLLABLE);
 
